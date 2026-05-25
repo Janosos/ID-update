@@ -1,26 +1,240 @@
-@import "tailwindcss";
-
+/* Custom Variables and Global Reset */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-space-grotesk), sans-serif;
+  
+  /* Light Mode Palette */
+  --bg-color: #f8fafc;
+  --text-color: #0f172a;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.06);
+  --grid-color: rgba(0, 0, 0, 0.03);
+  --nav-bg: rgba(255, 255, 255, 0.85);
+
+  /* Bootstrap 5 Overrides for Light Mode */
+  --bs-body-bg: #f8fafc !important;
+  --bs-body-color: #0f172a !important;
+  --bs-tertiary-bg: #f1f5f9 !important;
+  --bs-secondary-bg: #e2e8f0 !important;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* Dark Mode Palette */
+html.dark {
+  --bg-color: #0f172a; /* Slate-900 (deep blue slate background) */
+  --text-color: #f8fafc;
+  --card-bg: rgba(30, 41, 59, 0.45); /* Lighter translucent glass card background */
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  --grid-color: rgba(255, 255, 255, 0.035);
+  --nav-bg: rgba(15, 23, 42, 0.85);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Bootstrap 5 Overrides for consistent dark theme */
+  --bs-body-bg: #0f172a !important;
+  --bs-body-bg-rgb: 15, 23, 42 !important;
+  
+  --bs-body-color: #f8fafc !important;
+  --bs-body-color-rgb: 248, 250, 252 !important;
+
+  --bs-tertiary-bg: #1e293b !important; /* Slate-800 tertiary background */
+  --bs-tertiary-bg-rgb: 30, 41, 59 !important;
+
+  --bs-secondary-bg: #182235 !important; /* Lighter secondary background */
+  --bs-secondary-bg-rgb: 24, 34, 53 !important;
+
+  --bs-border-color: rgba(255, 255, 255, 0.1) !important;
+  --bs-border-color-translucent: rgba(255, 255, 255, 0.07) !important;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--card-border) !important;
+  box-shadow: var(--card-shadow);
+  border-radius: 1.25rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-panel-nav {
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--card-border) !important;
+  transition: all 0.3s ease;
+}
+
+/* Retro Grid Background overlay */
+.bg-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+}
+
+/* Gradient Text Effect */
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(135deg, #14b8a6, #3b82f6);
+}
+
+html.dark .text-gradient {
+  background-image: linear-gradient(135deg, #2dd4bf, #60a5fa) !important;
+}
+
+/* Theme toggle button styles */
+.toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  font-size: 1.2rem;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background-color: rgba(20, 184, 166, 0.1);
+  transform: scale(1.1);
+}
+
+/* Slow Pulse Animation */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Portfolio Swiper Adjustments */
+.portfolio-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.portfolio-card img {
+  height: 220px;
+  object-cover: cover;
+  transition: transform 0.5s ease;
+}
+
+.portfolio-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Mother's Day Page Custom Variables */
+.mothers-day-theme {
+  --bg-color: #fff8f6 !important;
+  --text-color: #211a18 !important;
+  --card-bg: rgba(255, 248, 246, 0.85) !important;
+  --card-border: rgba(217, 139, 139, 0.3) !important;
+  --card-shadow: 0 10px 30px -10px rgba(141, 75, 76, 0.15) !important;
+  --grid-color: rgba(141, 75, 76, 0.03) !important;
+}
+
+/* General Layout spacing */
+main {
+  flex-grow: 1;
+}
+
+/* Utility animations */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Premium outlined buttons */
+.btn-premium-outline-light {
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.btn-premium-outline-light:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Custom premium theme outline button */
+.btn-premium-outline-theme {
+  border: 1px solid rgba(15, 23, 42, 0.15) !important;
+  color: #0f172a !important;
+  background: rgba(15, 23, 42, 0.04) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.btn-premium-outline-theme:hover {
+  background: rgba(15, 23, 42, 0.08) !important;
+  border-color: rgba(15, 23, 42, 0.3) !important;
+  transform: translateY(-2px) !important;
+  color: #0f172a !important;
+}
+
+html.dark .btn-premium-outline-theme {
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+html.dark .btn-premium-outline-theme:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+/* Subtle inner panels/tags */
+.inner-panel {
+  background: rgba(15, 23, 42, 0.03) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  border-radius: 0.75rem;
+}
+html.dark .inner-panel {
+  background: rgba(15, 23, 42, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
