@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'export',       // Fuerza la compilación a puros archivos planos (HTML/CSS/JS)
+  trailingSlash: true,    // Requerido por cPanel: Crea carpetas físicas por ruta para evitar errores 404
+  images: {
+    unoptimized: true,    // Evita que busque un servidor Node activo para procesar imágenes
+  },
 };
 
 export default nextConfig;
