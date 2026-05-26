@@ -70,10 +70,57 @@ export default function HeroMonitor() {
 
     // Use static layout metrics relative to offsetParent (which is screen)
     // to avoid distortion caused by 3D mouse rotation
-    const finalTop = targetEl.offsetTop;
-    const finalLeft = targetEl.offsetLeft;
-    const finalWidth = targetEl.offsetWidth;
-    const finalHeight = targetEl.offsetHeight;
+    let finalTop = targetEl.offsetTop;
+    let finalLeft = targetEl.offsetLeft;
+    let finalWidth = targetEl.offsetWidth;
+    let finalHeight = targetEl.offsetHeight;
+
+    // Fallback calculation in case layout hasn't settled yet or container is temporarily hidden
+    if (finalWidth === 0 || finalHeight === 0) {
+      const screenWidth = screen.offsetWidth || 480;
+      const screenHeight = screen.offsetHeight || 270;
+      const gap = 6;
+      const padding = 12;
+      const innerW = screenWidth - padding * 2;
+      const innerH = screenHeight - padding * 2;
+
+      // grid-template-rows: 15% 35% 1fr 10%; 
+      const r1 = innerH * 0.15;
+      const r2 = innerH * 0.35;
+      const r4 = innerH * 0.10;
+      const r3 = innerH - r1 - r2 - r4 - gap * 3;
+
+      // grid-template-columns: 1fr 2fr 1fr;
+      const c1 = (innerW - gap * 2) * 0.25;
+      const c23 = innerW - c1 - gap;
+
+      if (item.targetId === "target-nav") {
+        finalTop = padding;
+        finalLeft = padding;
+        finalWidth = innerW;
+        finalHeight = r1;
+      } else if (item.targetId === "target-hero") {
+        finalTop = padding + r1 + gap;
+        finalLeft = padding;
+        finalWidth = innerW;
+        finalHeight = r2;
+      } else if (item.targetId === "target-side") {
+        finalTop = padding + r1 + r2 + gap * 2;
+        finalLeft = padding;
+        finalWidth = c1;
+        finalHeight = r3;
+      } else if (item.targetId === "target-main") {
+        finalTop = padding + r1 + r2 + gap * 2;
+        finalLeft = padding + c1 + gap;
+        finalWidth = c23;
+        finalHeight = r3;
+      } else if (item.targetId === "target-foot") {
+        finalTop = padding + r1 + r2 + r3 + gap * 3;
+        finalLeft = padding;
+        finalWidth = innerW;
+        finalHeight = r4;
+      }
+    }
 
     const block = document.createElement("div");
     block.className = `falling-block ${item.color}`;
@@ -108,32 +155,48 @@ export default function HeroMonitor() {
 
     screen.appendChild(block);
 
-    // Trigger fall
-    setTimeout(() => {
-      block.style.top = `${finalTop + finalHeight / 2 - size / 2}px`;
-      
-      if (!isRandomClick) {
-        setTimeout(() => {
-          block.style.transform = "rotate(0deg)";
-          block.style.top = `${finalTop}px`;
-          block.style.left = `${finalLeft}px`;
-          block.style.width = `${finalWidth}px`;
-          block.style.height = `${finalHeight}px`;
-          
-          setTimeout(() => {
-            block.style.opacity = "0";
-            setActiveParts(prev => ({ ...prev, [item.targetId]: true }));
-            setTimeout(() => block.remove(), 500);
-          }, 300);
-        }, fallDuration * 1000);
-      } else {
-        setTimeout(() => {
-          block.style.transform = `rotate(${Math.random() * 360}deg) scale(0)`;
+    // Force a reflow to guarantee the transition starts from the initial position (-60px)
+    // and prevents the browser from batching layout modifications
+    block.offsetHeight;
+
+    // Trigger fall immediately in the same frame
+    block.style.top = `${finalTop + finalHeight / 2 - size / 2}px`;
+    
+    if (!isRandomClick) {
+      const t1 = setTimeout(() => {
+        // Change transition style to be fast and uniform for the landing and expansion phase
+        block.style.transition = "top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease, transform 0.3s ease, opacity 0.3s ease";
+        block.style.transform = "rotate(0deg)";
+        block.style.top = `${finalTop}px`;
+        block.style.left = `${finalLeft}px`;
+        block.style.width = `${finalWidth}px`;
+        block.style.height = `${finalHeight}px`;
+        
+        const t2 = setTimeout(() => {
           block.style.opacity = "0";
-          setTimeout(() => block.remove(), 500);
-        }, fallDuration * 1000);
-      }
-    }, 10);
+          setActiveParts(prev => ({ ...prev, [item.targetId]: true }));
+          
+          const t3 = setTimeout(() => {
+            block.remove();
+          }, 500);
+          timeoutsRef.current.push(t3);
+        }, 300);
+        timeoutsRef.current.push(t2);
+      }, fallDuration * 1000);
+      timeoutsRef.current.push(t1);
+    } else {
+      const t1 = setTimeout(() => {
+        block.style.transition = "transform 0.5s ease, opacity 0.5s ease";
+        block.style.transform = `rotate(${Math.random() * 360}deg) scale(0)`;
+        block.style.opacity = "0";
+        
+        const t2 = setTimeout(() => {
+          block.remove();
+        }, 500);
+        timeoutsRef.current.push(t2);
+      }, fallDuration * 1000);
+      timeoutsRef.current.push(t1);
+    }
   };
 
   const startBuild = () => {
