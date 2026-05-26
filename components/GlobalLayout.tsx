@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import LoadingScreen from "@/components/LoadingScreen";
+import ChatBot from "@/components/ChatBot";
 
 export default function GlobalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -232,6 +233,8 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
           </div>
         </footer>
       )}
+
+      {!isMothersDay && <ChatBot />}
 
       {/* Custom Global Navigation Styles */}
       <style jsx global>{`

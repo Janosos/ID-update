@@ -10,20 +10,16 @@ export default function Home() {
   const [showPromo, setShowPromo] = useState(false);
 
   useEffect(() => {
-    const isDismissed = sessionStorage.getItem("notes-promo-dismissed");
-    if (!isDismissed) {
-      const timer = setTimeout(() => {
-        setShowPromo(true);
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(() => {
+      setShowPromo(true);
+    }, 4000);
+    return () => clearTimeout(timer);
   }, []);
 
   const dismissPromo = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setShowPromo(false);
-    sessionStorage.setItem("notes-promo-dismissed", "true");
   };
 
   useEffect(() => {
