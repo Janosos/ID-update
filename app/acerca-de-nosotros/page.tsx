@@ -123,7 +123,7 @@ export default function AboutUsPage() {
       ` }} />
 
       {/* Header Section */}
-      <header className="relative py-5 overflow-hidden bg-grid">
+      <header className="position-relative py-5 overflow-hidden bg-grid">
         <div 
           className="absolute position-absolute bg-info rounded-circle blur-3xl opacity-10 animate-pulse-slow parallax-blob"
           style={{ width: "350px", height: "350px", top: "10%", left: "10%", filter: "blur(100px)", zIndex: -1 }}
@@ -133,7 +133,7 @@ export default function AboutUsPage() {
           style={{ width: "350px", height: "350px", bottom: "10%", right: "10%", filter: "blur(100px)", zIndex: -1 }}
         ></div>
 
-        <div className="container-xl px-4 text-center relative z-10 reveal active py-5">
+        <div className="container-xl px-4 text-center position-relative z-10 reveal active py-5">
           <span className="text-info font-bold tracking-widest text-uppercase small mb-3 d-block">Sobre Nosotros</span>
           <h1 className="display-4 fw-bold leading-tight text-body mb-4">
             Construyendo el <br /><span className="text-gradient">Imperio Digital</span> de Tu Negocio
@@ -266,7 +266,7 @@ export default function AboutUsPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-5 my-5 relative overflow-hidden">
+      <section className="py-5 my-5 position-relative overflow-hidden">
         <div 
           className="absolute position-absolute bg-info rounded-circle blur-3xl opacity-10 parallax-blob"
           style={{ width: "300px", height: "300px", top: "0", left: "calc(50% - 150px)", filter: "blur(100px)", zIndex: -1 }}
@@ -286,11 +286,9 @@ export default function AboutUsPage() {
               href="https://wa.me/526623440716?text=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20una%20cotizaci%C3%B3n%20o%20informaci%C3%B3n" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="btn btn-info text-white fw-bold w-100 py-3 rounded shadow hover-grow-btn d-flex align-items-center justify-content-center gap-2 text-uppercase"
-              style={{ background: "#14b8a6", borderColor: "#14b8a6" }}
+              className="btn-whatsapp-cta"
             >
-              <span>Solicitar Cotización Gratis</span>
-              <i className="bi bi-whatsapp fs-5"></i>
+              <i className="bi bi-whatsapp"></i> Solicitar Cotización Gratis
             </a>
             
             <p className="text-muted small mt-3 mb-0">Sin compromiso. Respondemos en menos de 2 horas.</p>

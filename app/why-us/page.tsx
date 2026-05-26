@@ -63,13 +63,13 @@ export default function WhyUsPage() {
       ` }} />
 
       {/* Header & Digital Impact Section */}
-      <header className="relative py-5 overflow-hidden bg-grid border-bottom">
+      <header className="position-relative py-5 overflow-hidden bg-grid border-bottom">
         <div 
           className="absolute position-absolute bg-info rounded-circle blur-3xl opacity-10 animate-pulse-slow parallax-blob"
           style={{ width: "350px", height: "350px", top: "10%", right: "10%", filter: "blur(100px)", zIndex: -1 }}
         ></div>
         
-        <div className="container-xl px-4 py-5 z-10 relative">
+        <div className="container-xl px-4 py-5 z-10 position-relative">
           <div className="row align-items-center g-5 text-center text-lg-start">
             {/* Left side: Heading */}
             <div className="col-12 col-lg-7 d-flex flex-column gap-3">
@@ -279,13 +279,13 @@ export default function WhyUsPage() {
       </section>
 
       {/* Footer CTA Section */}
-      <section className="py-5 my-5 relative overflow-hidden" id="contacto">
+      <section className="py-5 my-5 position-relative overflow-hidden" id="contacto">
         <div 
           className="absolute position-absolute bg-info rounded-circle blur-3xl opacity-10 parallax-blob"
           style={{ width: "300px", height: "300px", top: "0", left: "calc(50% - 150px)", filter: "blur(100px)", zIndex: -1 }}
         ></div>
         
-        <div className="container-xl px-4 text-center py-4 z-10 relative">
+        <div className="container-xl px-4 text-center py-4 z-10 position-relative">
           <h2 className="display-5 font-display fw-bold mb-4">Tu éxito es nuestro éxito</h2>
           <p className="lead text-secondary mb-5 max-w-xl mx-auto font-medium">
             Ya sea que necesites una página informativa, una tienda en línea compleja o una plataforma web avanzada, estamos listos para arrancar.
@@ -300,11 +300,9 @@ export default function WhyUsPage() {
               href="https://wa.me/526623440716?text=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20una%20cotizaci%C3%B3n%20o%20informaci%C3%B3n" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="btn btn-info text-white fw-bold w-100 py-3 rounded shadow hover-grow-btn d-flex align-items-center justify-content-center gap-2 text-uppercase"
-              style={{ background: "#14b8a6", borderColor: "#14b8a6" }}
+              className="btn-whatsapp-cta"
             >
-              <span>Solicitar Cotización Gratis</span>
-              <i className="bi bi-whatsapp fs-5"></i>
+              <i className="bi bi-whatsapp"></i> Solicitar Cotización Gratis
             </a>
             
             <p className="text-muted small mt-3 mb-0">Sin compromiso. Respondemos en menos de 2 horas.</p>

@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function NotesAppPage() {
   return (
-    <div className="bg-grid py-5 min-vh-100 d-flex flex-column align-items-center justify-content-center">
+    <div className="bg-grid py-5 min-vh-100 d-flex flex-column align-items-center justify-content-center position-relative overflow-hidden">
       <div 
         className="absolute position-absolute bg-info rounded-circle blur-3xl opacity-10 animate-pulse-slow parallax-blob"
         style={{ width: "350px", height: "350px", top: "10%", left: "10%", filter: "blur(100px)", zIndex: -1 }}
@@ -15,7 +15,7 @@ export default function NotesAppPage() {
       ></div>
 
       <div className="container-xl px-4 py-5 z-1">
-        <div className="glass-panel p-4 p-md-5 rounded-4 border relative overflow-hidden">
+        <div className="glass-panel p-4 p-md-5 rounded-4 border position-relative overflow-hidden">
           <div className="d-flex flex-column gap-5">
             {/* 1. Header Centered Text */}
             <div className="text-center max-w-4xl mx-auto space-y-4">
@@ -106,8 +106,7 @@ export default function NotesAppPage() {
                   href="https://wa.me/526623440716?text=Hola%2C%20me%20gustar%C3%ADa%20cotizar%20una%20aplicacion%20como%20Notes%20Creator" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="btn btn-success w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2"
-                  style={{ background: "#25d366", borderColor: "#25d366" }}
+                  className="btn-whatsapp-cta"
                 >
                   <i className="bi bi-whatsapp"></i> Consultar por WhatsApp
                 </a>

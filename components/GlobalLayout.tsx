@@ -104,7 +104,7 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
                 style={{ height: "40px", width: "auto", objectFit: "contain" }}
               />
               <span className="fs-3 fw-bold tracking-tighter text-uppercase m-0">
-                Imperio<span className="text-teal-600 dark:text-teal-500 text-info">Dev</span>
+                Imperio<span style={{ color: "#14b8a6" }}>Dev</span>
               </span>
             </Link>
 

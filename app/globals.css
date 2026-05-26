@@ -17,6 +17,7 @@
   --bs-body-color: #0f172a !important;
   --bs-tertiary-bg: #f1f5f9 !important;
   --bs-secondary-bg: #e2e8f0 !important;
+  --bs-secondary-color: #475569 !important;
 }
 
 /* Dark Mode Palette */
@@ -44,6 +45,7 @@ html.dark {
 
   --bs-border-color: rgba(255, 255, 255, 0.1) !important;
   --bs-border-color-translucent: rgba(255, 255, 255, 0.07) !important;
+  --bs-secondary-color: #cbd5e1 !important;
 }
 
 body {
@@ -237,4 +239,69 @@ html.dark .btn-premium-outline-theme:hover {
 html.dark .inner-panel {
   background: rgba(15, 23, 42, 0.3) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Fix Tailwind-style relative positioning */
+.relative {
+  position: relative !important;
+}
+
+/* Fix z-index issue */
+.z-10 {
+  z-index: 10 !important;
+}
+
+/* Force horizontal overflow protection on viewport */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+#id-global-wrapper {
+  overflow-x: hidden;
+}
+
+/* Force text-secondary color override for guarantee */
+.text-secondary {
+  color: var(--bs-secondary-color) !important;
+}
+
+/* Responsive WhatsApp CTA button */
+.btn-whatsapp-cta {
+  background-color: #25d366 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 0.75rem;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 1rem !important;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3) !important;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.btn-whatsapp-cta:hover, .btn-whatsapp-cta:focus {
+  background-color: #20ba5a !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4) !important;
+}
+
+.btn-whatsapp-cta:active {
+  transform: translateY(0) scale(1);
+}
+
+/* Mobile adjustments for narrow screens */
+@media (max-width: 576px) {
+  .btn-whatsapp-cta {
+    font-size: 0.9rem !important;
+    padding: 0.75rem 0.75rem !important;
+    gap: 0.35rem;
+  }
 }

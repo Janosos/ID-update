@@ -78,6 +78,32 @@ export default function Home() {
     setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
   };
 
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      nextSlide();
+    } else if (isRightSwipe) {
+      prevSlide();
+    }
+  };
+
   return (
     <div className="bg-grid pb-5">
       <style dangerouslySetInnerHTML={{ __html: `
@@ -126,7 +152,7 @@ export default function Home() {
       ` }} />
 
       {/* 1. Hero / Header Section */}
-      <header className="relative min-vh-100 d-flex align-items-center justify-content-center pt-5 overflow-hidden">
+      <header className="position-relative min-vh-100 d-flex align-items-center justify-content-center pt-5 overflow-hidden">
         <div 
           className="absolute position-absolute bg-info rounded-circle blur-3xl opacity-20 animate-pulse-slow parallax-blob"
           style={{ width: "400px", height: "400px", top: "10%", left: "10%", filter: "blur(100px)", zIndex: -1 }}
@@ -389,7 +415,7 @@ export default function Home() {
                     className="py-4 rounded-3 text-center mb-4 border" 
                     style={{ background: "rgba(15, 23, 42, 0.4)", borderColor: "rgba(255, 255, 255, 0.06)" }}
                   >
-                    <i className="bi bi-crown text-primary fs-1"></i>
+                    <i className="bi bi-crown-fill text-info fs-1"></i>
                   </div>
                   <h3 className="h4 fw-bold text-body mb-1 font-display">PRO</h3>
                   <p className="text-muted small mb-4" style={{ minHeight: "40px" }}>
@@ -501,7 +527,13 @@ export default function Home() {
 
           <div className="position-relative px-md-5">
             {/* Slider Container */}
-            <div className="slider-container" style={{ overflow: "hidden" }}>
+            <div 
+              className="slider-container" 
+              style={{ overflow: "hidden" }}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
               <div 
                 className="slider-track d-flex"
                 style={{
@@ -589,7 +621,7 @@ export default function Home() {
       </section>
 
       {/* 5. Contact Section */}
-      <section className="py-5 my-5 relative overflow-hidden" id="contacto">
+      <section className="py-5 my-5 position-relative overflow-hidden" id="contacto">
         <div className="container-xl px-4 py-5 z-1 text-center">
           <h2 className="display-4 fw-bold mb-3 text-body">¿Listo para destacar?</h2>
           <p className="lead text-secondary mb-5 max-w-xl mx-auto">
@@ -603,8 +635,7 @@ export default function Home() {
               href="https://wa.me/526623440716?text=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20una%20cotizaci%C3%B3n%20o%20informaci%C3%B3n" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="btn btn-success w-100 py-3 fs-5 fw-bold rounded shadow hover-grow-btn d-flex align-items-center justify-content-center gap-2 text-uppercase text-white border-0"
-              style={{ background: "#25d366" }}
+              className="btn-whatsapp-cta"
             >
               <i className="bi bi-whatsapp"></i> Solicitar Cotización Gratis
             </a>

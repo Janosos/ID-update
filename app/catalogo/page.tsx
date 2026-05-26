@@ -133,7 +133,7 @@ export default function CatalogPage() {
   });
 
   return (
-    <div className="bg-grid py-5 min-vh-100 d-flex flex-column align-items-center">
+    <div className="bg-grid py-5 min-vh-100 d-flex flex-column align-items-center position-relative overflow-hidden">
       <div 
         className="absolute position-absolute bg-info rounded-circle blur-3xl opacity-10 animate-pulse-slow parallax-blob"
         style={{ width: "350px", height: "350px", top: "10%", left: "10%", filter: "blur(100px)", zIndex: -1 }}
