@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function GlobalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -91,6 +92,7 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
 
   return (
     <div id="id-global-wrapper" className="min-h-screen d-flex flex-column">
+      <LoadingScreen />
       {/* Hide navbar on Mothers Day */}
       {!isMothersDay && (
         <nav id="navbar-id" className="navbar navbar-expand-lg fixed-top py-3 glass-panel-nav">
