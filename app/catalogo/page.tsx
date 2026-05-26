@@ -39,7 +39,7 @@ export default function CatalogPage() {
       price: "$7,000 MXN",
       category: "web",
       description: "La opción de diseño equilibrada para pequeñas empresas.",
-      icon: "bi-layer-group",
+      icon: "bi-layers",
       features: [
         "Todo lo del plan Sencillo",
         "Estructura web estándar completa",
@@ -54,7 +54,7 @@ export default function CatalogPage() {
       price: "$8,000 MXN",
       category: "web",
       description: "Solución completa y robusta con integraciones avanzadas.",
-      icon: "bi-crown-fill",
+      icon: "bi-gem",
       features: [
         "Todo lo del plan Estándar",
         "Más de 4 Subpáginas internas",

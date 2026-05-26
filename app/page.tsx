@@ -415,7 +415,7 @@ export default function Home() {
                     className="py-4 rounded-3 text-center mb-4 border" 
                     style={{ background: "rgba(15, 23, 42, 0.4)", borderColor: "rgba(255, 255, 255, 0.06)" }}
                   >
-                    <i className="bi bi-crown-fill text-info fs-1"></i>
+                    <i className="bi bi-gem text-info fs-1"></i>
                   </div>
                   <h3 className="h4 fw-bold text-body mb-1 font-display">PRO</h3>
                   <p className="text-muted small mb-4" style={{ minHeight: "40px" }}>

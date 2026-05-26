@@ -21,7 +21,9 @@ export const metadata: Metadata = {
   title: "ImperioDev - Creación de Experiencias Digitales",
   description: "Desarrollo web a la medida con WordPress, WooCommerce, React y Bootstrap. Diseños de alto impacto y velocidad optimizada.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "https://www.imperiodev.com/wp-content/uploads/2025/02/9c7d6fb0-1eab-481e-a6da-6b37688eacef-e1739234268387-46x63.png",
+    shortcut: "https://www.imperiodev.com/wp-content/uploads/2025/02/9c7d6fb0-1eab-481e-a6da-6b37688eacef-e1739234268387-46x63.png",
+    apple: "https://www.imperiodev.com/wp-content/uploads/2025/02/9c7d6fb0-1eab-481e-a6da-6b37688eacef-e1739234268387-46x63.png",
   },
 };
 
