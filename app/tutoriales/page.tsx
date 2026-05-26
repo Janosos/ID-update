@@ -23,10 +23,10 @@ export default function TutorialsPage() {
         </header>
 
         {/* Tab Controls */}
-        <div className="d-flex justify-content-center gap-3 mb-5">
+        <div className="d-flex flex-column flex-sm-row justify-content-center align-items-stretch align-items-sm-center gap-3 mb-5">
           <button
             onClick={() => setActiveTab("products")}
-            className={`btn btn-lg px-4 py-3 fw-bold d-flex align-items-center gap-2 rounded-3 ${
+            className={`btn btn-lg px-4 py-3 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-3 ${
               activeTab === "products" ? "btn-info text-white shadow" : "btn-premium-outline-theme"
             }`}
             style={activeTab === "products" ? { background: "#14b8a6", borderColor: "#14b8a6" } : {}}
@@ -36,7 +36,7 @@ export default function TutorialsPage() {
           </button>
           <button
             onClick={() => setActiveTab("shipping")}
-            className={`btn btn-lg px-4 py-3 fw-bold d-flex align-items-center gap-2 rounded-3 ${
+            className={`btn btn-lg px-4 py-3 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-3 ${
               activeTab === "shipping" ? "btn-info text-white shadow" : "btn-premium-outline-theme"
             }`}
             style={activeTab === "shipping" ? { background: "#14b8a6", borderColor: "#14b8a6" } : {}}
@@ -50,8 +50,8 @@ export default function TutorialsPage() {
         <div className="row justify-content-center">
           <div className="col-12 col-lg-10">
             {activeTab === "products" ? (
-              <div className="glass-panel p-4 p-md-5 fade-in-up">
-                <div className="d-flex align-items-center gap-3 mb-4">
+              <div className="glass-panel p-3 p-sm-4 p-md-5 fade-in-up">
+                <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 mb-4">
                   <div className="rounded-3 bg-info bg-opacity-10 text-info p-3 fs-3"><i className="bi bi-tag-fill"></i></div>
                   <h2 className="h2 fw-bold text-body m-0 font-display">Guía: Gestión de Productos en WooCommerce</h2>
                 </div>
@@ -162,8 +162,8 @@ export default function TutorialsPage() {
                 </div>
               </div>
             ) : (
-              <div className="glass-panel p-4 p-md-5 fade-in-up">
-                <div className="d-flex align-items-center gap-3 mb-4">
+              <div className="glass-panel p-3 p-sm-4 p-md-5 fade-in-up">
+                <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 mb-4">
                   <div className="rounded-3 bg-info bg-opacity-10 text-info p-3 fs-3"><i className="bi bi-truck-flatbed"></i></div>
                   <h2 className="h2 fw-bold text-body m-0 font-display">Guía: Configuración de Envíos con envia.com</h2>
                 </div>

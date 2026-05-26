@@ -255,22 +255,16 @@ export default function WhyUsPage() {
             {/* Feature 7 - Double column */}
             <div className="col-12 col-lg-8">
               <div className="glass-panel p-4 p-md-5 h-100 feature-card">
-                <div className="row align-items-center g-4">
-                  <div className="col-auto">
-                    <div 
-                      className="rounded-4 bg-warning bg-opacity-10 text-warning-emphasis d-flex align-items-center justify-content-center border border-warning border-opacity-10 shadow-sm"
-                      style={{ width: "50px", height: "50px" }}
-                    >
-                      <i className="bi bi-tags fs-4"></i>
-                    </div>
-                  </div>
-                  <div className="col">
-                    <h3 className="h5 fw-bold text-body mb-2">Precios Competitivos y Claros</h3>
-                    <p className="text-secondary small leading-relaxed font-medium m-0">
-                      Creemos que una web de alto nivel no tiene que ser impagable. Ofrecemos paquetes personalizados y flexibles que se ajustan a tu presupuesto, sin cuotas sorpresa ni costos ocultos.
-                    </p>
-                  </div>
+                <div 
+                  className="rounded-4 bg-warning bg-opacity-10 text-warning-emphasis d-flex align-items-center justify-content-center mb-4 border border-warning border-opacity-10 shadow-sm"
+                  style={{ width: "50px", height: "50px" }}
+                >
+                  <i className="bi bi-tags fs-4"></i>
                 </div>
+                <h3 className="h5 fw-bold text-body mb-3">Precios Competitivos y Claros</h3>
+                <p className="text-secondary small leading-relaxed font-medium m-0">
+                  Creemos que una web de alto nivel no tiene que ser impagable. Ofrecemos paquetes personalizados y flexibles que se ajustan a tu presupuesto, sin cuotas sorpresa ni costos ocultos.
+                </p>
               </div>
             </div>
 

@@ -166,7 +166,7 @@ export default function CatalogPage() {
             </div>
           </div>
           
-          <div className="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
+          <div className="col-12 col-md-6 d-flex flex-wrap gap-2 justify-content-start justify-content-md-end">
             <button
               onClick={() => setFilterCategory("all")}
               className={`btn btn-sm px-4 py-2 fw-semibold rounded-pill ${

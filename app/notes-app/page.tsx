@@ -5,6 +5,18 @@ import Link from "next/link";
 export default function NotesAppPage() {
   return (
     <div className="bg-grid py-5 min-vh-100 d-flex flex-column align-items-center justify-content-center position-relative overflow-hidden">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .presentation-container {
+          width: 100%;
+          aspect-ratio: 16 / 9;
+        }
+        @media (max-width: 768px) {
+          .presentation-container {
+            aspect-ratio: 4 / 5;
+            min-height: 480px;
+          }
+        }
+      ` }} />
       <div 
         className="absolute position-absolute bg-info rounded-circle blur-3xl opacity-10 animate-pulse-slow parallax-blob"
         style={{ width: "350px", height: "350px", top: "10%", left: "10%", filter: "blur(100px)", zIndex: -1 }}
@@ -15,7 +27,7 @@ export default function NotesAppPage() {
       ></div>
 
       <div className="container-xl px-4 py-5 z-1">
-        <div className="glass-panel p-4 p-md-5 rounded-4 border position-relative overflow-hidden">
+        <div className="glass-panel p-3 p-sm-4 p-md-5 rounded-4 border position-relative overflow-hidden">
           <div className="d-flex flex-column gap-5">
             {/* 1. Header Centered Text */}
             <div className="text-center max-w-4xl mx-auto space-y-4">
@@ -70,7 +82,7 @@ export default function NotesAppPage() {
             {/* 2. Embedded Presentation Iframe */}
             <div className="position-relative w-100 group">
               <div 
-                className="ratio ratio-16x9 rounded-3 overflow-hidden shadow border bg-dark"
+                className="presentation-container rounded-3 overflow-hidden shadow border bg-dark"
               >
                 {/* Loader visual */}
                 <div className="position-absolute start-50 top-50 translate-middle text-center" style={{ zIndex: -1 }}>
