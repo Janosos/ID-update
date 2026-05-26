@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 
 export default function NotesAppPage() {
+  const [iframeLoaded, setIframeLoaded] = useState(false);
   return (
     <div className="bg-grid py-5 min-vh-100 d-flex flex-column align-items-center justify-content-center position-relative overflow-hidden">
       <style dangerouslySetInnerHTML={{ __html: `
@@ -15,6 +17,68 @@ export default function NotesAppPage() {
             aspect-ratio: 4 / 5;
             min-height: 480px;
           }
+        }
+
+        /* Pulsing and core loader animations */
+        .text-glow-teal {
+          text-shadow: 0 0 10px rgba(20, 184, 166, 0.3);
+        }
+        
+        @keyframes orbit {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        .loader-orbit {
+          position: relative;
+          width: 80px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .loader-core {
+          width: 60px;
+          height: 60px;
+          z-index: 2;
+          border: 1px solid rgba(20, 184, 166, 0.3);
+        }
+        
+        .orbit-ring {
+          position: absolute;
+          border-radius: 50%;
+          border: 2px solid transparent;
+        }
+        
+        .orbit-ring-1 {
+          width: 80px;
+          height: 80px;
+          border-top-color: #14b8a6;
+          animation: orbit 1.5s linear infinite;
+        }
+        
+        .orbit-ring-2 {
+          width: 72px;
+          height: 72px;
+          border-right-color: #3b82f6;
+          animation: orbit 1.2s ease-in-out infinite reverse;
+        }
+        
+        .orbit-ring-3 {
+          width: 88px;
+          height: 88px;
+          border-bottom-color: #a855f7;
+          animation: orbit 2s linear infinite;
+          opacity: 0.6;
+        }
+
+        @keyframes pulse-fast {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        .animate-pulse-fast {
+          animation: pulse-fast 1.5s infinite ease-in-out;
         }
       ` }} />
       <div 
@@ -82,14 +146,33 @@ export default function NotesAppPage() {
             {/* 2. Embedded Presentation Iframe */}
             <div className="position-relative w-100 group">
               <div 
-                className="presentation-container rounded-3 overflow-hidden shadow border bg-dark"
+                className="presentation-container rounded-3 overflow-hidden shadow border bg-dark position-relative"
               >
-                {/* Loader visual */}
-                <div className="position-absolute start-50 top-50 translate-middle text-center" style={{ zIndex: -1 }}>
-                  <div className="spinner-border text-primary mb-2" role="status">
-                    <span className="visually-hidden">Loading...</span>
+                {/* Loader visual overlay */}
+                <div 
+                  className="position-absolute w-100 h-100 top-0 start-0 d-flex flex-column align-items-center justify-content-center text-center p-4"
+                  style={{ 
+                    zIndex: 10, 
+                    background: "#0f172a", 
+                    opacity: iframeLoaded ? 0 : 1,
+                    pointerEvents: iframeLoaded ? "none" : "auto",
+                    transition: "opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)"
+                  }}
+                >
+                  <div className="loader-orbit mb-4">
+                    <div className="orbit-ring orbit-ring-1"></div>
+                    <div className="orbit-ring orbit-ring-2"></div>
+                    <div className="orbit-ring orbit-ring-3"></div>
+                    <div className="loader-core rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center shadow-sm">
+                      <i className="bi bi-journal-text fs-2 animate-pulse-fast"></i>
+                    </div>
                   </div>
-                  <div className="text-muted small">Cargando presentación...</div>
+                  <div className="fs-5 fw-semibold text-body mb-2 text-glow-teal animate-pulse-slow">
+                    Preparando presentación...
+                  </div>
+                  <div className="text-secondary small max-w-xs mx-auto leading-relaxed">
+                    Alineando las diapositivas de Notes Creator. Espera un momento.
+                  </div>
                 </div>
 
                 <iframe 
@@ -97,6 +180,8 @@ export default function NotesAppPage() {
                   className="w-100 h-100 border-0 d-block"
                   allowFullScreen 
                   title="Notes Creator Presentation"
+                  onLoad={() => setIframeLoaded(true)}
+                  style={{ opacity: iframeLoaded ? 1 : 0, transition: "opacity 0.6s ease" }}
                 ></iframe>
               </div>
               
