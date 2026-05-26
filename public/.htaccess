@@ -1,0 +1,3 @@
+# ImperioDev Apache Server Configuration
+# Route all missing static file requests to the custom Next.js 404 page
+ErrorDocument 404 /404.html
