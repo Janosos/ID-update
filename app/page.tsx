@@ -7,6 +7,24 @@ import HeroMonitor from "@/components/HeroMonitor";
 export default function Home() {
   const [visibleItems, setVisibleItems] = useState(3);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showPromo, setShowPromo] = useState(false);
+
+  useEffect(() => {
+    const isDismissed = sessionStorage.getItem("notes-promo-dismissed");
+    if (!isDismissed) {
+      const timer = setTimeout(() => {
+        setShowPromo(true);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const dismissPromo = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowPromo(false);
+    sessionStorage.setItem("notes-promo-dismissed", "true");
+  };
 
   useEffect(() => {
     const updateVisibleItems = () => {
@@ -148,6 +166,55 @@ export default function Home() {
         .card-hover-premium:hover {
           transform: translateY(-6px) scale(1.01);
           box-shadow: var(--card-shadow);
+        }
+
+        /* Promo Toast Slide-In Animation */
+        @keyframes slide-up-in {
+          0% { transform: translateY(100px) scale(0.9); opacity: 0; }
+          100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-8deg); }
+          75% { transform: rotate(8deg); }
+        }
+        .animate-wiggle {
+          animation: wiggle 2s infinite ease-in-out;
+        }
+        .promo-toast-wrapper {
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          z-index: 1050;
+          max-width: 360px;
+          width: calc(100vw - 48px);
+          animation: slide-up-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .promo-toast {
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          cursor: pointer;
+          background: rgba(15, 23, 42, 0.98) !important;
+          backdrop-filter: blur(20px);
+          border-left: 4px solid #14b8a6 !important;
+        }
+        .promo-toast:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 30px rgba(20, 184, 166, 0.25) !important;
+          border-color: #14b8a6 !important;
+        }
+        .btn-close-promo {
+          color: #94a3b8;
+          transition: color 0.2s ease, background-color 0.2s ease;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+        }
+        .btn-close-promo:hover {
+          color: #14b8a6;
+          background: rgba(255, 255, 255, 0.1);
         }
       ` }} />
 
@@ -645,6 +712,36 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* 6. Promotional Floating Toast */}
+      {showPromo && (
+        <div className="promo-toast-wrapper">
+          <Link href="/notes-app" className="text-decoration-none">
+            <div className="promo-toast glass-panel p-3 border-info border-opacity-50 shadow-lg d-flex gap-3 align-items-center position-relative">
+              <button 
+                onClick={dismissPromo} 
+                className="btn-close-promo position-absolute top-0 end-0 m-2 border-0 bg-transparent"
+                aria-label="Cerrar anuncio"
+              >
+                <i className="bi bi-x fs-5"></i>
+              </button>
+              
+              <div className="promo-icon-container rounded-3 bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "50px", height: "50px" }}>
+                <i className="bi bi-phone-vibrate fs-3 animate-wiggle"></i>
+              </div>
+              
+              <div className="pe-3">
+                <span className="text-info text-xs fw-bold uppercase tracking-wider d-block mb-1">✨ ¡Lanzamiento!</span>
+                <h4 className="h6 fw-bold text-body mb-1">Empieza a verte profesional</h4>
+                <p className="text-secondary small m-0 leading-sm">
+                  Gestiona tus notas de venta con nuestra nueva app.
+                </p>
+                <span className="text-info small fw-bold mt-1 d-inline-block">Probar gratis ahora <i className="bi bi-arrow-right"></i></span>
+              </div>
+            </div>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
