@@ -28,6 +28,14 @@ export default function LoadingScreen() {
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
+    const handleHide = () => {
+      setVisible(false);
+    };
+    window.addEventListener("hide-loading-screen", handleHide);
+    return () => window.removeEventListener("hide-loading-screen", handleHide);
+  }, []);
+
+  useEffect(() => {
     // Barajar el array al montar el componente (Orden aleatorio)
     const shuffled = [...frasesMexicanas].sort(() => Math.random() - 0.5);
     setPhrases(shuffled);

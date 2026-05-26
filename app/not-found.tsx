@@ -22,6 +22,13 @@ export default function NotFound() {
   const floatTimeRef = useRef(0);
 
   useEffect(() => {
+    // Hide the loading screen immediately since this is the 404 page
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("hide-loading-screen"));
+    }
+  }, []);
+
+  useEffect(() => {
     const malePlug = malePlugRef.current;
     const femaleSocket = femaleSocketRef.current;
     const arcCanvas = arcCanvasRef.current;
