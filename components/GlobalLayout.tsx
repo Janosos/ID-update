@@ -94,6 +94,12 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
   return (
     <div id="id-global-wrapper" className="min-h-screen d-flex flex-column">
       <LoadingScreen />
+
+      {/* Parallax Starfield Background */}
+      <div id="stars"></div>
+      <div id="stars2"></div>
+      <div id="stars3"></div>
+
       {/* Hide navbar on Mothers Day */}
       {!isMothersDay && (
         <nav id="navbar-id" className="navbar navbar-expand-lg fixed-top py-3 glass-panel-nav">
