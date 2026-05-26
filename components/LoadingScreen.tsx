@@ -4,20 +4,20 @@ import React, { useState, useEffect } from 'react';
 
 // Lista de frases divertidas estilo desarrollador mexicano
 const frasesMexicanas = [
-  "Poniéndole aguacate al código",
-  "Rezándole al santo para que compile",
-  "Buscando el punto y coma perdido",
-  "Mandando los bugs por los soda",
+  "Poniendo aguacate al código",
+  "Rezando para que compile",
+  "Buscando el punto y coma",
+  "Bugs por los sodas",
   "Poniendo cumbias de fondo",
-  "Acomodando los bits con cinta canela",
-  "Dándole su respectiva reiniciada",
-  "Sobornando al servidor con unos tacos",
-  "Agregando 'jalando al 100' al commit",
-  "Esperando a que Telmex no falle",
-  "Sacando el fua en producción",
-  "Haciéndose patos un ratito",
-  "Limpiando el caché a escobazos",
-  "Preguntándole a ChatGPT",
+  "Acomodando bits con cinta",
+  "Su respectiva reiniciada",
+  "Server sobornado con tacos",
+  "Commit con 'jalando al 100'",
+  "Que Telmex no falle hoy",
+  "Sacando el fua en prod",
+  "Haciendo patos un rato",
+  "Caché limpio a escobazos",
+  "Preguntando a ChatGPT",
   "Echándole ganas"
 ];
 
@@ -36,27 +36,27 @@ export default function LoadingScreen() {
   useEffect(() => {
     if (phrases.length === 0) return;
     
-    // Avanzar a la siguiente frase cada 2.5 segundos
+    // Avanzar a la siguiente frase cada 1.2 segundos
     const interval = setInterval(() => {
       setCurrentIndex((prev) => {
         // Nos aseguramos de no pasarnos del límite del array
         if (prev < phrases.length - 1) return prev + 1;
         return prev;
       });
-    }, 2500);
+    }, 1200);
 
     return () => clearInterval(interval);
   }, [phrases]);
 
   useEffect(() => {
-    // Desaparecer después de que se muestren algunas frases (e.g. 4.2 segundos total)
+    // Desaparecer después de 3.0 segundos (experiencia más rápida)
     const fadeTimer = setTimeout(() => {
       setFadeOut(true);
       const removeTimer = setTimeout(() => {
         setVisible(false);
       }, 500); // Duración de la transición de opacidad
       return () => clearTimeout(removeTimer);
-    }, 4200);
+    }, 3000);
     return () => clearTimeout(fadeTimer);
   }, []);
 
@@ -214,7 +214,12 @@ export default function LoadingScreen() {
           display: flex;
           align-items: center;
           width: 100%;
-          max-width: 280px;
+          max-width: 320px;
+        }
+        @media (max-width: 576px) {
+          .loading-screen-item {
+            max-width: 310px;
+          }
         }
         .loading-screen-icon-wrap {
           width: 32px;
@@ -249,6 +254,8 @@ export default function LoadingScreen() {
         .loading-screen-text {
           font-weight: 500;
           white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
           transition: all 0.5s ease;
         }
         .loading-screen-text.active {
@@ -263,6 +270,17 @@ export default function LoadingScreen() {
         .loading-screen-text.pending {
           color: #475569;
           font-size: 1rem;
+        }
+        @media (max-width: 576px) {
+          .loading-screen-text.active {
+            font-size: 0.95rem;
+          }
+          .loading-screen-text.completed {
+            font-size: 0.85rem;
+          }
+          .loading-screen-text.pending {
+            font-size: 0.85rem;
+          }
         }
 
         @keyframes fadeIn {
