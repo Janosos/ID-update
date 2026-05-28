@@ -164,6 +164,40 @@ export default function Home() {
           box-shadow: var(--card-shadow);
         }
 
+        .social-icon-btn {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: var(--card-bg);
+          border: 1px solid var(--card-border);
+          color: var(--text-color);
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: var(--card-shadow);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+        }
+        .social-icon-btn:hover {
+          transform: translateY(-3px) scale(1.1);
+          color: #ffffff !important;
+        }
+        .facebook-btn:hover {
+          background: #1877f2 !important;
+          border-color: #1877f2 !important;
+          box-shadow: 0 8px 20px rgba(24, 119, 242, 0.3) !important;
+        }
+        .instagram-btn:hover {
+          background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+          border-color: #dc2743 !important;
+          box-shadow: 0 8px 20px rgba(220, 39, 67, 0.3) !important;
+        }
+        .whatsapp-btn:hover {
+          background: #25d366 !important;
+          border-color: #25d366 !important;
+          box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3) !important;
+        }
+
         /* Promo Toast Slide-In Animation */
         @keyframes slide-up-in {
           0% { transform: translateY(100px) scale(0.9); opacity: 0; }
@@ -258,6 +292,37 @@ export default function Home() {
                 >
                   Explorar Portafolio
                 </Link>
+              </div>
+
+              {/* Quick Social Links */}
+              <div className="d-flex justify-content-center justify-content-lg-start gap-3 mt-3">
+                <a 
+                  href="https://www.facebook.com/ImperioDev" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="social-icon-btn facebook-btn"
+                  title="Facebook"
+                >
+                  <i className="bi bi-facebook fs-5"></i>
+                </a>
+                <a 
+                  href="https://www.instagram.com/imperiodev_" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="social-icon-btn instagram-btn"
+                  title="Instagram"
+                >
+                  <i className="bi bi-instagram fs-5"></i>
+                </a>
+                <a 
+                  href="https://wa.me/526623440716" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="social-icon-btn whatsapp-btn"
+                  title="WhatsApp"
+                >
+                  <i className="bi bi-whatsapp fs-5"></i>
+                </a>
               </div>
             </div>
 
