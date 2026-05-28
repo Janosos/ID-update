@@ -1,332 +1,759 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 
-interface ProductColor {
-  name: string;
-  class: string;
-  img: string;
-  colorVal: string;
+interface TextSection {
+  title: string;
+  subtitle: string;
+  description: string;
+  start: number;
+  end: number;
+  align: "left" | "right" | "center";
 }
 
-export default function LandingDemo() {
-  const [selectedColor, setSelectedColor] = useState<number>(0);
-  const [formSubmitted, setFormSubmitted] = useState<boolean>(false);
-  const [leadName, setLeadName] = useState<string>("");
+export default function ScrollLandingDemo() {
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isPreloaded, setIsPreloaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const colors: ProductColor[] = [
+  const totalFrames = 240;
+
+  // Set document title dynamically on client
+  useEffect(() => {
+    document.title = "Demo de Landing Page - ImperioDev";
+  }, []);
+
+  // Detect mobile screen width dynamically
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 992);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Preload scroll animation frames
+  useEffect(() => {
+    let loaded = 0;
+    const tempImages: HTMLImageElement[] = [];
+
+    const handleImageLoad = () => {
+      loaded++;
+      const progress = Math.floor((loaded / totalFrames) * 100);
+      setLoadingProgress(progress);
+      if (loaded === totalFrames) {
+        imagesRef.current = tempImages;
+        setIsPreloaded(true);
+      }
+    };
+
+    for (let i = 1; i <= totalFrames; i++) {
+      const img = new Image();
+      const frameNum = String(i).padStart(3, "0");
+      img.src = `/demos/landing/scroll-images/ezgif-frame-${frameNum}.jpg`;
+      img.onload = handleImageLoad;
+      img.onerror = handleImageLoad; // Skip if failed to avoid blocking
+      tempImages.push(img);
+    }
+  }, []);
+
+  // Dynamically override parent layout overflow settings to fix position: sticky bugs
+  useEffect(() => {
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+    const wrapperEl = document.getElementById("id-global-wrapper");
+    const mainEl = document.querySelector("main");
+
+    // Save original styles to restore on unmount
+    const originalHtmlOverflow = htmlEl.style.overflow;
+    const originalHtmlOverflowX = htmlEl.style.overflowX;
+    const originalHtmlHeight = htmlEl.style.height;
+
+    const originalBodyOverflow = bodyEl.style.overflow;
+    const originalBodyOverflowX = bodyEl.style.overflowX;
+    const originalBodyHeight = bodyEl.style.height;
+
+    const originalWrapperOverflow = wrapperEl ? wrapperEl.style.overflow : "";
+    const originalWrapperOverflowX = wrapperEl ? wrapperEl.style.overflowX : "";
+    const originalWrapperHeight = wrapperEl ? wrapperEl.style.height : "";
+
+    const originalMainOverflow = mainEl ? mainEl.style.overflow : "";
+    const originalMainOverflowX = mainEl ? mainEl.style.overflowX : "";
+    const originalMainHeight = mainEl ? mainEl.style.height : "";
+
+    // Set overflow visible and height auto to allow sticky elements to stick on viewport scroll
+    htmlEl.style.setProperty("overflow", "visible", "important");
+    htmlEl.style.setProperty("overflow-x", "visible", "important");
+    htmlEl.style.setProperty("height", "auto", "important");
+
+    bodyEl.style.setProperty("overflow", "visible", "important");
+    bodyEl.style.setProperty("overflow-x", "visible", "important");
+    bodyEl.style.setProperty("height", "auto", "important");
+
+    if (wrapperEl) {
+      wrapperEl.style.setProperty("overflow", "visible", "important");
+      wrapperEl.style.setProperty("overflow-x", "visible", "important");
+      wrapperEl.style.setProperty("height", "auto", "important");
+    }
+
+    if (mainEl) {
+      mainEl.style.setProperty("overflow", "visible", "important");
+      mainEl.style.setProperty("overflow-x", "visible", "important");
+      mainEl.style.setProperty("height", "auto", "important");
+    }
+
+    return () => {
+      // Restore original styles on unmount
+      htmlEl.style.overflow = originalHtmlOverflow;
+      htmlEl.style.overflowX = originalHtmlOverflowX;
+      htmlEl.style.height = originalHtmlHeight;
+
+      bodyEl.style.overflow = originalBodyOverflow;
+      bodyEl.style.overflowX = originalBodyOverflowX;
+      bodyEl.style.height = originalBodyHeight;
+
+      if (wrapperEl) {
+        wrapperEl.style.overflow = originalWrapperOverflow;
+        wrapperEl.style.overflowX = originalWrapperOverflowX;
+        wrapperEl.style.height = originalWrapperHeight;
+      }
+
+      if (mainEl) {
+        mainEl.style.overflow = originalMainOverflow;
+        mainEl.style.overflowX = originalMainOverflowX;
+        mainEl.style.height = originalMainHeight;
+      }
+    };
+  }, []);
+
+  // Track page scroll percentage using robust cross-browser properties
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollableHeight <= 0) return;
+      const progress = scrollTop / scrollableHeight;
+      setScrollProgress(Math.min(1, Math.max(0, progress)));
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true });
+    
+    // Initialize
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+    };
+  }, [isPreloaded]);
+
+  // Render current frame to canvas
+  useEffect(() => {
+    if (!isPreloaded || !canvasRef.current || imagesRef.current.length === 0) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Calculate current frame index (1 to 240)
+    const currentFrame = Math.min(
+      totalFrames,
+      Math.max(1, Math.floor(scrollProgress * (totalFrames - 1)) + 1)
+    );
+
+    const img = imagesRef.current[currentFrame - 1];
+    if (!img) return;
+
+    // Set canvas dimensions to match the image dimensions if not set
+    if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight) {
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+    }
+
+    // Clear canvas and draw image
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+  }, [scrollProgress, isPreloaded]);
+
+  // Detailed product description walkthrough (7 sections)
+  const textSections: TextSection[] = [
     {
-      name: "Negro Obsidiana",
-      class: "bg-dark",
-      img: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&auto=format&fit=crop&q=80",
-      colorVal: "#1e293b"
+      title: "AeroPods Pro",
+      subtitle: "Sonido en su estado más puro.",
+      description: "Una experiencia de audio completamente rediseñada para envolverte en cada nota. Ingeniería de precisión acústica y diseño ergonómico de vanguardia.",
+      start: 0.0,
+      end: 0.14,
+      align: "center"
     },
     {
-      name: "Plata Estelar",
-      class: "bg-secondary-subtle",
-      img: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&auto=format&fit=crop&q=80",
-      colorVal: "#cbd5e1"
+      title: "Transductor de Alta Excursión",
+      subtitle: "Componentes de precisión absoluta.",
+      description: "Un motor de bobina móvil de diseño exclusivo y un amplificador de rango dinámico ultra amplio minimizan la distorsión, entregando graves profundos de hasta 15 Hz.",
+      start: 0.17,
+      end: 0.28,
+      align: "left"
     },
     {
-      name: "Azul Cobalto",
-      class: "bg-primary",
-      img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80",
-      colorVal: "#2563eb"
+      title: "Diafragma de Berilio",
+      subtitle: "Materiales de grado aeroespacial.",
+      description: "El diafragma ultraligero recubierto de berilio de 11 mm responde con una velocidad extrema a las altas frecuencias, eliminando resonancias y entregando agudos cristalinos y detallados.",
+      start: 0.31,
+      end: 0.41,
+      align: "right"
+    },
+    {
+      title: "Cancelación Activa de Ruido",
+      subtitle: "Silencio absoluto, música pura.",
+      description: "Dos micrófonos dedicados analizan el ruido ambiental 48,000 veces por segundo, generando una onda de fase inversa que neutraliza el sonido exterior antes de que llegue a tus oídos.",
+      start: 0.44,
+      end: 0.54,
+      align: "left"
+    },
+    {
+      title: "Micrófonos de Formación de Haces",
+      subtitle: "Focalización de voz y nitidez extrema.",
+      description: "Los micrófonos dual-beamforming y una malla acústica de acero inoxidable reducen el ruido del viento y aíslan tu voz para llamadas cristalinas en cualquier entorno.",
+      start: 0.57,
+      end: 0.67,
+      align: "right"
+    },
+    {
+      title: "Procesador Imperio H3 Pro",
+      subtitle: "Computación de audio en tiempo real.",
+      description: "El chip H3 utiliza 10 núcleos de procesamiento de audio para ecualizar dinámicamente el sonido según la fisonomía de tu oído y optimizar el consumo de batería en un espacio ultra compacto.",
+      start: 0.70,
+      end: 0.80,
+      align: "left"
+    },
+    {
+      title: "Energía Ininterrumpida",
+      subtitle: "Hasta 45 horas de autonomía total.",
+      description: "Los audífonos ofrecen hasta 9 horas de reproducción por carga. El estuche de carga inteligente MagSafe proporciona hasta 36 horas adicionales con carga rápida mediante USB-C.",
+      start: 0.83,
+      end: 0.93,
+      align: "center"
     }
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (leadName.trim()) {
-      setFormSubmitted(true);
+  // Helper to calculate opacity for a section based on scroll progress
+  const getSectionOpacity = (progress: number, start: number, end: number) => {
+    const range = end - start;
+    const fadeInPoint = start + range * 0.2;
+    const fadeOutPoint = end - range * 0.2;
+
+    if (progress < start || progress > end) return 0;
+    if (progress >= fadeInPoint && progress <= fadeOutPoint) return 1;
+    
+    if (progress < fadeInPoint) {
+      return (progress - start) / (fadeInPoint - start);
     }
+    return (end - progress) / (end - fadeOutPoint);
+  };
+
+  // Helper to calculate translation offset for section
+  const getSectionTranslateY = (progress: number, start: number, end: number) => {
+    const opacity = getSectionOpacity(progress, start, end);
+    return (1 - opacity) * 40; // translate up by 40px when fading in
   };
 
   return (
-    <div className="min-vh-100 bg-body d-flex flex-column position-relative" style={{ fontFamily: "var(--font-sans)" }}>
+    <div data-bs-theme="light" className="bg-white text-black min-vh-100 position-relative" style={{ fontFamily: "var(--font-sans)", overflow: "visible" }}>
       <style dangerouslySetInnerHTML={{ __html: `
-        .feature-icon {
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background: rgba(249, 115, 22, 0.08);
-          color: #f97316;
+        /* Force overflow visible to fix CSS position: sticky bug on ancestor hierarchy */
+        html, body, #id-global-wrapper, main {
+          overflow: visible !important;
+          overflow-x: visible !important;
+          height: auto !important;
+        }
+
+        /* Override CSS Variables for Light Theme inside this subtree */
+        [data-bs-theme="light"] {
+          --bs-body-bg: #ffffff !important;
+          --bs-body-bg-rgb: 255, 255, 255 !important;
+          --bs-body-color: #1d1d1f !important;
+          --bs-body-color-rgb: 29, 29, 31 !important;
+          --bs-secondary-color: #515154 !important;
+          --bs-secondary-color-rgb: 81, 81, 84 !important;
+          --bs-tertiary-bg: #f5f5f7 !important;
+          --bs-tertiary-bg-rgb: 245, 245, 247 !important;
+          --bs-border-color: #d2d2d7 !important;
+          --bs-border-color-translucent: rgba(0, 0, 0, 0.08) !important;
+        }
+
+        /* Apple-style thin borders and light gradients */
+        body {
+          background-color: #ffffff !important;
+          color: #1d1d1f !important;
+        }
+
+        .apple-nav {
+          background: rgba(255, 255, 255, 0.9) !important;
+          backdrop-filter: saturate(180%) blur(20px);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+          transition: background 0.3s ease;
+        }
+
+        .sticky-viewport {
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          width: 100%;
+          overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
+          background-color: #ffffff;
         }
 
-        .color-dot {
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          border: 2px solid transparent;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-        .color-dot.active {
-          border-color: #f97316;
-          transform: scale(1.15);
+        .scroll-canvas-container {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1;
         }
 
-        .hero-img {
-          transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
-          max-height: 450px;
-          object-fit: cover;
+        .scroll-canvas {
+          max-height: 72vh;
+          max-width: 90%;
+          object-fit: contain;
+          transition: transform 0.1s ease;
+        }
+
+        .text-section-overlay {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          z-index: 2;
+          pointer-events: none;
+        }
+
+        .text-card {
+          max-width: 450px;
+          pointer-events: auto;
+          background: rgba(255, 255, 255, 0.95) !important; /* Higher opacity for contrast */
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 0, 0, 0.12) !important; /* Darker border for legibility */
           border-radius: 1.5rem;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+          transition: opacity 0.2s ease, transform 0.2s ease;
+          padding: 2.25rem !important;
         }
 
-        .demo-bar {
+        .text-card-center {
+          max-width: 580px;
+          background: rgba(255, 255, 255, 0.95) !important; /* Higher opacity */
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 0, 0, 0.12) !important;
+          border-radius: 1.5rem;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+          text-align: center;
+          padding: 2.25rem !important;
+        }
+
+        /* High-contrast Apple-style Typography */
+        .apple-label {
+          color: #e05e00 !important; /* Stronger contrast orange */
+          font-weight: 700 !important;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          font-size: 0.72rem;
+          display: block;
+          margin-bottom: 0.5rem;
+        }
+
+        .apple-title {
+          color: #000000 !important;
+          font-weight: 700 !important;
+          font-family: var(--font-display);
+        }
+
+        .apple-subtitle {
+          color: #1c1c1e !important; /* Very dark charcoal */
+          font-weight: 600 !important;
+        }
+
+        .apple-desc {
+          color: #1c1c1e !important; /* Extremely high contrast dark gray/black */
+          font-weight: 500 !important; /* Slightly bolder for sub-pixel rendering legibility */
+          line-height: 1.65 !important;
+        }
+
+        .demo-bar-light {
           position: fixed;
           bottom: 20px;
           left: 50%;
           transform: translateX(-50%);
           z-index: 1000;
-          background: rgba(15, 23, 42, 0.9);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(15px);
+          border: 1px solid rgba(0, 0, 0, 0.08);
           border-radius: 50px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Specs Table Styling */
+        html body .spec-title {
+          color: #1d1d1f !important;
+          font-weight: 700 !important;
+          font-size: 1.1rem !important;
+          margin-bottom: 0.4rem !important;
+          font-family: var(--font-display);
         }
         
-        .testimonial-card {
-          border-left: 4px solid #f97316 !important;
+        html body .spec-desc {
+          color: #515154 !important; /* High contrast dark grey instead of light secondary gray */
+          font-size: 0.92rem !important;
+          line-height: 1.6 !important;
+          font-weight: 400 !important;
+        }
+
+        /* Booking Card styling */
+        html body .buy-card {
+          background-color: #f5f5f7 !important;
+          border: 1px solid #e5e5e7 !important;
+          border-radius: 1.5rem !important;
+          color: #1d1d1f !important;
+          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        html body .buy-card-subtitle {
+          color: #515154 !important;
+          font-weight: 500 !important;
+        }
+
+        html body .buy-input {
+          background-color: #ffffff !important;
+          color: #1d1d1f !important;
+          border: 1px solid #d2d2d7 !important;
+          border-radius: 0.75rem !important;
+          padding: 0.85rem 1.1rem !important;
+          font-size: 0.95rem !important;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        html body .buy-input::placeholder {
+          color: #86868b !important;
+          opacity: 1 !important;
+        }
+        html body .buy-input:focus {
+          border-color: #0071e3 !important;
+          box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15) !important;
+          background-color: #ffffff !important;
+          color: #1d1d1f !important;
+        }
+
+        html body .buy-card .btn-dark {
+          background-color: #1d1d1f !important;
+          border-color: #1d1d1f !important;
+          color: #ffffff !important;
+          transition: all 0.2s ease !important;
+        }
+        html body .buy-card .btn-dark:hover {
+          background-color: #000000 !important;
+          border-color: #000000 !important;
+          transform: translateY(-1px) !important;
+        }
+
+        /* Mobile specific overrides */
+        @media (max-width: 991.98px) {
+          .scroll-canvas {
+            max-height: 40vh !important;
+            transform: translateY(12vh) !important; /* Shifted down to lower half */
+          }
+          section.py-5 {
+            padding-top: 3rem !important;
+            padding-bottom: 3rem !important;
+          }
+        }
+
+        @media (max-width: 767.98px) {
+          .text-card, .text-card-center {
+            padding: 1.25rem !important;
+            border-radius: 1.25rem !important;
+            top: 11vh !important;
+            bottom: auto !important;
+          }
+          .apple-title {
+            font-size: 1.4rem !important;
+          }
+          .apple-subtitle {
+            font-size: 0.85rem !important;
+          }
+          .apple-desc {
+            font-size: 0.82rem !important;
+            line-height: 1.5 !important;
+          }
+          html body .display-5 {
+            font-size: 2.2rem !important;
+          }
+          html body .buy-card {
+            padding: 1.75rem !important;
+          }
+          html body .spec-title {
+            font-size: 1.05rem !important;
+          }
+          html body .spec-desc {
+            font-size: 0.88rem !important;
+          }
+        }
+
+        /* Loading Screen styles */
+        .loading-screen-demos {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100vh;
+          background: #ffffff;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          z-index: 2000;
+        }
+
+        html body .loading-screen-demos p {
+          color: #515154 !important;
+        }
+
+        .progress-bar-demos {
+          width: 200px;
+          height: 3px;
+          background: #e5e5e7;
+          border-radius: 3px;
+          overflow: hidden;
+          margin-top: 20px;
+        }
+
+        .progress-fill-demos {
+          height: 100%;
+          background: #000000;
+          transition: width 0.1s ease;
         }
       `}} />
 
-      {/* Floating Demo Controller */}
-      <div className="demo-bar px-4 py-2 d-flex align-items-center gap-3">
-        <span className="text-white small fw-bold d-none d-sm-inline">⚡ Modo Demo: Landing Page</span>
-        <Link href="/demos" className="btn btn-warning btn-sm text-dark fw-bold rounded-pill px-3 py-1.5 d-flex align-items-center gap-1">
-          <i className="bi bi-grid-fill"></i> Salir al Panel
+      {/* 3D Preloader Screen */}
+      {!isPreloaded && (
+        <div className="loading-screen-demos">
+          <div className="text-center">
+            <img 
+              src="https://www.imperiodev.com/wp-content/uploads/2025/02/9c7d6fb0-1eab-481e-a6da-6b37688eacef-e1739234268387-46x63.png" 
+              alt="ImperioDev Logo" 
+              className="mb-3 animate-float"
+              style={{ height: "50px", width: "auto" }}
+            />
+            <h2 className="h5 fw-bold text-black font-display mb-1">Cargando Experiencia 3D</h2>
+            <p className="small text-muted">{loadingProgress}% completado</p>
+            <div className="progress-bar-demos mx-auto">
+              <div className="progress-fill-demos" style={{ width: `${loadingProgress}%` }}></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Demo Control Bar */}
+      <div className="demo-bar-light px-4 py-2 d-flex align-items-center gap-3">
+        <span className="text-black small fw-bold d-none d-sm-inline">Demo de Landing Page</span>
+        <Link href="/demos" className="btn btn-dark btn-sm fw-bold rounded-pill px-3 py-1.5 d-flex align-items-center gap-1">
+          <i className="bi bi-grid-fill"></i> Salir de la Demo
         </Link>
       </div>
 
-      {/* Navigation Header */}
-      <nav className="navbar navbar-expand-lg border-bottom py-3 sticky-top bg-body bg-opacity-75 backdrop-blur">
-        <div className="container-xl px-4">
-          <span className="navbar-brand fw-bold tracking-tight text-body d-flex align-items-center gap-2">
-            <span className="bg-warning text-dark rounded px-2 py-0.5" style={{ fontSize: "0.85rem" }}>AERO</span>
-            <span>AeroPods Studio</span>
+      {/* Sticky Sub-Navbar */}
+      <nav className="navbar navbar-expand apple-nav py-2 sticky-top z-10">
+        <div className="container-xl px-4 d-flex justify-content-between align-items-center">
+          <span className="navbar-brand fw-bold text-black m-0 d-flex align-items-center gap-2">
+            <span className="fw-semibold font-display">AeroPods Pro</span>
           </span>
-          <div className="ms-auto">
-            <a href="#contacto" className="btn btn-warning text-dark fw-bold rounded px-4 py-2 btn-sm">
-              Reservar Ahora
+          <div className="d-flex align-items-center gap-3">
+            <span className="small" style={{ color: "#1d1d1f", fontWeight: 600, fontSize: "clamp(0.75rem, 2.2vw, 0.85rem)" }}>
+              <span className="d-none d-sm-inline">Cancelación de Ruido Inteligente</span>
+              <span className="d-inline d-sm-none">Cancelación de Ruido</span>
+            </span>
+            <a href="#comprar" className="btn btn-dark btn-sm rounded-pill px-3 fw-bold">
+              Reservar
             </a>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="py-5 flex-grow-1 d-flex align-items-center">
-        <div className="container-xl px-4">
-          <div className="row align-items-center g-5">
-            {/* Call to Action details */}
-            <div className="col-12 col-lg-6 d-flex flex-column gap-4">
-              <div>
-                <span className="badge bg-warning bg-opacity-10 text-warning px-3 py-1.5 rounded-pill border border-warning border-opacity-25 uppercase tracking-wider fw-bold" style={{ fontSize: "0.75rem" }}>
-                  🔥 Oferta de Lanzamiento
-                </span>
-              </div>
-              <h1 className="display-4 fw-bold text-body lh-sm">
-                Sonido de Otro Planeta. <br />
-                <span className="text-warning">Sin Ataduras.</span>
-              </h1>
-              <p className="lead text-secondary">
-                Los nuevos AeroPods combinan cancelación activa de ruido adaptativa, audio espacial tridimensional y una batería de 40 horas en un diseño icónico.
-              </p>
-
-              {/* Color Selector Dynamic Simulation */}
-              <div className="p-3 glass-panel rounded-4 bg-body-tertiary">
-                <p className="small text-secondary mb-2 fw-bold">Elige tu color preferido:</p>
-                <div className="d-flex align-items-center gap-3">
-                  <div className="d-flex gap-2">
-                    {colors.map((color, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedColor(idx)}
-                        className={`color-dot ${color.class} ${selectedColor === idx ? "active" : ""}`}
-                        style={{ backgroundColor: color.colorVal }}
-                        title={color.name}
-                        aria-label={`Seleccionar color ${color.name}`}
-                      />
-                    ))}
-                  </div>
-                  <span className="small text-body fw-semibold">{colors[selectedColor].name}</span>
-                </div>
-              </div>
-
-              {/* CTA buttons */}
-              <div className="d-flex flex-column flex-sm-row gap-3 pt-2">
-                <a href="#contacto" className="btn btn-warning text-dark fw-bold px-4 py-3 rounded shadow-sm d-flex align-items-center justify-content-center gap-2">
-                  Adquirir en Preventa <i className="bi bi-chevron-right"></i>
-                </a>
-                <a href="#especificaciones" className="btn btn-outline-secondary fw-bold px-4 py-3 rounded d-flex align-items-center justify-content-center">
-                  Ver Especificaciones
-                </a>
-              </div>
-            </div>
-
-            {/* Product Image Showcase Column */}
-            <div className="col-12 col-lg-6 text-center">
-              <div className="position-relative d-inline-block">
-                <div 
-                  className="position-absolute bg-warning rounded-circle blur-3xl opacity-10"
-                  style={{ width: "300px", height: "300px", top: "10%", left: "10%", filter: "blur(80px)", zIndex: -1 }}
-                ></div>
-                <img 
-                  src={colors[selectedColor].img} 
-                  alt={`AeroPods ${colors[selectedColor].name}`} 
-                  className="img-fluid shadow-lg hero-img"
-                />
-              </div>
-            </div>
+      {/* Scrollable Container (600vh to slow down scroll rate and make animation detailed) */}
+      <div ref={containerRef} style={{ height: "600vh", overflow: "visible" }}>
+        
+        {/* Sticky Viewport */}
+        <div className="sticky-viewport">
+          
+          {/* Fictional Headphones Canvas */}
+          <div className="scroll-canvas-container">
+            <canvas 
+              ref={canvasRef} 
+              className="scroll-canvas"
+              style={{
+                transform: `scale(${1 + (1 - getSectionOpacity(scrollProgress, 0, 0.14)) * 0.05})`
+              }}
+            />
           </div>
-        </div>
-      </section>
 
-      {/* Features grid */}
-      <section className="py-5 bg-body-tertiary border-top border-bottom" id="especificaciones">
-        <div className="container-xl px-4">
-          <div className="row g-4">
-            <div className="col-12 col-md-4">
-              <div className="d-flex gap-3 align-items-start">
-                <div className="feature-icon flex-shrink-0">
-                  <i className="bi bi-mic-fill fs-5"></i>
-                </div>
-                <div>
-                  <h3 className="h5 fw-bold text-body mb-2">Cancelación de Ruido (ANC)</h3>
-                  <p className="text-secondary small m-0">
-                    Aísla el ruido ambiental de manera inteligente para sumergirte por completo en tu música o llamadas.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="col-12 col-md-4">
-              <div className="d-flex gap-3 align-items-start">
-                <div className="feature-icon flex-shrink-0">
-                  <i className="bi bi-battery-charging fs-5"></i>
-                </div>
-                <div>
-                  <h3 className="h5 fw-bold text-body mb-2">40 Horas de Batería</h3>
-                  <p className="text-secondary small m-0">
-                    Hasta 8 horas continuas por carga más 32 horas extra provistas por el estuche de carga rápida inteligente.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="col-12 col-md-4">
-              <div className="d-flex gap-3 align-items-start">
-                <div className="feature-icon flex-shrink-0">
-                  <i className="bi bi-water fs-5"></i>
-                </div>
-                <div>
-                  <h3 className="h5 fw-bold text-body mb-2">Resistencia al Agua IPX4</h3>
-                  <p className="text-secondary small m-0">
-                    Diseño a prueba de salpicaduras y sudor, ideal para entrenamientos intensos o días lluviosos.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+          {/* Scrolling Text Overlays */}
+          <div className="text-section-overlay container-xl px-4 position-relative">
+            {textSections.map((section, idx) => {
+              const opacity = getSectionOpacity(scrollProgress, section.start, section.end);
+              const translateY = getSectionTranslateY(scrollProgress, section.start, section.end);
+              
+              if (opacity <= 0.01) return null;
 
-      {/* Testimonials */}
-      <section className="py-5">
-        <div className="container-xl px-4">
-          <h2 className="text-center fw-bold text-body mb-5">Lo Que Opinan los Expertos</h2>
-          <div className="row g-4">
-            <div className="col-12 col-md-6">
-              <div className="glass-panel p-4 testimonial-card bg-body-tertiary h-100 d-flex flex-column justify-content-between">
-                <p className="text-secondary italic mb-3">
-                  "La fidelidad de sonido de estos audífonos rivaliza con equipos de estudio profesional de tres veces su precio. El audio espacial 3D es simplemente impresionante."
-                </p>
-                <div className="d-flex align-items-center gap-2">
-                  <strong className="small text-body">Sandro M.</strong>
-                  <span className="text-muted small">- Reviewer de Audio Tech</span>
-                </div>
-              </div>
-            </div>
-            <div className="col-12 col-md-6">
-              <div className="glass-panel p-4 testimonial-card bg-body-tertiary h-100 d-flex flex-column justify-content-between">
-                <p className="text-secondary italic mb-3">
-                  "El emparejamiento con mis dispositivos es instantáneo, la ergonomía es perfecta para mi jornada diaria y los controles táctiles son sumamente intuitivos."
-                </p>
-                <div className="d-flex align-items-center gap-2">
-                  <strong className="small text-body">Elena R.</strong>
-                  <span className="text-muted small">- Diseñadora Digital</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Form Lead Capture Section */}
-      <section className="py-5 bg-body-tertiary border-top mt-auto" id="contacto">
-        <div className="container-xl px-4">
-          <div className="max-w-md mx-auto text-center">
-            <h2 className="fw-bold text-body mb-2">Reserva tus AeroPods</h2>
-            <p className="text-secondary small mb-4">
-              Déjanos tus datos para asegurar tu precio de preventa especial con un 20% de descuento.
-            </p>
-
-            <div className="glass-panel p-4 text-start bg-body shadow-sm">
-              {formSubmitted ? (
-                <div className="text-center py-4">
-                  <div className="text-success fs-1 mb-3">
-                    <i className="bi bi-check2-circle"></i>
-                  </div>
-                  <h4 className="fw-bold text-body">¡Registro Exitoso!</h4>
-                  <p className="text-secondary small mt-2 m-0">
-                    Gracias, <strong>{leadName}</strong>. Hemos reservado tu descuento. Recibirás un correo con las instrucciones de pago en unos minutos.
-                  </p>
-                  <button 
-                    onClick={() => { setFormSubmitted(false); setLeadName(""); }} 
-                    className="btn btn-outline-secondary btn-sm mt-4 fw-bold rounded px-3"
+              // Responsive positioning
+              if (isMobile) {
+                return (
+                  <div 
+                    key={idx} 
+                    className="position-absolute text-card text-center"
+                    style={{
+                      left: "5%",
+                      right: "5%",
+                      top: "11vh",
+                      opacity: opacity,
+                      transform: `translate3d(0, ${translateY}px, 0)`,
+                      maxWidth: "none",
+                      pointerEvents: opacity > 0.5 ? "auto" : "none"
+                    }}
                   >
-                    Registrar Otro
-                  </button>
+                    <span className="apple-label font-monospace">
+                      {section.align === "center" ? "Lanzamiento" : section.align === "left" ? "Especificaciones" : "Componentes"}
+                    </span>
+                    <h2 className="h4 apple-title mb-2">{section.title}</h2>
+                    <h3 className="h6 apple-subtitle mb-2" style={{ fontSize: "0.85rem" }}>{section.subtitle}</h3>
+                    <p className="small apple-desc mb-0" style={{ fontSize: "0.8rem" }}>{section.description}</p>
+                  </div>
+                );
+              }
+
+              // Desktop positioning
+              if (section.align === "left") {
+                return (
+                  <div 
+                    key={idx} 
+                    className="position-absolute text-card"
+                    style={{
+                      left: "4%",
+                      top: "25%",
+                      opacity: opacity,
+                      transform: `translate3d(0, ${translateY}px, 0)`,
+                      pointerEvents: opacity > 0.5 ? "auto" : "none"
+                    }}
+                  >
+                    <span className="apple-label font-monospace">Especificaciones</span>
+                    <h2 className="h3 apple-title mb-2">{section.title}</h2>
+                    <h3 className="h6 apple-subtitle mb-3">{section.subtitle}</h3>
+                    <p className="small apple-desc mb-0">{section.description}</p>
+                  </div>
+                );
+              }
+
+              if (section.align === "right") {
+                return (
+                  <div 
+                    key={idx} 
+                    className="position-absolute text-card"
+                    style={{
+                      right: "4%",
+                      top: "25%",
+                      opacity: opacity,
+                      transform: `translate3d(0, ${translateY}px, 0)`,
+                      pointerEvents: opacity > 0.5 ? "auto" : "none"
+                    }}
+                  >
+                    <span className="apple-label font-monospace">Componentes</span>
+                    <h2 className="h3 apple-title mb-2">{section.title}</h2>
+                    <h3 className="h6 apple-subtitle mb-3">{section.subtitle}</h3>
+                    <p className="small apple-desc mb-0">{section.description}</p>
+                  </div>
+                );
+              }
+
+              // Center alignment (intro & outro)
+              return (
+                <div 
+                  key={idx} 
+                  className="position-absolute text-card-center start-50 translate-middle-x"
+                  style={{
+                    top: "16%",
+                    opacity: opacity,
+                    transform: `translate3d(-50%, ${translateY}px, 0)`,
+                    pointerEvents: opacity > 0.5 ? "auto" : "none"
+                  }}
+                >
+                  <span className="apple-label font-monospace">Lanzamiento</span>
+                  <h2 className="display-5 apple-title mb-2">{section.title}</h2>
+                  <h3 className="h5 apple-subtitle mb-3">{section.subtitle}</h3>
+                  <p className="small apple-desc mb-0 max-w-md mx-auto">{section.description}</p>
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
+              );
+            })}
+          </div>
+
+        </div>
+      </div>
+
+      {/* Specs Summary Grid & Purchase simulator at the very bottom */}
+      <section className="py-5 bg-white border-top border-bottom" id="comprar" style={{ position: "relative", zIndex: 10 }}>
+        <div className="container-xl px-4 py-5">
+          <div className="row g-5 align-items-center">
+            <div className="col-12 col-lg-6">
+              <span className="text-danger fw-bold uppercase tracking-wider small d-block mb-2">Ingeniería Acústica</span>
+              <h2 className="display-5 fw-bold text-black mb-4 font-display">Tecnología de otro nivel.</h2>
+              
+              <div className="row g-4 mt-2">
+                <div className="col-12 col-sm-6">
+                  <h4 className="h6 spec-title">Cancelación de Ruido</h4>
+                  <p className="spec-desc">Elimina el doble de ruido exterior adaptándose al canal de tu oído.</p>
+                </div>
+                <div className="col-12 col-sm-6">
+                  <h4 className="h6 spec-title">Audio Espacial Personalizado</h4>
+                  <p className="spec-desc">Sonido de 360 grados calibrado según la fisonomía de tus oídos.</p>
+                </div>
+                <div className="col-12 col-sm-6">
+                  <h4 className="h6 spec-title">Control Táctil Inteligente</h4>
+                  <p className="spec-desc">Desliza el dedo por el auricular para subir o bajar el volumen al instante.</p>
+                </div>
+                <div className="col-12 col-sm-6">
+                  <h4 className="h6 spec-title">Resistencia IPX4</h4>
+                  <p className="spec-desc">Los audífonos y el estuche están preparados para soportar sudor y agua de forma segura.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-12 col-lg-5 offset-lg-1">
+              <div className="p-4 p-md-5 buy-card">
+                <h3 className="h4 fw-bold text-black mb-2 font-display">Reserva tus AeroPods</h3>
+                <p className="small buy-card-subtitle mb-4">Garantiza el precio exclusivo de preventa. Unidades limitadas.</p>
+                
+                <form onSubmit={(e) => { e.preventDefault(); alert("Reserva realizada con éxito (Simulación de landing)."); }} className="d-flex flex-column gap-3">
                   <div>
-                    <label htmlFor="name-input" className="form-label small fw-bold text-body">Nombre Completo</label>
-                    <input 
-                      type="text" 
-                      id="name-input" 
-                      className="form-control" 
-                      placeholder="Ej. Juan Pérez" 
-                      value={leadName}
-                      onChange={(e) => setLeadName(e.target.value)}
-                      required 
-                    />
+                    <label className="form-label small fw-bold text-black" htmlFor="name-input-end">Tu Nombre</label>
+                    <input type="text" id="name-input-end" className="form-control buy-input" placeholder="Ej. Carlos Martínez" required />
                   </div>
                   <div>
-                    <label htmlFor="email-input" className="form-label small fw-bold text-body">Correo Electrónico</label>
-                    <input 
-                      type="email" 
-                      id="email-input" 
-                      className="form-control" 
-                      placeholder="ejemplo@correo.com" 
-                      required 
-                    />
+                    <label className="form-label small fw-bold text-black" htmlFor="email-input-end">Tu Correo</label>
+                    <input type="email" id="email-input-end" className="form-control buy-input" placeholder="ejemplo@correo.com" required />
                   </div>
-                  <div>
-                    <label htmlFor="color-select" className="form-label small fw-bold text-body">Color Seleccionado</label>
-                    <select id="color-select" className="form-select" value={selectedColor} onChange={(e) => setSelectedColor(Number(e.target.value))}>
-                      {colors.map((color, idx) => (
-                        <option key={idx} value={idx}>{color.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <button type="submit" className="btn btn-warning text-dark fw-bold w-100 py-2.5 mt-2">
-                    Asegurar mi Descuento
+                  <button type="submit" className="btn btn-dark w-100 py-3 mt-2 fw-bold rounded-pill">
+                    Reservar Preventa Especial
                   </button>
                 </form>
-              )}
+              </div>
             </div>
           </div>
         </div>

@@ -22,7 +22,7 @@ export default function DemosPage() {
   const demos: DemoItem[] = [
     {
       id: "landing",
-      title: "Landing Page",
+      title: "Demo de Landing Page",
       tag: "Conversión Alta",
       description: "Página de aterrizaje optimizada para capturar prospectos y maximizar las ventas de un producto o servicio específico.",
       features: [
@@ -34,7 +34,7 @@ export default function DemosPage() {
       icon: "bi-layout-text-sidebar-reverse",
       href: "/demos/landing",
       glowColor: "rgba(249, 115, 22, 0.15)", // Orange glow
-      btnText: "Ver Demo de Landing"
+      btnText: "Ver Demo de Landing Page"
     },
     {
       id: "ecommerce",
