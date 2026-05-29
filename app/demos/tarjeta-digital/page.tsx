@@ -69,7 +69,7 @@ END:VCARD`;
         .legacy-container {
           background-color: var(--legacy-bg);
           color: var(--legacy-text);
-          font-family: 'Hanken Grotesk', sans-serif;
+          font-family: var(--font-hanken-grotesk), sans-serif;
         }
 
         /* Force stable text sizes and rendering to prevent letter size adjustments */
@@ -95,7 +95,7 @@ END:VCARD`;
         }
 
         .font-headline {
-          font-family: 'Libre Caslon Text', serif;
+          font-family: var(--font-libre-caslon-text), serif;
         }
 
         /* Background radial dot grid texture */
