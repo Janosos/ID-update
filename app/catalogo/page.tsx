@@ -21,7 +21,7 @@ export default function CatalogPage() {
     {
       id: "web-sencilla",
       title: "Pagina Web Sencilla",
-      price: "$6,000 MXN",
+      price: "$4,000 - $6,000 MXN",
       category: "web",
       description: "Ideal para comenzar tu presencia online de forma rápida.",
       icon: "bi-feather",
@@ -36,7 +36,7 @@ export default function CatalogPage() {
     {
       id: "web-estandar",
       title: "Pagina Web Estándar",
-      price: "$7,000 MXN",
+      price: "$6,000 - $8,000 MXN",
       category: "web",
       description: "La opción de diseño equilibrada para pequeñas empresas.",
       icon: "bi-layers",
@@ -51,7 +51,7 @@ export default function CatalogPage() {
     {
       id: "web-pro",
       title: "Pagina Web PRO",
-      price: "$8,000 MXN",
+      price: "$10,000 - $12,000 MXN",
       category: "web",
       description: "Solución completa y robusta con integraciones avanzadas.",
       icon: "bi-gem",
