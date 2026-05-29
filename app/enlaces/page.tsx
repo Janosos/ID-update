@@ -12,7 +12,7 @@ interface LinkItem {
 
 export default function EnlacesPage() {
   const links: LinkItem[] = [
-    { label: "Demos de Trabajo", href: "/demos", icon: "bi-window-stack", description: "Explora trabajos, integraciones y plantillas interactivas.", badge: "Próximamente", glow: true },
+    { label: "Demos de Trabajo", href: "/demos", icon: "bi-window-stack", description: "Explora trabajos, integraciones y plantillas interactivas.", glow: true },
     { label: "Notes Creator App", href: "/notes-app", icon: "bi-phone-fill", description: "Conoce nuestra aplicación inteligente de cotizaciones.", badge: "Popular" },
     { label: "Contacto Directo", href: "https://wa.me/526623440716", icon: "bi-whatsapp", description: "Envíanos un mensaje y cotiza tu web gratis.", external: true },
     { label: "Facebook Oficial", href: "https://www.facebook.com/ImperioDev", icon: "bi-facebook", description: "Síguenos en Facebook y entérate de nuestras novedades.", external: true },

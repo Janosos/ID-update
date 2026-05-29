@@ -287,8 +287,16 @@ export default function Home() {
                   Ver Planes Web <i className="bi bi-arrow-right"></i>
                 </Link>
                 <Link 
+                  href="/enlaces" 
+                  className="btn btn-premium-outline-theme btn-shimmer fw-bold px-4 py-3 rounded d-flex align-items-center justify-content-center gap-2"
+                  style={{ "--shimmer-delay": "0s" } as React.CSSProperties}
+                >
+                  Enlaces <i className="bi bi-link-45deg fs-5"></i>
+                </Link>
+                <Link 
                   href="#portfolio" 
-                  className="btn btn-premium-outline-theme fw-bold px-4 py-3 rounded d-flex align-items-center justify-content-center"
+                  className="btn btn-premium-outline-theme btn-shimmer fw-bold px-4 py-3 rounded d-flex align-items-center justify-content-center"
+                  style={{ "--shimmer-delay": "0.6s" } as React.CSSProperties}
                 >
                   Explorar Portafolio
                 </Link>

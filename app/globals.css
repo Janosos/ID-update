@@ -232,6 +232,44 @@ html.dark .btn-premium-outline-theme:hover {
   color: #ffffff !important;
 }
 
+/* Premium Shimmer/Reflection Effect */
+.btn-shimmer {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  animation: shimmer-swipe 4.5s infinite ease-in-out;
+  animation-delay: var(--shimmer-delay, 0s);
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+@keyframes shimmer-swipe {
+  0% {
+    left: -150%;
+  }
+  30% {
+    left: 150%;
+  }
+  100% {
+    left: 150%;
+  }
+}
+
 /* Subtle inner panels/tags */
 .inner-panel {
   background: rgba(15, 23, 42, 0.03) !important;
