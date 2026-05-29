@@ -30,12 +30,38 @@ const hankenGrotesk = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "ImperioDev - Creación de Experiencias Digitales",
+  title: {
+    default: "ImperioDev - Creación de Experiencias Digitales",
+    template: "%s | ImperioDev"
+  },
   description: "Desarrollo web a la medida con WordPress, WooCommerce, React y Bootstrap. Diseños de alto impacto y velocidad optimizada.",
+  metadataBase: new URL("https://www.imperiodev.com"),
   icons: {
     icon: "https://www.imperiodev.com/wp-content/uploads/2025/02/9c7d6fb0-1eab-481e-a6da-6b37688eacef-e1739234268387-46x63.png",
     shortcut: "https://www.imperiodev.com/wp-content/uploads/2025/02/9c7d6fb0-1eab-481e-a6da-6b37688eacef-e1739234268387-46x63.png",
     apple: "https://www.imperiodev.com/wp-content/uploads/2025/02/9c7d6fb0-1eab-481e-a6da-6b37688eacef-e1739234268387-46x63.png",
+  },
+  openGraph: {
+    title: "ImperioDev - Creación de Experiencias Digitales",
+    description: "Desarrollo web a la medida con WordPress, WooCommerce, React y Bootstrap. Diseños de alto impacto y velocidad optimizada.",
+    url: "https://www.imperiodev.com",
+    siteName: "ImperioDev",
+    images: [
+      {
+        url: "/BannerSEO.avif",
+        width: 1200,
+        height: 630,
+        alt: "ImperioDev - Creación de Experiencias Digitales",
+      },
+    ],
+    locale: "es_MX",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ImperioDev - Creación de Experiencias Digitales",
+    description: "Desarrollo web a la medida con WordPress, WooCommerce, React y Bootstrap. Diseños de alto impacto y velocidad optimizada.",
+    images: ["/BannerSEO.avif"],
   },
 };
 
