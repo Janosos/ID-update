@@ -13,30 +13,27 @@ interface TextSection {
 }
 
 export default function ScrollLandingDemo() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isPreloaded, setIsPreloaded] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
+  const lastCardStates = useRef<{ opacity: number; translateY: number }[]>([]);
+  const scrollInfoRef = useRef({
+    targetProgress: 0,
+    currentProgress: 0,
+    animationFrameId: 0,
+    lastFrameRendered: -1
+  });
 
   const totalFrames = 240;
 
   // Set document title dynamically on client
   useEffect(() => {
     document.title = "Demo de Landing Page - ImperioDev";
-  }, []);
-
-  // Detect mobile screen width dynamically
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 992);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Preload scroll animation frames
@@ -63,6 +60,17 @@ export default function ScrollLandingDemo() {
       tempImages.push(img);
     }
   }, []);
+
+  // Set initial canvas resolution when preloading is complete
+  useEffect(() => {
+    if (isPreloaded && canvasRef.current && imagesRef.current.length > 0) {
+      const firstImg = imagesRef.current[0];
+      if (firstImg) {
+        canvasRef.current.width = firstImg.naturalWidth;
+        canvasRef.current.height = firstImg.naturalHeight;
+      }
+    }
+  }, [isPreloaded]);
 
   // Dynamically override parent layout overflow settings to fix position: sticky bugs
   useEffect(() => {
@@ -132,56 +140,6 @@ export default function ScrollLandingDemo() {
       }
     };
   }, []);
-
-  // Track page scroll percentage using robust cross-browser properties
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (scrollableHeight <= 0) return;
-      const progress = scrollTop / scrollableHeight;
-      setScrollProgress(Math.min(1, Math.max(0, progress)));
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    document.addEventListener("scroll", handleScroll, { passive: true });
-    
-    // Initialize
-    handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      document.removeEventListener("scroll", handleScroll);
-    };
-  }, [isPreloaded]);
-
-  // Render current frame to canvas
-  useEffect(() => {
-    if (!isPreloaded || !canvasRef.current || imagesRef.current.length === 0) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Calculate current frame index (1 to 240)
-    const currentFrame = Math.min(
-      totalFrames,
-      Math.max(1, Math.floor(scrollProgress * (totalFrames - 1)) + 1)
-    );
-
-    const img = imagesRef.current[currentFrame - 1];
-    if (!img) return;
-
-    // Set canvas dimensions to match the image dimensions if not set
-    if (canvas.width !== img.naturalWidth || canvas.height !== img.naturalHeight) {
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-    }
-
-    // Clear canvas and draw image
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0);
-  }, [scrollProgress, isPreloaded]);
 
   // Detailed product description walkthrough (7 sections)
   const textSections: TextSection[] = [
@@ -264,6 +222,124 @@ export default function ScrollLandingDemo() {
     return (1 - opacity) * 40; // translate up by 40px when fading in
   };
 
+  // High-performance scroll tracking and DOM styling hook
+  // Decoupled from React renders to maintain solid 60fps/120fps LCP/FID metrics
+  useEffect(() => {
+    if (!isPreloaded) return;
+
+    const handleScroll = () => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const containerTop = window.pageYOffset + rect.top; // Absolute top position of the container
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      
+      const scrollStart = containerTop;
+      const scrollRange = container.offsetHeight - window.innerHeight;
+
+      if (scrollRange <= 0) return;
+
+      // Lock progress calculation exactly to the sticky scroll height range (0.0 to 1.0)
+      const progress = Math.min(1, Math.max(0, (scrollTop - scrollStart) / scrollRange));
+      scrollInfoRef.current.targetProgress = progress;
+    };
+
+    let active = true;
+    const renderLoop = () => {
+      if (!active) return;
+
+      const info = scrollInfoRef.current;
+      
+      // Smooth interpolation (lerp)
+      const diff = info.targetProgress - info.currentProgress;
+      if (Math.abs(diff) > 0.0001) {
+        info.currentProgress += diff * 0.15; // Smooth lerp
+      } else {
+        info.currentProgress = info.targetProgress;
+      }
+
+      const progress = info.currentProgress;
+      const canvas = canvasRef.current;
+      if (canvas && imagesRef.current.length > 0) {
+        // Map animation progress to reach frame 240 at progress = 0.96 (creating a buffer zone)
+        const animProgress = Math.min(1, progress / 0.96);
+        const currentFrame = Math.min(
+          totalFrames,
+          Math.max(1, Math.floor(animProgress * (totalFrames - 1)) + 1)
+        );
+
+        if (currentFrame !== info.lastFrameRendered) {
+          info.lastFrameRendered = currentFrame;
+          const img = imagesRef.current[currentFrame - 1];
+          if (img) {
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              ctx.drawImage(img, 0, 0);
+            }
+          }
+        }
+
+        // Apply scale transform to canvas using GPU layers
+        const firstSectionOpacity = getSectionOpacity(progress, 0, 0.14);
+        const canvasScale = 1 + (1 - firstSectionOpacity) * 0.05;
+        const isMobileScreen = window.innerWidth < 992;
+        canvas.style.transform = isMobileScreen
+          ? `scale3d(${canvasScale}, ${canvasScale}, 1) translate3d(0, 12vh, 0)`
+          : `scale3d(${canvasScale}, ${canvasScale}, 1) translate3d(0, 0, 0)`;
+
+        // Update Text Card opacities and translations directly in the DOM
+        textSections.forEach((section, idx) => {
+          const cardEl = cardRefs.current[idx];
+          if (!cardEl) return;
+
+          const opacity = getSectionOpacity(progress, section.start, section.end);
+          const translateY = getSectionTranslateY(progress, section.start, section.end);
+
+          // Optimize style writes: only update DOM if values have changed
+          const cache = lastCardStates.current[idx] || { opacity: -1, translateY: -1 };
+          if (Math.abs(cache.opacity - opacity) > 0.001 || Math.abs(cache.translateY - translateY) > 0.1) {
+            lastCardStates.current[idx] = { opacity, translateY };
+            if (opacity <= 0.01) {
+              cardEl.style.opacity = "0";
+              cardEl.style.transform = isMobileScreen
+                ? `translate3d(0, 40px, 0)`
+                : (section.align === "center" ? `translate3d(-50%, 40px, 0)` : `translate3d(0, 40px, 0)`);
+              cardEl.style.pointerEvents = "none";
+            } else {
+              cardEl.style.opacity = opacity.toString();
+              cardEl.style.transform = isMobileScreen
+                ? `translate3d(0, ${translateY}px, 0)`
+                : (section.align === "center" ? `translate3d(-50%, ${translateY}px, 0)` : `translate3d(0, ${translateY}px, 0)`);
+              cardEl.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
+            }
+          }
+        });
+      }
+
+      info.animationFrameId = requestAnimationFrame(renderLoop);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+    
+    // Initial scroll position setup
+    handleScroll();
+    
+    // Start continuous animation loop
+    renderLoop();
+
+    return () => {
+      active = false;
+      cancelAnimationFrame(scrollInfoRef.current.animationFrameId);
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [isPreloaded]);
+
   return (
     <div data-bs-theme="light" className="bg-white text-black min-vh-100 position-relative" style={{ fontFamily: "var(--font-sans)", overflow: "visible" }}>
       <style dangerouslySetInnerHTML={{ __html: `
@@ -327,7 +403,8 @@ export default function ScrollLandingDemo() {
           max-height: 72vh;
           max-width: 90%;
           object-fit: contain;
-          transition: transform 0.1s ease;
+          will-change: transform;
+          transform: scale3d(1, 1, 1) translate3d(0, 0, 0);
         }
 
         .text-section-overlay {
@@ -340,27 +417,55 @@ export default function ScrollLandingDemo() {
           pointer-events: none;
         }
 
-        .text-card {
-          max-width: 450px;
-          pointer-events: auto;
-          background: rgba(255, 255, 255, 0.95) !important; /* Higher opacity for contrast */
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(0, 0, 0, 0.12) !important; /* Darker border for legibility */
-          border-radius: 1.5rem;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
-          transition: opacity 0.2s ease, transform 0.2s ease;
-          padding: 2.25rem !important;
-        }
-
-        .text-card-center {
-          max-width: 580px;
-          background: rgba(255, 255, 255, 0.95) !important; /* Higher opacity */
+        /* Unified high-performance text card container for overlays */
+        .text-card-overlay-item {
+          position: absolute !important;
+          left: 5% !important;
+          right: 5% !important;
+          top: 11vh !important;
+          max-width: none !important;
+          text-align: center !important;
+          opacity: 0;
+          pointer-events: none;
+          transform: translate3d(0, 40px, 0);
+          will-change: transform, opacity;
+          transition: opacity 0.18s ease-out, transform 0.18s ease-out !important;
+          background: rgba(255, 255, 255, 0.95) !important;
           backdrop-filter: blur(20px);
           border: 1px solid rgba(0, 0, 0, 0.12) !important;
           border-radius: 1.5rem;
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
-          text-align: center;
           padding: 2.25rem !important;
+        }
+
+        .text-card-overlay-item.text-card-center {
+          max-width: 580px !important;
+        }
+
+        .text-card-overlay-item.text-card {
+          max-width: 450px !important;
+        }
+
+        /* Desktop media query positioning */
+        @media (min-width: 992px) {
+          .text-card-overlay-item.align-left {
+            left: 4% !important;
+            right: auto !important;
+            top: 25% !important;
+            text-align: left !important;
+          }
+          .text-card-overlay-item.align-right {
+            right: 4% !important;
+            left: auto !important;
+            top: 25% !important;
+            text-align: right !important;
+          }
+          .text-card-overlay-item.align-center {
+            left: 50% !important;
+            right: auto !important;
+            top: 16% !important;
+            text-align: center !important;
+          }
         }
 
         /* High-contrast Apple-style Typography */
@@ -470,7 +575,7 @@ export default function ScrollLandingDemo() {
         @media (max-width: 991.98px) {
           .scroll-canvas {
             max-height: 40vh !important;
-            transform: translateY(12vh) !important; /* Shifted down to lower half */
+            transform: scale3d(1, 1, 1) translate3d(0, 12vh, 0) !important; /* Shifted down to lower half using GPU layers */
           }
           section.py-5 {
             padding-top: 3rem !important;
@@ -479,11 +584,10 @@ export default function ScrollLandingDemo() {
         }
 
         @media (max-width: 767.98px) {
-          .text-card, .text-card-center {
+          .text-card-overlay-item {
             padding: 1.25rem !important;
             border-radius: 1.25rem !important;
             top: 11vh !important;
-            bottom: auto !important;
           }
           .apple-title {
             font-size: 1.4rem !important;
@@ -601,107 +705,31 @@ export default function ScrollLandingDemo() {
               ref={canvasRef} 
               className="scroll-canvas"
               style={{
-                transform: `scale(${1 + (1 - getSectionOpacity(scrollProgress, 0, 0.14)) * 0.05})`
+                transform: `scale3d(1, 1, 1) translate3d(0, 0, 0)`
               }}
             />
           </div>
 
           {/* Scrolling Text Overlays */}
           <div className="text-section-overlay container-xl px-4 position-relative">
-            {textSections.map((section, idx) => {
-              const opacity = getSectionOpacity(scrollProgress, section.start, section.end);
-              const translateY = getSectionTranslateY(scrollProgress, section.start, section.end);
-              
-              if (opacity <= 0.01) return null;
-
-              // Responsive positioning
-              if (isMobile) {
-                return (
-                  <div 
-                    key={idx} 
-                    className="position-absolute text-card text-center"
-                    style={{
-                      left: "5%",
-                      right: "5%",
-                      top: "11vh",
-                      opacity: opacity,
-                      transform: `translate3d(0, ${translateY}px, 0)`,
-                      maxWidth: "none",
-                      pointerEvents: opacity > 0.5 ? "auto" : "none"
-                    }}
-                  >
-                    <span className="apple-label font-monospace">
-                      {section.align === "center" ? "Lanzamiento" : section.align === "left" ? "Especificaciones" : "Componentes"}
-                    </span>
-                    <h2 className="h4 apple-title mb-2">{section.title}</h2>
-                    <h3 className="h6 apple-subtitle mb-2" style={{ fontSize: "0.85rem" }}>{section.subtitle}</h3>
-                    <p className="small apple-desc mb-0" style={{ fontSize: "0.8rem" }}>{section.description}</p>
-                  </div>
-                );
-              }
-
-              // Desktop positioning
-              if (section.align === "left") {
-                return (
-                  <div 
-                    key={idx} 
-                    className="position-absolute text-card"
-                    style={{
-                      left: "4%",
-                      top: "25%",
-                      opacity: opacity,
-                      transform: `translate3d(0, ${translateY}px, 0)`,
-                      pointerEvents: opacity > 0.5 ? "auto" : "none"
-                    }}
-                  >
-                    <span className="apple-label font-monospace">Especificaciones</span>
-                    <h2 className="h3 apple-title mb-2">{section.title}</h2>
-                    <h3 className="h6 apple-subtitle mb-3">{section.subtitle}</h3>
-                    <p className="small apple-desc mb-0">{section.description}</p>
-                  </div>
-                );
-              }
-
-              if (section.align === "right") {
-                return (
-                  <div 
-                    key={idx} 
-                    className="position-absolute text-card"
-                    style={{
-                      right: "4%",
-                      top: "25%",
-                      opacity: opacity,
-                      transform: `translate3d(0, ${translateY}px, 0)`,
-                      pointerEvents: opacity > 0.5 ? "auto" : "none"
-                    }}
-                  >
-                    <span className="apple-label font-monospace">Componentes</span>
-                    <h2 className="h3 apple-title mb-2">{section.title}</h2>
-                    <h3 className="h6 apple-subtitle mb-3">{section.subtitle}</h3>
-                    <p className="small apple-desc mb-0">{section.description}</p>
-                  </div>
-                );
-              }
-
-              // Center alignment (intro & outro)
-              return (
-                <div 
-                  key={idx} 
-                  className="position-absolute text-card-center start-50 translate-middle-x"
-                  style={{
-                    top: "16%",
-                    opacity: opacity,
-                    transform: `translate3d(-50%, ${translateY}px, 0)`,
-                    pointerEvents: opacity > 0.5 ? "auto" : "none"
-                  }}
-                >
-                  <span className="apple-label font-monospace">Lanzamiento</span>
-                  <h2 className="display-5 apple-title mb-2">{section.title}</h2>
-                  <h3 className="h5 apple-subtitle mb-3">{section.subtitle}</h3>
-                  <p className="small apple-desc mb-0 max-w-md mx-auto">{section.description}</p>
-                </div>
-              );
-            })}
+            {textSections.map((section, idx) => (
+              <div 
+                key={idx} 
+                ref={el => { cardRefs.current[idx] = el; }}
+                className={`text-card-overlay-item ${section.align === 'center' ? 'text-card-center' : 'text-card'} align-${section.align}`}
+                style={{
+                  opacity: 0,
+                  pointerEvents: "none"
+                }}
+              >
+                <span className="apple-label font-monospace">
+                  {section.align === "center" ? "Lanzamiento" : section.align === "left" ? "Especificaciones" : "Componentes"}
+                </span>
+                <h2 className={`apple-title mb-2 ${section.align === 'center' ? 'display-5' : 'h4'}`}>{section.title}</h2>
+                <h3 className={`apple-subtitle mb-2 ${section.align === 'center' ? 'h5' : 'h6'}`} style={{ fontSize: section.align === 'center' ? undefined : "0.85rem" }}>{section.subtitle}</h3>
+                <p className={`apple-desc mb-0 ${section.align === 'center' ? 'max-w-md mx-auto' : ''}`} style={{ fontSize: section.align === 'center' ? undefined : "0.8rem" }}>{section.description}</p>
+              </div>
+            ))}
           </div>
 
         </div>
