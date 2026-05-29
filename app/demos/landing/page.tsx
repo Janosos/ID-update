@@ -703,6 +703,8 @@ export default function ScrollLandingDemo() {
           <div className="scroll-canvas-container">
             <canvas 
               ref={canvasRef} 
+              width={1280}
+              height={720}
               className="scroll-canvas"
               style={{
                 transform: `scale3d(1, 1, 1) translate3d(0, 0, 0)`
