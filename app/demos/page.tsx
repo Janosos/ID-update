@@ -70,7 +70,7 @@ export default function DemosPage() {
     },
     {
       id: "landing-jugos",
-      title: "Demo de Jugos Premium",
+      title: "Demo de Landing Page 2",
       tag: "Interactiva 3D",
       description: "Página de aterrizaje premium de marca de jugos con efectos visuales dinámicos de rotación y color al hacer scroll.",
       features: [
@@ -82,7 +82,7 @@ export default function DemosPage() {
       icon: "bi-cup-straw",
       href: "/demos/landing/jugos",
       glowColor: "rgba(34, 197, 94, 0.15)", // Green glow
-      btnText: "Ver Demo de Jugos"
+      btnText: "Ver Landing Page 2"
     }
   ];
 

@@ -27,6 +27,9 @@ export default function JuiceScrollDemo() {
   const [isPreloaded, setIsPreloaded] = useState(false);
   const [selectedFlavor, setSelectedFlavor] = useState("limon");
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [subscriptionPlan, setSubscriptionPlan] = useState("quincenal");
+  const [nameFocused, setNameFocused] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -35,6 +38,8 @@ export default function JuiceScrollDemo() {
   const bottleLimonRef = useRef<HTMLDivElement>(null);
   const bottleNaranjaRef = useRef<HTMLDivElement>(null);
   const bottleUvaRef = useRef<HTMLDivElement>(null);
+
+  const isMobileRef = useRef(false);
 
   // Refs for background cards
   const bgLimonRef = useRef<HTMLDivElement>(null);
@@ -56,6 +61,44 @@ export default function JuiceScrollDemo() {
     targetProgress: 0,
     currentProgress: 0,
     animationFrameId: 0,
+  });
+
+  const lastStatesRef = useRef({
+    bgLimonOpacity: -1,
+    bgNaranjaOpacity: -1,
+    bgUvaOpacity: -1,
+    limonOpacity: -1,
+    limonTransform: "",
+    limonPointerEvents: "",
+    naranjaOpacity: -1,
+    naranjaTransform: "",
+    naranjaPointerEvents: "",
+    uvaOpacity: -1,
+    uvaTransform: "",
+    uvaPointerEvents: "",
+    textLimonLeftOpacity: -1,
+    textLimonLeftTransform: "",
+    textLimonLeftPointerEvents: "",
+    textLimonRightOpacity: -1,
+    textLimonRightTransform: "",
+    textLimonRightFilter: "",
+    textLimonRightPointerEvents: "",
+    textNaranjaLeftOpacity: -1,
+    textNaranjaLeftTransform: "",
+    textNaranjaLeftPointerEvents: "",
+    textNaranjaRightOpacity: -1,
+    textNaranjaRightTransform: "",
+    textNaranjaRightPointerEvents: "",
+    textUvaLeftOpacity: -1,
+    textUvaLeftTransform: "",
+    textUvaLeftPointerEvents: "",
+    textUvaRightOpacity: -1,
+    textUvaRightTransform: "",
+    textUvaRightLetterSpacing: "",
+    textUvaRightPointerEvents: "",
+    brandAccentColor: "",
+    floatOpacity: [] as number[],
+    floatTransform: [] as string[]
   });
 
   // 12 Floating decorative elements for a parallax 3D effect (emojis with blur filters for depth of field)
@@ -190,6 +233,7 @@ export default function JuiceScrollDemo() {
     if (!isPreloaded) return;
 
     const handleScroll = () => {
+      isMobileRef.current = window.innerWidth < 992;
       const container = containerRef.current;
       if (!container) return;
 
@@ -214,22 +258,33 @@ export default function JuiceScrollDemo() {
       const diff = info.targetProgress - info.currentProgress;
       
       if (Math.abs(diff) > 0.0001) {
-        info.currentProgress += diff * 0.12; // LERP smoothing
+        info.currentProgress += diff * 0.15; // Smooth LERP matching Aeropods
       } else {
         info.currentProgress = info.targetProgress;
       }
 
       const p = info.currentProgress;
-      const isMobile = window.innerWidth < 992;
+      const isMobile = isMobileRef.current;
 
       // 1. Backgrounds crossfade opacities
       const oLimonBg = getProgressOpacity(p, 0.0, 0.23, 0.12);
       const oNaranjaBg = getProgressOpacity(p, 0.35, 0.58, 0.12);
       const oUvaBg = getProgressOpacity(p, 0.70, 1.0, 0.12);
 
-      if (bgLimonRef.current) bgLimonRef.current.style.opacity = oLimonBg.toString();
-      if (bgNaranjaRef.current) bgNaranjaRef.current.style.opacity = oNaranjaBg.toString();
-      if (bgUvaRef.current) bgUvaRef.current.style.opacity = oUvaBg.toString();
+      const cache = lastStatesRef.current;
+
+      if (Math.abs(cache.bgLimonOpacity - oLimonBg) > 0.001) {
+        cache.bgLimonOpacity = oLimonBg;
+        if (bgLimonRef.current) bgLimonRef.current.style.opacity = oLimonBg.toFixed(3);
+      }
+      if (Math.abs(cache.bgNaranjaOpacity - oNaranjaBg) > 0.001) {
+        cache.bgNaranjaOpacity = oNaranjaBg;
+        if (bgNaranjaRef.current) bgNaranjaRef.current.style.opacity = oNaranjaBg.toFixed(3);
+      }
+      if (Math.abs(cache.bgUvaOpacity - oUvaBg) > 0.001) {
+        cache.bgUvaOpacity = oUvaBg;
+        if (bgUvaRef.current) bgUvaRef.current.style.opacity = oUvaBg.toFixed(3);
+      }
 
       // 2. Bottle animations (scale, translation, rotation)
       // Lemon bottle (transitions out between 0.23 and 0.35)
@@ -300,81 +355,140 @@ export default function JuiceScrollDemo() {
       }
 
       // Apply style values to bottle containers using GPU layers
-      if (bottleLimonRef.current) {
-        bottleLimonRef.current.style.opacity = limOpacity.toString();
-        bottleLimonRef.current.style.transform = `translate3d(${limTransX}px, ${limTransY + (isMobile ? 80 : 0)}px, 0) scale3d(${limScale}, ${limScale}, 1) rotate3d(0, 0, 1, ${limRot}deg)`;
-        bottleLimonRef.current.style.pointerEvents = limOpacity > 0.5 ? "auto" : "none";
+      const limTransformStr = `translate3d(${limTransX.toFixed(1)}px, ${(limTransY + (isMobile ? 30 : 0)).toFixed(1)}px, 0) scale3d(${limScale.toFixed(3)}, ${limScale.toFixed(3)}, 1) rotate3d(0, 0, 1, ${limRot.toFixed(1)}deg)`;
+      const limPointerStr = limOpacity > 0.5 ? "auto" : "none";
+      if (Math.abs(cache.limonOpacity - limOpacity) > 0.001 || cache.limonTransform !== limTransformStr || cache.limonPointerEvents !== limPointerStr) {
+        cache.limonOpacity = limOpacity;
+        cache.limonTransform = limTransformStr;
+        cache.limonPointerEvents = limPointerStr;
+        if (bottleLimonRef.current) {
+          bottleLimonRef.current.style.opacity = limOpacity.toFixed(3);
+          bottleLimonRef.current.style.transform = limTransformStr;
+          bottleLimonRef.current.style.pointerEvents = limPointerStr;
+        }
       }
-      if (bottleNaranjaRef.current) {
-        bottleNaranjaRef.current.style.opacity = narOpacity.toString();
-        bottleNaranjaRef.current.style.transform = `translate3d(${narTransX}px, ${narTransY + (isMobile ? 80 : 0)}px, 0) scale3d(${narScale}, ${narScale}, 1) rotate3d(0, 0, 1, ${narRot}deg)`;
-        bottleNaranjaRef.current.style.pointerEvents = narOpacity > 0.5 ? "auto" : "none";
+
+      const narTransformStr = `translate3d(${narTransX.toFixed(1)}px, ${(narTransY + (isMobile ? 30 : 0)).toFixed(1)}px, 0) scale3d(${narScale.toFixed(3)}, ${narScale.toFixed(3)}, 1) rotate3d(0, 0, 1, ${narRot.toFixed(1)}deg)`;
+      const narPointerStr = narOpacity > 0.5 ? "auto" : "none";
+      if (Math.abs(cache.naranjaOpacity - narOpacity) > 0.001 || cache.naranjaTransform !== narTransformStr || cache.naranjaPointerEvents !== narPointerStr) {
+        cache.naranjaOpacity = narOpacity;
+        cache.naranjaTransform = narTransformStr;
+        cache.naranjaPointerEvents = narPointerStr;
+        if (bottleNaranjaRef.current) {
+          bottleNaranjaRef.current.style.opacity = narOpacity.toFixed(3);
+          bottleNaranjaRef.current.style.transform = narTransformStr;
+          bottleNaranjaRef.current.style.pointerEvents = narPointerStr;
+        }
       }
-      if (bottleUvaRef.current) {
-        bottleUvaRef.current.style.opacity = uvaOpacity.toString();
-        bottleUvaRef.current.style.transform = `translate3d(${uvaTransX}px, ${uvaTransY + (isMobile ? 80 : 0)}px, 0) scale3d(${uvaScale}, ${uvaScale}, 1) rotate3d(0, 0, 1, ${uvaRot}deg)`;
-        bottleUvaRef.current.style.pointerEvents = uvaOpacity > 0.5 ? "auto" : "none";
+
+      const uvaTransformStr = `translate3d(${uvaTransX.toFixed(1)}px, ${(uvaTransY + (isMobile ? 30 : 0)).toFixed(1)}px, 0) scale3d(${uvaScale.toFixed(3)}, ${uvaScale.toFixed(3)}, 1) rotate3d(0, 0, 1, ${uvaRot.toFixed(1)}deg)`;
+      const uvaPointerStr = uvaOpacity > 0.5 ? "auto" : "none";
+      if (Math.abs(cache.uvaOpacity - uvaOpacity) > 0.001 || cache.uvaTransform !== uvaTransformStr || cache.uvaPointerEvents !== uvaPointerStr) {
+        cache.uvaOpacity = uvaOpacity;
+        cache.uvaTransform = uvaTransformStr;
+        cache.uvaPointerEvents = uvaPointerStr;
+        if (bottleUvaRef.current) {
+          bottleUvaRef.current.style.opacity = uvaOpacity.toFixed(3);
+          bottleUvaRef.current.style.transform = uvaTransformStr;
+          bottleUvaRef.current.style.pointerEvents = uvaPointerStr;
+        }
       }
 
       // 3. Side Text opacities and sliding transitions
       // Lemon Texts
       const oLimText = getProgressOpacity(p, 0.0, 0.20, 0.08);
       const tyLimText = getProgressTranslateY(oLimText);
-      if (textLimonLeftRef.current) {
-        textLimonLeftRef.current.style.opacity = oLimText.toString();
-        textLimonLeftRef.current.style.transform = isMobile
-          ? `translate3d(0, ${tyLimText}px, 0)`
-          : `translate3d(0, ${tyLimText}px, 0)`;
-        textLimonLeftRef.current.style.pointerEvents = oLimText > 0.5 ? "auto" : "none";
+      
+      const limLeftTransStr = `translate3d(0, ${tyLimText.toFixed(1)}px, 0)`;
+      const limLeftPointerStr = oLimText > 0.5 ? "auto" : "none";
+      if (Math.abs(cache.textLimonLeftOpacity - oLimText) > 0.001 || cache.textLimonLeftTransform !== limLeftTransStr || cache.textLimonLeftPointerEvents !== limLeftPointerStr) {
+        cache.textLimonLeftOpacity = oLimText;
+        cache.textLimonLeftTransform = limLeftTransStr;
+        cache.textLimonLeftPointerEvents = limLeftPointerStr;
+        if (textLimonLeftRef.current) {
+          textLimonLeftRef.current.style.opacity = oLimText.toFixed(3);
+          textLimonLeftRef.current.style.transform = limLeftTransStr;
+          textLimonLeftRef.current.style.pointerEvents = limLeftPointerStr;
+        }
       }
-      if (textLimonRightRef.current) {
-        textLimonRightRef.current.style.opacity = oLimText.toString();
-        textLimonRightRef.current.style.transform = isMobile
-          ? `translate3d(0, ${tyLimText}px, 0)`
-          : `translate3d(0, ${(1 - oLimText) * 40}px, 0)`;
-        textLimonRightRef.current.style.filter = isMobile
-          ? "none"
-          : `blur(${(1 - oLimText) * 8}px)`;
-        textLimonRightRef.current.style.pointerEvents = oLimText > 0.5 ? "auto" : "none";
+
+      const limRightTransStr = isMobile ? `translate3d(0, ${tyLimText.toFixed(1)}px, 0)` : `translate3d(0, ${(1 - oLimText) * 40}px, 0)`;
+      const limRightFilterStr = isMobile ? "none" : `blur(${(1 - oLimText) * 8}px)`;
+      const limRightPointerStr = oLimText > 0.5 ? "auto" : "none";
+      if (Math.abs(cache.textLimonRightOpacity - oLimText) > 0.001 || cache.textLimonRightTransform !== limRightTransStr || cache.textLimonRightFilter !== limRightFilterStr || cache.textLimonRightPointerEvents !== limRightPointerStr) {
+        cache.textLimonRightOpacity = oLimText;
+        cache.textLimonRightTransform = limRightTransStr;
+        cache.textLimonRightFilter = limRightFilterStr;
+        cache.textLimonRightPointerEvents = limRightPointerStr;
+        if (textLimonRightRef.current) {
+          textLimonRightRef.current.style.opacity = oLimText.toFixed(3);
+          textLimonRightRef.current.style.transform = limRightTransStr;
+          textLimonRightRef.current.style.filter = limRightFilterStr;
+          textLimonRightRef.current.style.pointerEvents = limRightPointerStr;
+        }
       }
 
       // Orange Texts
       const oNarText = getProgressOpacity(p, 0.38, 0.55, 0.08);
       const tyNarText = getProgressTranslateY(oNarText);
-      if (textNaranjaLeftRef.current) {
-        textNaranjaLeftRef.current.style.opacity = oNarText.toString();
-        textNaranjaLeftRef.current.style.transform = isMobile
-          ? `translate3d(0, ${tyNarText}px, 0)`
-          : `translate3d(0, ${tyNarText}px, 0)`;
-        textNaranjaLeftRef.current.style.pointerEvents = oNarText > 0.5 ? "auto" : "none";
+
+      const narLeftTransStr = `translate3d(0, ${tyNarText.toFixed(1)}px, 0)`;
+      const narLeftPointerStr = oNarText > 0.5 ? "auto" : "none";
+      if (Math.abs(cache.textNaranjaLeftOpacity - oNarText) > 0.001 || cache.textNaranjaLeftTransform !== narLeftTransStr || cache.textNaranjaLeftPointerEvents !== narLeftPointerStr) {
+        cache.textNaranjaLeftOpacity = oNarText;
+        cache.textNaranjaLeftTransform = narLeftTransStr;
+        cache.textNaranjaLeftPointerEvents = narLeftPointerStr;
+        if (textNaranjaLeftRef.current) {
+          textNaranjaLeftRef.current.style.opacity = oNarText.toFixed(3);
+          textNaranjaLeftRef.current.style.transform = narLeftTransStr;
+          textNaranjaLeftRef.current.style.pointerEvents = narLeftPointerStr;
+        }
       }
-      if (textNaranjaRightRef.current) {
-        textNaranjaRightRef.current.style.opacity = oNarText.toString();
-        textNaranjaRightRef.current.style.transform = isMobile
-          ? `translate3d(0, ${tyNarText}px, 0)`
-          : `translate3d(${(1 - oNarText) * 50}px, ${(1 - oNarText) * 20}px, 0) rotate(${(1 - oNarText) * -4}deg)`;
-        textNaranjaRightRef.current.style.pointerEvents = oNarText > 0.5 ? "auto" : "none";
+
+      const narRightTransStr = isMobile ? `translate3d(0, ${tyNarText.toFixed(1)}px, 0)` : `translate3d(${(1 - oNarText) * 50}px, ${(1 - oNarText) * 20}px, 0) rotate(${(1 - oNarText) * -4}deg)`;
+      const narRightPointerStr = oNarText > 0.5 ? "auto" : "none";
+      if (Math.abs(cache.textNaranjaRightOpacity - oNarText) > 0.001 || cache.textNaranjaRightTransform !== narRightTransStr || cache.textNaranjaRightPointerEvents !== narRightPointerStr) {
+        cache.textNaranjaRightOpacity = oNarText;
+        cache.textNaranjaRightTransform = narRightTransStr;
+        cache.textNaranjaRightPointerEvents = narRightPointerStr;
+        if (textNaranjaRightRef.current) {
+          textNaranjaRightRef.current.style.opacity = oNarText.toFixed(3);
+          textNaranjaRightRef.current.style.transform = narRightTransStr;
+          textNaranjaRightRef.current.style.pointerEvents = narRightPointerStr;
+        }
       }
 
       // Grape Texts
       const oUvaText = getProgressOpacity(p, 0.73, 0.95, 0.08);
       const tyUvaText = getProgressTranslateY(oUvaText);
-      if (textUvaLeftRef.current) {
-        textUvaLeftRef.current.style.opacity = oUvaText.toString();
-        textUvaLeftRef.current.style.transform = isMobile
-          ? `translate3d(0, ${tyUvaText}px, 0)`
-          : `translate3d(0, ${tyUvaText}px, 0)`;
-        textUvaLeftRef.current.style.pointerEvents = oUvaText > 0.5 ? "auto" : "none";
+
+      const uvaLeftTransStr = `translate3d(0, ${tyUvaText.toFixed(1)}px, 0)`;
+      const uvaLeftPointerStr = oUvaText > 0.5 ? "auto" : "none";
+      if (Math.abs(cache.textUvaLeftOpacity - oUvaText) > 0.001 || cache.textUvaLeftTransform !== uvaLeftTransStr || cache.textUvaLeftPointerEvents !== uvaLeftPointerStr) {
+        cache.textUvaLeftOpacity = oUvaText;
+        cache.textUvaLeftTransform = uvaLeftTransStr;
+        cache.textUvaLeftPointerEvents = uvaLeftPointerStr;
+        if (textUvaLeftRef.current) {
+          textUvaLeftRef.current.style.opacity = oUvaText.toFixed(3);
+          textUvaLeftRef.current.style.transform = uvaLeftTransStr;
+          textUvaLeftRef.current.style.pointerEvents = uvaLeftPointerStr;
+        }
       }
-      if (textUvaRightRef.current) {
-        textUvaRightRef.current.style.opacity = oUvaText.toString();
-        textUvaRightRef.current.style.transform = isMobile
-          ? `translate3d(0, ${tyUvaText}px, 0)`
-          : `translate3d(0, ${(1 - oUvaText) * -30}px, 0) scale(${0.9 + oUvaText * 0.1})`;
-        textUvaRightRef.current.style.letterSpacing = isMobile
-          ? "normal"
-          : `${(1 - oUvaText) * 0.06}em`;
-        textUvaRightRef.current.style.pointerEvents = oUvaText > 0.5 ? "auto" : "none";
+
+      const uvaRightTransStr = isMobile ? `translate3d(0, ${tyUvaText.toFixed(1)}px, 0)` : `translate3d(0, ${(1 - oUvaText) * -30}px, 0) scale(${0.9 + oUvaText * 0.1})`;
+      const uvaRightSpacingStr = isMobile ? "normal" : `${(1 - oUvaText) * 0.06}em`;
+      const uvaRightPointerStr = oUvaText > 0.5 ? "auto" : "none";
+      if (Math.abs(cache.textUvaRightOpacity - oUvaText) > 0.001 || cache.textUvaRightTransform !== uvaRightTransStr || cache.textUvaRightLetterSpacing !== uvaRightSpacingStr || cache.textUvaRightPointerEvents !== uvaRightPointerStr) {
+        cache.textUvaRightOpacity = oUvaText;
+        cache.textUvaRightTransform = uvaRightTransStr;
+        cache.textUvaRightLetterSpacing = uvaRightSpacingStr;
+        cache.textUvaRightPointerEvents = uvaRightPointerStr;
+        if (textUvaRightRef.current) {
+          textUvaRightRef.current.style.opacity = oUvaText.toFixed(3);
+          textUvaRightRef.current.style.transform = uvaRightTransStr;
+          textUvaRightRef.current.style.letterSpacing = uvaRightSpacingStr;
+          textUvaRightRef.current.style.pointerEvents = uvaRightPointerStr;
+        }
       }
 
       // 4. Parallax Decorative Float Elements
@@ -382,29 +496,43 @@ export default function JuiceScrollDemo() {
         const floatEl = floatsRef.current[idx];
         if (!floatEl) return;
 
-        // Calculate opacity based on active phase
         let floatOpacity = 0;
         if (item.phase === "limon") floatOpacity = oLimonBg;
         else if (item.phase === "naranja") floatOpacity = oNaranjaBg;
         else if (item.phase === "uva") floatOpacity = oUvaBg;
 
-        // Apply scroll-linked Y transition and rotation
         const travel = p * item.speed * 180;
         const rotate = p * item.rotateSpeed * 360;
 
-        floatEl.style.opacity = (floatOpacity * 0.85).toString();
-        floatEl.style.transform = `translate3d(0, ${travel}px, 0) rotate(${rotate}deg) scale(${item.scale})`;
+        const finalOpacity = floatOpacity * 0.85;
+        const finalTransform = `translate3d(0, ${travel.toFixed(1)}px, 0) rotate(${rotate.toFixed(1)}deg) scale(${item.scale})`;
+
+        const lastOpacity = cache.floatOpacity[idx] || -1;
+        const lastTransform = cache.floatTransform[idx] || "";
+
+        if (Math.abs(lastOpacity - finalOpacity) > 0.005 || lastTransform !== finalTransform) {
+          cache.floatOpacity[idx] = finalOpacity;
+          cache.floatTransform[idx] = finalTransform;
+          floatEl.style.opacity = finalOpacity.toFixed(3);
+          floatEl.style.transform = finalTransform;
+        }
       });
 
       // Calculate brand accent color based on active section
-      const brandAccentEl = document.querySelector(".brand-accent") as HTMLElement;
-      if (brandAccentEl) {
-        if (p < 0.29) {
-          brandAccentEl.style.color = "#8ade28"; // Lemon Green
-        } else if (p >= 0.29 && p < 0.64) {
-          brandAccentEl.style.color = "#ff7c33"; // Orange
-        } else {
-          brandAccentEl.style.color = "#a275e3"; // Grape Purple
+      let targetColor = "";
+      if (p < 0.29) {
+        targetColor = "#5c8b05"; // Lemon Green
+      } else if (p >= 0.29 && p < 0.64) {
+        targetColor = "#d95d14"; // Orange
+      } else {
+        targetColor = "#692fb8"; // Grape Purple
+      }
+
+      if (cache.brandAccentColor !== targetColor) {
+        cache.brandAccentColor = targetColor;
+        const brandAccentEl = document.querySelector(".brand-accent") as HTMLElement;
+        if (brandAccentEl) {
+          brandAccentEl.style.color = targetColor;
         }
       }
 
@@ -434,6 +562,53 @@ export default function JuiceScrollDemo() {
       setFormSubmitted(false);
     }, 4500);
   };
+
+  // Theme styling configurations based on selected flavor
+  const themeColors = {
+    limon: {
+      primary: "#8ade28",
+      dark: "#5c8b05",
+      border: "rgba(138, 222, 40, 0.4)",
+      shadow: "rgba(138, 222, 40, 0.15)",
+      bgLight: "rgba(138, 222, 40, 0.08)",
+      text: "#3e6302"
+    },
+    naranja: {
+      primary: "#ff9559",
+      dark: "#d95d14",
+      border: "rgba(255, 149, 89, 0.4)",
+      shadow: "rgba(255, 149, 89, 0.15)",
+      bgLight: "rgba(255, 149, 89, 0.08)",
+      text: "#a84203"
+    },
+    uva: {
+      primary: "#a275e3",
+      dark: "#692fb8",
+      border: "rgba(162, 117, 227, 0.4)",
+      shadow: "rgba(162, 117, 227, 0.15)",
+      bgLight: "rgba(162, 117, 227, 0.08)",
+      text: "#4e199c"
+    }
+  }[selectedFlavor as "limon" | "naranja" | "uva"] || {
+    primary: "#8ade28",
+    dark: "#5c8b05",
+    border: "rgba(138, 222, 40, 0.4)",
+    shadow: "rgba(138, 222, 40, 0.15)",
+    bgLight: "rgba(138, 222, 40, 0.08)",
+    text: "#3e6302"
+  };
+
+  const planPrices = {
+    semanal: { price: "$39.99", desc: "4 botellas por semana (Envío cada Lunes)" },
+    quincenal: { price: "$29.99", desc: "8 botellas quincenales (Envío Lunes por medio)" },
+    mensual: { price: "$19.99", desc: "12 botellas mensuales (Envío primer Lunes)" }
+  }[subscriptionPlan as "semanal" | "quincenal" | "mensual"] || { price: "$29.99", desc: "8 botellas quincenales" };
+
+  const flavorDetails = {
+    limon: { name: "Oasis Limón", blend: "Limón Eureka + Menta Silvestre", desc: "Prensado en frío con menta fresca orgánica." },
+    naranja: { name: "Oasis Naranja", blend: "Naranja Valencia + Mandarina", desc: "Vitamina C e hidratación cítrica natural." },
+    uva: { name: "Oasis Uva", blend: "Uva Isabela + Arándanos", desc: "Súper antioxidantes para tu salud cardiovascular." }
+  }[selectedFlavor as "limon" | "naranja" | "uva"] || { name: "Oasis Limón", blend: "Limón Eureka + Menta Silvestre", desc: "Prensado en frío con menta fresca orgánica." };
 
   return (
     <div data-bs-theme="light" className="bg-white text-black min-vh-100 position-relative" style={{ fontFamily: "'Outfit', var(--font-sans)", overflow: "visible" }}>
@@ -617,7 +792,6 @@ export default function JuiceScrollDemo() {
           opacity: 0;
           pointer-events: none;
           will-change: transform, opacity;
-          transition: opacity 0.15s ease-out, transform 0.15s ease-out !important;
         }
 
         .message-column-left .glass-juice-card {
@@ -769,16 +943,26 @@ export default function JuiceScrollDemo() {
           .juice-bottle-wrapper {
             width: 440px;
             height: 520px;
-            top: 20vh !important;
+            top: 14vh !important; /* Shift bottle container down to 14vh to avoid card overlap */
             pointer-events: none !important;
           }
           .juice-bottle-img {
             max-height: 480px !important;
+            /* Disable heavy multiple drop shadows on mobile to prevent rendering lag */
+            filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.15)) !important;
           }
           .bottle-glow {
             width: 320px;
             height: 320px;
-            filter: blur(60px);
+            /* Reduce blur filter intensity to prevent layout rendering stutter */
+            filter: blur(25px) !important;
+            opacity: 0.25 !important;
+          }
+          .glass-juice-card {
+            /* Disable expensive backdrop-filter on mobile */
+            backdrop-filter: none !important;
+            background: rgba(255, 255, 255, 0.96) !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
           }
           .message-column-left, .message-column-right {
             position: static !important;
@@ -812,7 +996,7 @@ export default function JuiceScrollDemo() {
             line-height: 1.4 !important;
           }
           .floating-element {
-            font-size: 1.8rem;
+            font-size: 1.6rem !important;
           }
         }
 
@@ -1054,75 +1238,303 @@ export default function JuiceScrollDemo() {
 
             {/* Right Column: Pre-order Simulator form */}
             <div className="col-12 col-lg-5 offset-lg-1">
-              <div className="p-4 p-md-5 buy-card" style={{ backgroundColor: "#f9fbf7", border: "1px solid #e2ebd8", borderRadius: "2rem" }}>
-                <h3 className="h4 fw-bold text-black mb-2 font-display">Prueba Oasis Natura</h3>
-                <p className="small text-secondary mb-4">Garantiza tu caja de cata mensual. Entrega semanal a domicilio.</p>
+              <div className="p-4 p-md-5 position-relative specs-card-juice" style={{ 
+                backgroundColor: "#ffffff", 
+                border: `1px solid ${themeColors.border}`, 
+                borderRadius: "2.25rem",
+                boxShadow: `0 30px 60px ${themeColors.shadow}, 0 4px 15px rgba(0,0,0,0.01)`,
+                transition: "all 0.4s ease"
+              }}>
+                {/* Price Badge */}
+                <div className="position-absolute top-0 end-0 translate-middle-y me-4 me-md-5 px-3 py-1.5 rounded-pill text-white fw-bold shadow-sm" style={{
+                  fontSize: "0.85rem",
+                  background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.dark})`,
+                  transition: "all 0.4s ease",
+                  zIndex: 15
+                }}>
+                  {planPrices.price} / {subscriptionPlan === 'semanal' ? 'semana' : subscriptionPlan === 'quincenal' ? 'quincena' : 'mes'}
+                </div>
+
+                <span className="fw-bold uppercase tracking-wider small d-block mb-1 text-uppercase" style={{ color: themeColors.dark, transition: "color 0.4s ease" }}>Degustación Premium</span>
+                <h3 className="h4 fw-extrabold text-black mb-2 font-display">Reserva tu Experiencia</h3>
+                <p className="small text-secondary mb-4">Garantiza tu suscripción especial con entrega semanal refrigerada directamente desde nuestros huertos locales.</p>
                 
                 {formSubmitted ? (
-                  <div className="alert alert-success border-0 p-4 rounded-3 d-flex flex-column align-items-center text-center gap-2" style={{ backgroundColor: "rgba(34, 197, 94, 0.08)" }}>
-                    <span className="fs-1">🎉</span>
-                    <h5 className="fw-bold text-success mb-1">¡Reserva Registrada!</h5>
-                    <p className="small text-success mb-0">Te hemos enviado un correo de confirmación de tu suscripción de degustación. ¡Prepárate para la frescura!</p>
+                  <div className="p-4 rounded-3 d-flex flex-column align-items-center text-center gap-3" style={{ backgroundColor: "rgba(34, 197, 94, 0.05)", border: "1px solid rgba(34, 197, 94, 0.15)" }}>
+                    <div className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm" style={{ width: "56px", height: "56px", fontSize: "1.5rem" }}>
+                      ✓
+                    </div>
+                    <div>
+                      <h5 className="fw-extrabold text-success mb-1">¡Suscripción Reservada!</h5>
+                      <p className="small text-secondary mb-0">Hemos registrado tu solicitud de preventa especial con éxito.</p>
+                    </div>
+                    
+                    <div className="w-100 bg-white p-3 rounded-3 text-start border d-flex flex-column gap-2" style={{ fontSize: "0.82rem" }}>
+                      <div className="d-flex justify-content-between"><span className="text-muted">Pedido ID:</span><span className="fw-bold text-black font-monospace">#ON-2026-{Math.floor(1000 + Math.random() * 9000)}</span></div>
+                      <div className="d-flex justify-content-between"><span className="text-muted">Frecuencia:</span><span className="fw-bold text-black text-capitalize">{subscriptionPlan}</span></div>
+                      <div className="d-flex justify-content-between"><span className="text-muted">Sabor Inicial:</span><span className="fw-bold text-black">{flavorDetails.name}</span></div>
+                      <div className="d-flex justify-content-between"><span className="text-muted">Precio:</span><span className="fw-bold text-black">{planPrices.price} / mes</span></div>
+                      <hr className="my-1" />
+                      <div className="d-flex align-items-center gap-2 text-success font-semibold" style={{ fontSize: "0.78rem" }}>
+                        <span>🚚 Est. primer envío:</span>
+                        <span>Próximo Martes (Refrigerado)</span>
+                      </div>
+                    </div>
+                    
+                    <button 
+                      type="button" 
+                      onClick={() => setFormSubmitted(false)}
+                      className="btn btn-sm btn-outline-secondary rounded-pill px-4 mt-1"
+                      style={{ fontSize: "0.8rem" }}
+                    >
+                      Modificar Reserva
+                    </button>
                   </div>
                 ) : (
                   <form onSubmit={handleBookingSubmit} className="d-flex flex-column gap-3">
                     
                     {/* Flavor Selection Cards */}
                     <div className="mb-1">
-                      <label className="form-label small fw-bold text-black mb-2">Elige tu sabor para la primera botella</label>
-                      <div className="d-flex flex-column gap-2">
+                      <label className="form-label small fw-bold text-black mb-2">1. Selecciona tu sabor inicial</label>
+                      <div className="row g-2">
                         
-                        <div 
-                          className={`flavor-selector-btn d-flex align-items-center gap-3 ${selectedFlavor === 'limon' ? 'active-limon' : ''}`}
-                          style={{ background: "#ffffff", border: selectedFlavor === 'limon' ? '2px solid #b2e662' : '1px solid #d2d2d7' }}
-                          onClick={() => setSelectedFlavor("limon")}
-                        >
-                          <span className="fs-4">🍋</span>
-                          <div>
-                            <h5 className="small fw-bold mb-0">Oasis Limón</h5>
-                            <p className="text-muted mb-0" style={{ fontSize: "0.75rem" }}>Ácido alcalinizante + menta fresca</p>
+                        <div className="col-4">
+                          <div 
+                            className={`text-center p-2.5 h-100 d-flex flex-column align-items-center justify-content-center gap-1.5`}
+                            style={{ 
+                              background: "#ffffff", 
+                              border: selectedFlavor === 'limon' ? `2px solid #8ade28` : '1px solid #eef2e7',
+                              boxShadow: selectedFlavor === 'limon' ? '0 8px 15px rgba(138, 222, 40, 0.15)' : 'none',
+                              borderRadius: "1.25rem",
+                              cursor: "pointer",
+                              transition: "all 0.3s ease"
+                            }}
+                            onClick={() => setSelectedFlavor("limon")}
+                          >
+                            <span className="fs-3">🍋</span>
+                            <span className="fw-bold d-block" style={{ fontSize: "0.78rem", color: selectedFlavor === 'limon' ? '#3e6302' : '#6c757d' }}>Limón</span>
+                            <span className="text-muted d-block" style={{ fontSize: "0.58rem" }}>Eureka+Menta</span>
                           </div>
                         </div>
 
-                        <div 
-                          className={`flavor-selector-btn d-flex align-items-center gap-3 ${selectedFlavor === 'naranja' ? 'active-naranja' : ''}`}
-                          style={{ background: "#ffffff", border: selectedFlavor === 'naranja' ? '2px solid #ff9559' : '1px solid #d2d2d7' }}
-                          onClick={() => setSelectedFlavor("naranja")}
-                        >
-                          <span className="fs-4">🍊</span>
-                          <div>
-                            <h5 className="small fw-bold mb-0">Oasis Naranja</h5>
-                            <p className="text-muted mb-0" style={{ fontSize: "0.75rem" }}>Cítrico solar + potasio activo</p>
+                        <div className="col-4">
+                          <div 
+                            className={`text-center p-2.5 h-100 d-flex flex-column align-items-center justify-content-center gap-1.5`}
+                            style={{ 
+                              background: "#ffffff", 
+                              border: selectedFlavor === 'naranja' ? '2px solid #ff7c33' : '1px solid #eef2e7',
+                              boxShadow: selectedFlavor === 'naranja' ? '0 8px 15px rgba(255, 124, 51, 0.15)' : 'none',
+                              borderRadius: "1.25rem",
+                              cursor: "pointer",
+                              transition: "all 0.3s ease"
+                            }}
+                            onClick={() => setSelectedFlavor("naranja")}
+                          >
+                            <span className="fs-3">🍊</span>
+                            <span className="fw-bold d-block" style={{ fontSize: "0.78rem", color: selectedFlavor === 'naranja' ? '#a84203' : '#6c757d' }}>Naranja</span>
+                            <span className="text-muted d-block" style={{ fontSize: "0.58rem" }}>Valencia+Mand.</span>
                           </div>
                         </div>
 
-                        <div 
-                          className={`flavor-selector-btn d-flex align-items-center gap-3 ${selectedFlavor === 'uva' ? 'active-uva' : ''}`}
-                          style={{ background: "#ffffff", border: selectedFlavor === 'uva' ? '2px solid #a275e3' : '1px solid #d2d2d7' }}
-                          onClick={() => setSelectedFlavor("uva")}
-                        >
-                          <span className="fs-4">🍇</span>
-                          <div>
-                            <h5 className="small fw-bold mb-0">Oasis Uva</h5>
-                            <p className="text-muted mb-0" style={{ fontSize: "0.75rem" }}>Antioxidante resveratrol + dulzura profunda</p>
+                        <div className="col-4">
+                          <div 
+                            className={`text-center p-2.5 h-100 d-flex flex-column align-items-center justify-content-center gap-1.5`}
+                            style={{ 
+                              background: "#ffffff", 
+                              border: selectedFlavor === 'uva' ? '2px solid #a275e3' : '1px solid #eef2e7',
+                              boxShadow: selectedFlavor === 'uva' ? '0 8px 15px rgba(162, 117, 227, 0.15)' : 'none',
+                              borderRadius: "1.25rem",
+                              cursor: "pointer",
+                              transition: "all 0.3s ease"
+                            }}
+                            onClick={() => setSelectedFlavor("uva")}
+                          >
+                            <span className="fs-3">🍇</span>
+                            <span className="fw-bold d-block" style={{ fontSize: "0.78rem", color: selectedFlavor === 'uva' ? '#4e199c' : '#6c757d' }}>Uva</span>
+                            <span className="text-muted d-block" style={{ fontSize: "0.58rem" }}>Isabela+Aránd.</span>
                           </div>
                         </div>
 
                       </div>
                     </div>
 
+                    {/* Subscription Plan Cards */}
+                    <div className="mb-1">
+                      <label className="form-label small fw-bold text-black mb-2">2. Frecuencia de entrega</label>
+                      <div className="row g-2">
+                        
+                        <div className="col-4">
+                          <button
+                            type="button"
+                            onClick={() => setSubscriptionPlan("semanal")}
+                            className="btn w-100 p-2.5 d-flex flex-column align-items-center justify-content-center border"
+                            style={{
+                              border: subscriptionPlan === 'semanal' ? `2px solid ${themeColors.dark}` : '1px solid #eef2e7',
+                              background: subscriptionPlan === 'semanal' ? themeColors.bgLight : '#ffffff',
+                              borderRadius: "0.95rem",
+                              transition: "all 0.25s ease"
+                            }}
+                          >
+                            <span className="fw-bold" style={{ fontSize: "0.8rem", color: subscriptionPlan === 'semanal' ? themeColors.text : '#4a5568' }}>Semanal</span>
+                            <span className="text-muted" style={{ fontSize: "0.62rem" }}>$39.99/mes</span>
+                          </button>
+                        </div>
+
+                        <div className="col-4">
+                          <button
+                            type="button"
+                            onClick={() => setSubscriptionPlan("quincenal")}
+                            className="btn w-100 p-2.5 d-flex flex-column align-items-center justify-content-center border"
+                            style={{
+                              border: subscriptionPlan === 'quincenal' ? `2px solid ${themeColors.dark}` : '1px solid #eef2e7',
+                              background: subscriptionPlan === 'quincenal' ? themeColors.bgLight : '#ffffff',
+                              borderRadius: "0.95rem",
+                              transition: "all 0.25s ease"
+                            }}
+                          >
+                            <span className="fw-bold" style={{ fontSize: "0.8rem", color: subscriptionPlan === 'quincenal' ? themeColors.text : '#4a5568' }}>Quincenal</span>
+                            <span className="text-muted" style={{ fontSize: "0.62rem" }}>$29.99/mes</span>
+                          </button>
+                        </div>
+
+                        <div className="col-4">
+                          <button
+                            type="button"
+                            onClick={() => setSubscriptionPlan("mensual")}
+                            className="btn w-100 p-2.5 d-flex flex-column align-items-center justify-content-center border"
+                            style={{
+                              border: subscriptionPlan === 'mensual' ? `2px solid ${themeColors.dark}` : '1px solid #eef2e7',
+                              background: subscriptionPlan === 'mensual' ? themeColors.bgLight : '#ffffff',
+                              borderRadius: "0.95rem",
+                              transition: "all 0.25s ease"
+                            }}
+                          >
+                            <span className="fw-bold" style={{ fontSize: "0.8rem", color: subscriptionPlan === 'mensual' ? themeColors.text : '#4a5568' }}>Mensual</span>
+                            <span className="text-muted" style={{ fontSize: "0.62rem" }}>$19.99/mes</span>
+                          </button>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* Included Plan Info */}
+                    <div className="bg-light p-3 rounded-3 mb-1" style={{ border: "1px solid #f1f5f9" }}>
+                      <div className="d-flex align-items-center gap-2 mb-1.5">
+                        <span style={{ color: themeColors.dark, fontSize: "0.82rem", transition: "color 0.4s ease" }} className="fw-bold">⚡ Incluido en tu Plan:</span>
+                      </div>
+                      <ul className="list-unstyled m-0 d-flex flex-column gap-1" style={{ fontSize: "0.78rem" }}>
+                        <li className="d-flex align-items-center gap-2 text-secondary">
+                          <span className="text-success fw-bold">✓</span> {planPrices.desc}
+                        </li>
+                        <li className="d-flex align-items-center gap-2 text-secondary">
+                          <span className="text-success fw-bold">✓</span> Envío express refrigerado sin costo adicional
+                        </li>
+                        <li className="d-flex align-items-center gap-2 text-secondary">
+                          <span className="text-success fw-bold">✓</span> Regalo: Botella térmica de acero inoxidable Oasis
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Personal Information */}
                     <div>
-                      <label className="form-label small fw-bold text-black" htmlFor="juice-client-name">Nombre del Suscriptor</label>
-                      <input type="text" id="juice-client-name" className="form-control buy-input" placeholder="Ej. Alejandra Gómez" required />
+                      <label className="form-label small fw-bold text-black" htmlFor="juice-client-name">3. Nombre Completo</label>
+                      <div className="input-group">
+                        <span 
+                          className="input-group-text bg-white text-muted" 
+                          style={{ 
+                            borderTopLeftRadius: "1rem", 
+                            borderBottomLeftRadius: "1rem", 
+                            border: nameFocused ? `1px solid ${themeColors.dark}` : "1px solid #eef2e7",
+                            borderRight: "none",
+                            transition: "all 0.2s ease" 
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-person-fill" viewBox="0 0 16 16">
+                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                          </svg>
+                        </span>
+                        <input 
+                          type="text" 
+                          id="juice-client-name" 
+                          className="form-control" 
+                          placeholder="Ej. Alejandra Gómez" 
+                          required 
+                          onFocus={() => setNameFocused(true)}
+                          onBlur={() => setNameFocused(false)}
+                          style={{ 
+                            borderTopRightRadius: "1rem", 
+                            borderBottomRightRadius: "1rem", 
+                            border: nameFocused ? `1px solid ${themeColors.dark}` : "1px solid #eef2e7", 
+                            borderLeft: "none",
+                            boxShadow: nameFocused ? `0 0 0 3px ${themeColors.shadow}` : "none",
+                            padding: "0.85rem 1rem",
+                            fontSize: "0.92rem",
+                            fontWeight: 500,
+                            transition: "all 0.2s ease"
+                          }} 
+                        />
+                      </div>
                     </div>
                     
                     <div>
-                      <label className="form-label small fw-bold text-black" htmlFor="juice-client-email">Correo de Entrega</label>
-                      <input type="email" id="juice-client-email" className="form-control buy-input" placeholder="ejemplo@correo.com" required />
+                      <label className="form-label small fw-bold text-black" htmlFor="juice-client-email">4. Correo Electrónico</label>
+                      <div className="input-group">
+                        <span 
+                          className="input-group-text bg-white text-muted" 
+                          style={{ 
+                            borderTopLeftRadius: "1rem", 
+                            borderBottomLeftRadius: "1rem", 
+                            border: emailFocused ? `1px solid ${themeColors.dark}` : "1px solid #eef2e7",
+                            borderRight: "none",
+                            transition: "all 0.2s ease" 
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-envelope-fill" viewBox="0 0 16 16">
+                            <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zM15 11.801V4.697l-5.803 3.546z"/>
+                          </svg>
+                        </span>
+                        <input 
+                          type="email" 
+                          id="juice-client-email" 
+                          className="form-control" 
+                          placeholder="ejemplo@correo.com" 
+                          required 
+                          onFocus={() => setEmailFocused(true)}
+                          onBlur={() => setEmailFocused(false)}
+                          style={{ 
+                            borderTopRightRadius: "1rem", 
+                            borderBottomRightRadius: "1rem", 
+                            border: emailFocused ? `1px solid ${themeColors.dark}` : "1px solid #eef2e7", 
+                            borderLeft: "none",
+                            boxShadow: emailFocused ? `0 0 0 3px ${themeColors.shadow}` : "none",
+                            padding: "0.85rem 1rem",
+                            fontSize: "0.92rem",
+                            fontWeight: 500,
+                            transition: "all 0.2s ease"
+                          }} 
+                        />
+                      </div>
                     </div>
                     
-                    <button type="submit" className="btn btn-success w-100 py-3 mt-2 fw-bold rounded-pill text-white" style={{ backgroundColor: "#22c55e", borderColor: "#22c55e" }}>
-                      Suscribirse a Caja de Cata
+                    <button 
+                      type="submit" 
+                      className="btn w-100 py-3 mt-2 fw-bold text-white border-0 shadow-sm" 
+                      style={{ 
+                        background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.dark})`,
+                        borderRadius: "50px",
+                        transition: "all 0.3s ease",
+                        boxShadow: `0 8px 20px ${themeColors.shadow}`
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "translateY(-2px) scale(1.01)";
+                        e.currentTarget.style.boxShadow = `0 12px 25px ${themeColors.shadow}`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "none";
+                        e.currentTarget.style.boxShadow = `0 8px 20px ${themeColors.shadow}`;
+                      }}
+                    >
+                      Completar Pre-Reserva
                     </button>
                   </form>
                 )}
