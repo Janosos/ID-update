@@ -38,6 +38,8 @@ const LiquidBackground = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const originalCanvasAdd = canvas.addEventListener;
+    
+    const originalDPR = window.devicePixelRatio;
 
     // Helper to make touch events passive, preventing scroll blocking
     const makePassive = (type: string, listener: any, options: any) => {
@@ -60,6 +62,14 @@ const LiquidBackground = ({
       return originalCanvasAdd.call(canvas, type, listener, makePassive(type, listener, options));
     };
 
+    // Temporarily limit devicePixelRatio on mobile to drastically reduce GPU rendering load and prevent lag
+    if (window.innerWidth < 992) {
+      Object.defineProperty(window, "devicePixelRatio", {
+        get: () => 1.2,
+        configurable: true
+      });
+    }
+
     const loadEffect = async () => {
       try {
         // Import dynamic library using eval to bypass static bundler checking for remote CDN URLs
@@ -81,6 +91,14 @@ const LiquidBackground = ({
         appInstance.setRain(false);
       } catch (error) {
         console.error("Error loading liquid background effect:", error);
+      } finally {
+        // Restore original devicePixelRatio
+        if (window.innerWidth < 992) {
+          Object.defineProperty(window, "devicePixelRatio", {
+            get: () => originalDPR,
+            configurable: true
+          });
+        }
       }
     };
 
@@ -91,6 +109,13 @@ const LiquidBackground = ({
       window.addEventListener = originalWindowAdd;
       document.addEventListener = originalDocAdd;
       canvas.addEventListener = originalCanvasAdd;
+
+      if (window.innerWidth < 992) {
+        Object.defineProperty(window, "devicePixelRatio", {
+          get: () => originalDPR,
+          configurable: true
+        });
+      }
 
       if (appInstance && typeof appInstance.destroy === 'function') {
         try {
@@ -390,15 +415,24 @@ export default function JuiceScrollDemo() {
 
       if (Math.abs(cache.bgLimonOpacity - oLimonBg) > 0.001) {
         cache.bgLimonOpacity = oLimonBg;
-        if (bgLimonRef.current) bgLimonRef.current.style.opacity = oLimonBg.toFixed(3);
+        if (bgLimonRef.current) {
+          bgLimonRef.current.style.opacity = oLimonBg.toFixed(3);
+          bgLimonRef.current.style.display = oLimonBg > 0.001 ? "block" : "none";
+        }
       }
       if (Math.abs(cache.bgNaranjaOpacity - oNaranjaBg) > 0.001) {
         cache.bgNaranjaOpacity = oNaranjaBg;
-        if (bgNaranjaRef.current) bgNaranjaRef.current.style.opacity = oNaranjaBg.toFixed(3);
+        if (bgNaranjaRef.current) {
+          bgNaranjaRef.current.style.opacity = oNaranjaBg.toFixed(3);
+          bgNaranjaRef.current.style.display = oNaranjaBg > 0.001 ? "block" : "none";
+        }
       }
       if (Math.abs(cache.bgUvaOpacity - oUvaBg) > 0.001) {
         cache.bgUvaOpacity = oUvaBg;
-        if (bgUvaRef.current) bgUvaRef.current.style.opacity = oUvaBg.toFixed(3);
+        if (bgUvaRef.current) {
+          bgUvaRef.current.style.opacity = oUvaBg.toFixed(3);
+          bgUvaRef.current.style.display = oUvaBg > 0.001 ? "block" : "none";
+        }
       }
 
       // 2. Bottle animations (scale, translation, rotation)
@@ -768,7 +802,6 @@ export default function JuiceScrollDemo() {
           top: 0;
           left: 0;
           opacity: 0;
-          transition: opacity 0.05s linear;
           z-index: 0;
           background-size: cover !important;
           background-position: center !important;
@@ -1016,6 +1049,16 @@ export default function JuiceScrollDemo() {
         .text-naranja-accent { color: #6e2502 !important; }
         .text-uva-accent { color: #290a54 !important; }
 
+        .grape-desc-theme h2 {
+          color: #d6bdfa !important; /* Light lilac */
+        }
+        .grape-desc-theme .highlight {
+          color: #ffffff !important;
+        }
+        .grape-desc-theme .desc {
+          color: #cbb3f5 !important; /* Soft lavender-grey */
+        }
+
         .label-limon { color: #5c8b05 !important; }
         .label-naranja { color: #d95d14 !important; }
         .label-uva { color: #692fb8 !important; }
@@ -1130,6 +1173,13 @@ export default function JuiceScrollDemo() {
             right: 5% !important;
             text-align: center !important;
             top: 74vh !important;
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
           }
           .plain-juice-desc h2 {
             font-size: 1.8rem !important;
@@ -1233,42 +1283,30 @@ export default function JuiceScrollDemo() {
           </div>
 
           {/* Background Layers */}
-          <div 
-            ref={bgLimonRef} 
-            className="bg-layer-juice bg-limon"
-            style={isMobile ? { backgroundImage: `url(${limonBgImgMobile.src})` } : undefined}
-          >
-            {isPreloaded && !isMobile && (
+          <div ref={bgLimonRef} className="bg-layer-juice bg-limon">
+            {isPreloaded && (
               <LiquidBackground 
-                imageUrl={limonBgImg.src} 
+                imageUrl={isMobile ? limonBgImgMobile.src : limonBgImg.src} 
                 metalness={0.7}
                 roughness={0.3}
                 displacementScale={5}
               />
             )}
           </div>
-          <div 
-            ref={bgNaranjaRef} 
-            className="bg-layer-juice bg-naranja"
-            style={isMobile ? { backgroundImage: `url(${naranjaBgImgMobile.src})` } : undefined}
-          >
-            {isPreloaded && !isMobile && (
+          <div ref={bgNaranjaRef} className="bg-layer-juice bg-naranja">
+            {isPreloaded && (
               <LiquidBackground 
-                imageUrl={naranjaBgImg.src} 
+                imageUrl={isMobile ? naranjaBgImgMobile.src : naranjaBgImg.src} 
                 metalness={0.7}
                 roughness={0.3}
                 displacementScale={5}
               />
             )}
           </div>
-          <div 
-            ref={bgUvaRef} 
-            className="bg-layer-juice bg-uva"
-            style={isMobile ? { backgroundImage: `url(${uvaBgImgMobile.src})` } : undefined}
-          >
-            {isPreloaded && !isMobile && (
+          <div ref={bgUvaRef} className="bg-layer-juice bg-uva">
+            {isPreloaded && (
               <LiquidBackground 
-                imageUrl={uvaBgImg.src} 
+                imageUrl={isMobile ? uvaBgImgMobile.src : uvaBgImg.src} 
                 metalness={0.7}
                 roughness={0.3}
                 displacementScale={5}
@@ -1416,7 +1454,7 @@ export default function JuiceScrollDemo() {
                   </div>
 
                   {/* Grape Right Text */}
-                  <div ref={textUvaRightRef} className="plain-juice-desc">
+                  <div ref={textUvaRightRef} className="plain-juice-desc grape-desc-theme">
                     <h2 className="text-uva-accent mb-3 text-uppercase font-display" style={{ fontSize: "2.8rem", fontWeight: 900, lineHeight: 0.95, letterSpacing: "-0.02em" }}>
                       SÚPER<br />ANTIOXIDANTE
                     </h2>
