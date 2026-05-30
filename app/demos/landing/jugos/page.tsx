@@ -5,6 +5,76 @@ import Link from "next/link";
 import limonImg from "../bebidas/limon.avif";
 import naranjaImg from "../bebidas/naranja.avif";
 import uvaImg from "../bebidas/uva.avif";
+import limonBgImg from "../bebidas/limonbg.avif";
+import naranjaBgImg from "../bebidas/naranjasbg.avif";
+import uvaBgImg from "../bebidas/uvasbg.avif";
+
+interface LiquidBackgroundProps {
+  imageUrl: string;
+  metalness?: number;
+  roughness?: number;
+  displacementScale?: number;
+  className?: string;
+}
+
+const LiquidBackground = ({
+  imageUrl,
+  metalness = 0.75,
+  roughness = 0.25,
+  displacementScale = 5,
+  className = ""
+}: LiquidBackgroundProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    let appInstance: any;
+
+    const loadEffect = async () => {
+      if (!canvasRef.current) return;
+
+      try {
+        // Import dynamic library using eval to bypass static bundler checking for remote CDN URLs
+        // @ts-ignore
+        const module = await eval("import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js')");
+        const LiquidEffect = module.default || module;
+
+        appInstance = LiquidEffect(canvasRef.current);
+        appInstance.loadImage(imageUrl);
+        
+        if (appInstance.liquidPlane) {
+          appInstance.liquidPlane.material.metalness = metalness;
+          appInstance.liquidPlane.material.roughness = roughness;
+          if (appInstance.liquidPlane.uniforms?.displacementScale) {
+            appInstance.liquidPlane.uniforms.displacementScale.value = displacementScale;
+          }
+        }
+        
+        appInstance.setRain(false);
+      } catch (error) {
+        console.error("Error loading liquid background effect:", error);
+      }
+    };
+
+    loadEffect();
+
+    return () => {
+      if (appInstance && typeof appInstance.destroy === 'function') {
+        try {
+          appInstance.destroy();
+        } catch (e) {
+          console.error("Error destroying liquid background instance:", e);
+        }
+      }
+    };
+  }, [imageUrl, metalness, roughness, displacementScale]);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      className={`d-block w-100 h-100 ${className}`}
+    />
+  );
+};
 
 interface JuiceSection {
   title: string;
@@ -131,7 +201,10 @@ export default function JuiceScrollDemo() {
   // Preload images
   useEffect(() => {
     let loadedCount = 0;
-    const imagesToLoad = [limonImg.src, naranjaImg.src, uvaImg.src];
+    const imagesToLoad = [
+      limonImg.src, naranjaImg.src, uvaImg.src,
+      limonBgImg.src, naranjaBgImg.src, uvaBgImg.src
+    ];
 
     const checkLoad = () => {
       loadedCount++;
@@ -645,7 +718,7 @@ export default function JuiceScrollDemo() {
           background-color: #ffffff;
         }
 
-        /* 3 Layered Background Gradients */
+        /* 3 Layered Background Images */
         .bg-layer-juice {
           position: absolute;
           width: 100%;
@@ -655,16 +728,19 @@ export default function JuiceScrollDemo() {
           opacity: 0;
           transition: opacity 0.05s linear;
           z-index: 0;
+          background-size: cover !important;
+          background-position: center !important;
+          background-repeat: no-repeat !important;
         }
         
-         .bg-limon {
-          background: linear-gradient(135deg, #fbfef5 0%, #f3ffeb 50%, #e6ffd0 100%);
+        .bg-limon {
+          background-color: #f3ffeb;
         }
         .bg-naranja {
-          background: linear-gradient(135deg, #fffcf7 0%, #fff3e6 50%, #ffe2cc 100%);
+          background-color: #fff3e6;
         }
         .bg-uva {
-          background: linear-gradient(135deg, #fdfbfe 0%, #f6efff 50%, #edd8ff 100%);
+          background-color: #f6efff;
         }
 
         /* Central Bottles Area */
@@ -781,37 +857,54 @@ export default function JuiceScrollDemo() {
           height: 100%;
         }
 
-        .glass-juice-card {
+        .stacked-card-wrapper {
           position: absolute !important;
-          background: rgba(255, 255, 255, 0.8) !important;
-          backdrop-filter: blur(20px) saturate(180%);
-          border-radius: 1.75rem;
-          padding: 2.25rem !important;
           width: 100%;
           max-width: 380px;
+          height: auto;
           opacity: 0;
           pointer-events: none;
           will-change: transform, opacity;
         }
 
-        .message-column-left .glass-juice-card {
+        .message-column-left .stacked-card-wrapper {
           top: 30% !important;
           left: 0 !important;
         }
 
-        .glass-juice-card.border-limon {
-          border: 3px solid rgba(138, 222, 40, 0.4) !important;
-          box-shadow: 0 20px 40px rgba(138, 222, 40, 0.12), 0 5px 15px rgba(0, 0, 0, 0.02) !important;
+        .stacked-card-bg-1 {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border-radius: 2.5rem 7.5rem 2.5rem 2.5rem;
+          transform: rotate(4deg) scale(0.98);
+          z-index: 1;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
         }
 
-        .glass-juice-card.border-naranja {
-          border: 3px solid rgba(255, 121, 42, 0.4) !important;
-          box-shadow: 0 20px 40px rgba(255, 121, 42, 0.12), 0 5px 15px rgba(0, 0, 0, 0.02) !important;
+        .stacked-card-bg-2 {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border-radius: 2.5rem 7.5rem 2.5rem 2.5rem;
+          transform: rotate(-3deg) scale(0.99);
+          z-index: 2;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
         }
 
-        .glass-juice-card.border-uva {
-          border: 3px solid rgba(135, 56, 250, 0.4) !important;
-          box-shadow: 0 20px 40px rgba(135, 56, 250, 0.12), 0 5px 15px rgba(0, 0, 0, 0.02) !important;
+        .stacked-card-front {
+          position: relative;
+          background: #ffffff;
+          border-radius: 2.5rem 7.5rem 2.5rem 2.5rem;
+          padding: 2.5rem 2.25rem !important;
+          z-index: 3;
+          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+          border: 1px solid rgba(0, 0, 0, 0.03);
+          text-align: left !important;
         }
 
         .plain-juice-desc {
@@ -873,9 +966,13 @@ export default function JuiceScrollDemo() {
           margin-bottom: 0.5rem;
         }
 
-        .text-limon-accent { color: #3e6302 !important; }
-        .text-naranja-accent { color: #a84203 !important; }
-        .text-uva-accent { color: #4e199c !important; }
+        .text-limon-accent { color: #1b4d0c !important; }
+        .text-naranja-accent { color: #6e2502 !important; }
+        .text-uva-accent { color: #290a54 !important; }
+
+        .label-limon { color: #5c8b05 !important; }
+        .label-naranja { color: #d95d14 !important; }
+        .label-uva { color: #692fb8 !important; }
 
         .juice-title {
           font-weight: 800;
@@ -958,35 +1055,53 @@ export default function JuiceScrollDemo() {
             filter: blur(25px) !important;
             opacity: 0.25 !important;
           }
-          .glass-juice-card {
-            /* Disable expensive backdrop-filter on mobile */
-            backdrop-filter: none !important;
-            background: rgba(255, 255, 255, 0.96) !important;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+          .stacked-card-wrapper {
+            width: 90% !important;
+            max-width: none !important;
+            left: 5% !important;
+            right: 5% !important;
+            top: 8vh !important;
+          }
+          .stacked-card-front {
+            padding: 1.75rem 1.5rem !important;
+            border-radius: 1.75rem 4.5rem 1.75rem 1.75rem !important;
+            text-align: left !important;
+          }
+          .stacked-card-bg-1, .stacked-card-bg-2 {
+            border-radius: 1.75rem 4.5rem 1.75rem 1.75rem !important;
+          }
+          .stacked-card-front h2 {
+            font-size: 1.8rem !important;
+            margin-bottom: 0.5rem !important;
+          }
+          .stacked-card-front p {
+            font-size: 0.95rem !important;
+          }
+          .plain-juice-desc {
+            width: 90% !important;
+            max-width: none !important;
+            left: 5% !important;
+            right: 5% !important;
+            text-align: center !important;
+            top: 74vh !important;
+          }
+          .plain-juice-desc h2 {
+            font-size: 1.8rem !important;
+            line-height: 1.0 !important;
+            margin-bottom: 0.75rem !important;
+          }
+          .plain-juice-desc p.highlight {
+            font-size: 0.95rem !important;
+            margin-bottom: 0.5rem !important;
+          }
+          .plain-juice-desc p.desc {
+            font-size: 0.85rem !important;
+            line-height: 1.4 !important;
           }
           .message-column-left, .message-column-right {
             position: static !important;
             height: auto !important;
             display: block !important;
-          }
-          .message-column-left .glass-juice-card {
-            width: 90% !important;
-            max-width: none !important;
-            padding: 1.25rem !important;
-            left: 5% !important;
-            right: 5% !important;
-            text-align: center !important;
-            border-radius: 1.25rem;
-            top: 8vh !important;
-          }
-          .message-column-right .plain-juice-desc {
-            width: 90% !important;
-            max-width: none !important;
-            left: 5% !important;
-            right: 5% !important;
-            text-align: center !important;
-            font-size: 0.9rem;
-            top: 74vh !important;
           }
           .juice-title {
             font-size: 1.5rem !important;
@@ -1063,9 +1178,36 @@ export default function JuiceScrollDemo() {
           </div>
 
           {/* Background Layers */}
-          <div ref={bgLimonRef} className="bg-layer-juice bg-limon"></div>
-          <div ref={bgNaranjaRef} className="bg-layer-juice bg-naranja"></div>
-          <div ref={bgUvaRef} className="bg-layer-juice bg-uva"></div>
+          <div ref={bgLimonRef} className="bg-layer-juice bg-limon">
+            {isPreloaded && (
+              <LiquidBackground 
+                imageUrl={limonBgImg.src} 
+                metalness={0.7}
+                roughness={0.3}
+                displacementScale={5}
+              />
+            )}
+          </div>
+          <div ref={bgNaranjaRef} className="bg-layer-juice bg-naranja">
+            {isPreloaded && (
+              <LiquidBackground 
+                imageUrl={naranjaBgImg.src} 
+                metalness={0.7}
+                roughness={0.3}
+                displacementScale={5}
+              />
+            )}
+          </div>
+          <div ref={bgUvaRef} className="bg-layer-juice bg-uva">
+            {isPreloaded && (
+              <LiquidBackground 
+                imageUrl={uvaBgImg.src} 
+                metalness={0.7}
+                roughness={0.3}
+                displacementScale={5}
+              />
+            )}
+          </div>
 
           {/* Floating Parallax Decorative Particles */}
           <div className="decorations-container">
@@ -1133,27 +1275,45 @@ export default function JuiceScrollDemo() {
             <div className="container-fluid h-100 px-3 px-lg-5">
               <div className="row h-100 align-items-center">
                 
-                {/* Left Column (Glass Cards) */}
+                {/* Left Column (Stacked Cards) */}
                 <div className="col-12 col-lg-3 position-relative h-100 d-flex align-items-center justify-content-start message-column-left">
                   {/* Lemon Left Text */}
-                  <div ref={textLimonLeftRef} className="glass-juice-card border-limon">
-                    <span className="juice-label text-limon-accent">Sabor 01</span>
-                    <h2 className="juice-title h2 mb-0">Oasis Limón</h2>
-                    <h3 className="h6 fw-bold mb-0 mt-2 text-limon-accent">La frescura más ácida y natural</h3>
+                  <div ref={textLimonLeftRef} className="stacked-card-wrapper">
+                    <div className="stacked-card-bg-1" style={{ backgroundColor: "#4c9c1b" }}></div>
+                    <div className="stacked-card-bg-2" style={{ backgroundColor: "#8ade28" }}></div>
+                    <div className="stacked-card-front">
+                      <span className="juice-label label-limon">Sabor 01</span>
+                      <h2 className="juice-title mb-2 text-limon-accent font-display" style={{ fontSize: "2.8rem", fontWeight: 800, lineHeight: 1.05 }}>
+                        Oasis<br />Limón
+                      </h2>
+                      <p className="mb-0 text-slate-800 fw-bold" style={{ fontSize: "1.05rem", color: "#1e293b" }}>La frescura más ácida y natural.</p>
+                    </div>
                   </div>
 
                   {/* Orange Left Text */}
-                  <div ref={textNaranjaLeftRef} className="glass-juice-card border-naranja">
-                    <span className="juice-label text-naranja-accent">Sabor 02</span>
-                    <h2 className="juice-title h2 mb-0">Oasis Naranja</h2>
-                    <h3 className="h6 fw-bold mb-0 mt-2 text-naranja-accent">Vibrante dulzura cítrica</h3>
+                  <div ref={textNaranjaLeftRef} className="stacked-card-wrapper">
+                    <div className="stacked-card-bg-1" style={{ backgroundColor: "#c24f0c" }}></div>
+                    <div className="stacked-card-bg-2" style={{ backgroundColor: "#ffa366" }}></div>
+                    <div className="stacked-card-front">
+                      <span className="juice-label label-naranja">Sabor 02</span>
+                      <h2 className="juice-title mb-2 text-naranja-accent font-display" style={{ fontSize: "2.8rem", fontWeight: 800, lineHeight: 1.05 }}>
+                        Oasis<br />Naranja
+                      </h2>
+                      <p className="mb-0 text-slate-800 fw-bold" style={{ fontSize: "1.05rem", color: "#1e293b" }}>Vibrante dulzura cítrica.</p>
+                    </div>
                   </div>
 
                   {/* Grape Left Text */}
-                  <div ref={textUvaLeftRef} className="glass-juice-card border-uva">
-                    <span className="juice-label text-uva-accent">Sabor 03</span>
-                    <h2 className="juice-title h2 mb-0">Oasis Uva</h2>
-                    <h3 className="h6 fw-bold mb-0 mt-2 text-uva-accent">Dulzura exótica de la selva</h3>
+                  <div ref={textUvaLeftRef} className="stacked-card-wrapper">
+                    <div className="stacked-card-bg-1" style={{ backgroundColor: "#5925a3" }}></div>
+                    <div className="stacked-card-bg-2" style={{ backgroundColor: "#b996f5" }}></div>
+                    <div className="stacked-card-front">
+                      <span className="juice-label label-uva">Sabor 03</span>
+                      <h2 className="juice-title mb-2 text-uva-accent font-display" style={{ fontSize: "2.8rem", fontWeight: 800, lineHeight: 1.05 }}>
+                        Oasis<br />Uva
+                      </h2>
+                      <p className="mb-0 text-slate-800 fw-bold" style={{ fontSize: "1.05rem", color: "#1e293b" }}>Dulzura exótica de la selva.</p>
+                    </div>
                   </div>
                 </div>
 
@@ -1164,25 +1324,40 @@ export default function JuiceScrollDemo() {
                 <div className="col-12 col-lg-3 position-relative h-100 d-flex align-items-center justify-content-end message-column-right">
                   {/* Lemon Right Text */}
                   <div ref={textLimonRightRef} className="plain-juice-desc">
-                    <span className="accent-label mb-2 d-block text-limon-accent">EXTRACTO FRESCO</span>
-                    <p className="m-0">
-                      Prensado en frío con limones reales seleccionados a mano. Un estallido revitalizante que limpia tu organismo y despierta tu energía matutina con un toque sutil de menta silvestre.
+                    <h2 className="text-limon-accent mb-3 text-uppercase font-display" style={{ fontSize: "2.8rem", fontWeight: 900, lineHeight: 0.95, letterSpacing: "-0.02em" }}>
+                      EXTRACTO<br />FRESCO
+                    </h2>
+                    <p className="highlight mb-2 text-dark fw-bold" style={{ fontSize: "1.2rem", lineHeight: 1.35 }}>
+                      Prensado en frío con limones reales seleccionados a mano.
+                    </p>
+                    <p className="desc m-0 text-secondary" style={{ fontSize: "1rem", lineHeight: 1.55 }}>
+                      Un estallido revitalizante que limpia tu organismo y despierta tu energía matutina con un toque sutil de menta silvestre.
                     </p>
                   </div>
 
                   {/* Orange Right Text */}
                   <div ref={textNaranjaRightRef} className="plain-juice-desc">
-                    <span className="accent-label mb-2 d-block text-naranja-accent">ENERGÍA PURA</span>
-                    <p className="m-0">
-                      Elaborado con las naranjas más dulces y jugosas de la temporada, maduradas bajo el sol. Lleno de antioxidantes y fibra soluble para nutrir tu cuerpo con hidratación pura al instante.
+                    <h2 className="text-naranja-accent mb-3 text-uppercase font-display" style={{ fontSize: "2.8rem", fontWeight: 900, lineHeight: 0.95, letterSpacing: "-0.02em" }}>
+                      ENERGÍA<br />PURA
+                    </h2>
+                    <p className="highlight mb-2 text-dark fw-bold" style={{ fontSize: "1.2rem", lineHeight: 1.35 }}>
+                      Elaborado con las naranjas más dulces y jugosas de la temporada.
+                    </p>
+                    <p className="desc m-0 text-secondary" style={{ fontSize: "1rem", lineHeight: 1.55 }}>
+                      Maduradas bajo el sol y llenas de fibra soluble para nutrir tu cuerpo con hidratación natural y vitaminas al instante.
                     </p>
                   </div>
 
                   {/* Grape Right Text */}
                   <div ref={textUvaRightRef} className="plain-juice-desc">
-                    <span className="accent-label mb-2 d-block text-uva-accent">SUPERANTIOXIDANTE</span>
-                    <p className="m-0">
-                      Un néctar de uvas tintas silvestres. Rápida absorción de antioxidantes poderosos (polifenoles) que cuidan tu salud cardiovascular y deleitan tu paladar con notas profundas.
+                    <h2 className="text-uva-accent mb-3 text-uppercase font-display" style={{ fontSize: "2.8rem", fontWeight: 900, lineHeight: 0.95, letterSpacing: "-0.02em" }}>
+                      SÚPER<br />ANTIOXIDANTE
+                    </h2>
+                    <p className="highlight mb-2 text-dark fw-bold" style={{ fontSize: "1.2rem", lineHeight: 1.35 }}>
+                      Un néctar puro de uvas tintas silvestres seleccionadas.
+                    </p>
+                    <p className="desc m-0 text-secondary" style={{ fontSize: "1rem", lineHeight: 1.55 }}>
+                      Rápida absorción de polifenoles activos que cuidan tu salud cardiovascular y deleitan tu paladar con notas silvestres profundas.
                     </p>
                   </div>
                 </div>
