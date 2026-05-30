@@ -67,6 +67,22 @@ export default function DemosPage() {
       href: "/demos/tarjeta-digital",
       glowColor: "rgba(16, 185, 129, 0.15)", // Emerald glow
       btnText: "Ver Tarjeta Digital"
+    },
+    {
+      id: "landing-jugos",
+      title: "Demo de Jugos Premium",
+      tag: "Interactiva 3D",
+      description: "Página de aterrizaje premium de marca de jugos con efectos visuales dinámicos de rotación y color al hacer scroll.",
+      features: [
+        "Efecto de scroll inmersivo",
+        "Banner hero interactivo gigante",
+        "Transición de color de fondo 3D",
+        "Presentación de 3 sabores únicos"
+      ],
+      icon: "bi-cup-straw",
+      href: "/demos/landing/jugos",
+      glowColor: "rgba(34, 197, 94, 0.15)", // Green glow
+      btnText: "Ver Demo de Jugos"
     }
   ];
 
@@ -91,6 +107,10 @@ export default function DemosPage() {
         .tarjeta-card:hover {
           border-color: rgba(16, 185, 129, 0.4) !important;
           box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.25) !important;
+        }
+        .jugos-card:hover {
+          border-color: rgba(34, 197, 94, 0.4) !important;
+          box-shadow: 0 20px 40px -10px rgba(34, 197, 94, 0.25) !important;
         }
 
         .icon-box {
@@ -164,6 +184,11 @@ export default function DemosPage() {
               badgeStyle = "bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25";
               iconColor = "#f97316";
               iconBg = "rgba(249, 115, 22, 0.08)";
+            } else if (demo.id === "landing-jugos") {
+              cardHoverClass = "jugos-card";
+              badgeStyle = "bg-success bg-opacity-10 text-success border border-success border-opacity-25";
+              iconColor = "#22c55e";
+              iconBg = "rgba(34, 197, 94, 0.08)";
             } else if (isEcommerce) {
               cardHoverClass = "ecommerce-card";
               badgeStyle = "bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25";
@@ -173,7 +198,7 @@ export default function DemosPage() {
             }
 
             return (
-              <div key={demo.id} className="col-12 col-lg-4">
+              <div key={demo.id} className="col-12 col-md-6 col-lg-3">
                 <div 
                   className={`glass-panel p-4 h-100 d-flex flex-column justify-content-between demo-card ${cardHoverClass}`}
                   style={{ background: "var(--card-bg)" }}
