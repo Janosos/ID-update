@@ -8,6 +8,9 @@ import uvaImg from "../bebidas/uva.avif";
 import limonBgImg from "../bebidas/limonbg.avif";
 import naranjaBgImg from "../bebidas/naranjasbg.avif";
 import uvaBgImg from "../bebidas/uvasbg.avif";
+import limonBgImgMobile from "../bebidas/limonbg_mobile.avif";
+import naranjaBgImgMobile from "../bebidas/naranjasbg_mobile.avif";
+import uvaBgImgMobile from "../bebidas/uvasbg_mobile.avif";
 
 interface LiquidBackgroundProps {
   imageUrl: string;
@@ -28,17 +31,43 @@ const LiquidBackground = ({
 
   useEffect(() => {
     let appInstance: any;
+    
+    // Store original functions to restore on unmount
+    const originalWindowAdd = window.addEventListener;
+    const originalDocAdd = document.addEventListener;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const originalCanvasAdd = canvas.addEventListener;
+
+    // Helper to make touch events passive, preventing scroll blocking
+    const makePassive = (type: string, listener: any, options: any) => {
+      if (type && typeof type === "string" && type.startsWith("touch")) {
+        let passiveOptions = typeof options === "object" ? { ...options, passive: true } : { passive: true };
+        if (typeof options === "boolean") passiveOptions.capture = options;
+        return passiveOptions;
+      }
+      return options;
+    };
+
+    // Override addEventListener
+    window.addEventListener = function(type: string, listener: any, options?: any) {
+      return originalWindowAdd.call(window, type, listener, makePassive(type, listener, options));
+    };
+    document.addEventListener = function(type: string, listener: any, options?: any) {
+      return originalDocAdd.call(document, type, listener, makePassive(type, listener, options));
+    };
+    canvas.addEventListener = function(type: string, listener: any, options?: any) {
+      return originalCanvasAdd.call(canvas, type, listener, makePassive(type, listener, options));
+    };
 
     const loadEffect = async () => {
-      if (!canvasRef.current) return;
-
       try {
         // Import dynamic library using eval to bypass static bundler checking for remote CDN URLs
         // @ts-ignore
         const module = await eval("import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js')");
         const LiquidEffect = module.default || module;
 
-        appInstance = LiquidEffect(canvasRef.current);
+        appInstance = LiquidEffect(canvas);
         appInstance.loadImage(imageUrl);
         
         if (appInstance.liquidPlane) {
@@ -58,6 +87,11 @@ const LiquidBackground = ({
     loadEffect();
 
     return () => {
+      // Restore original functions
+      window.addEventListener = originalWindowAdd;
+      document.addEventListener = originalDocAdd;
+      canvas.addEventListener = originalCanvasAdd;
+
       if (appInstance && typeof appInstance.destroy === 'function') {
         try {
           appInstance.destroy();
@@ -100,6 +134,7 @@ export default function JuiceScrollDemo() {
   const [subscriptionPlan, setSubscriptionPlan] = useState("quincenal");
   const [nameFocused, setNameFocused] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -193,9 +228,15 @@ export default function JuiceScrollDemo() {
     { emoji: "🫐", left: "14%", top: "70%", speed: -1.2, rotateSpeed: 0.5, blur: 7, scale: 1.2, phase: "uva" }
   ];
 
-  // Set document title
+  // Set document title and check mobile status
   useEffect(() => {
     document.title = "Oasis Natura - Demos ImperioDev";
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 992);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Preload images
@@ -203,7 +244,8 @@ export default function JuiceScrollDemo() {
     let loadedCount = 0;
     const imagesToLoad = [
       limonImg.src, naranjaImg.src, uvaImg.src,
-      limonBgImg.src, naranjaBgImg.src, uvaBgImg.src
+      limonBgImg.src, naranjaBgImg.src, uvaBgImg.src,
+      limonBgImgMobile.src, naranjaBgImgMobile.src, uvaBgImgMobile.src
     ];
 
     const checkLoad = () => {
@@ -732,6 +774,10 @@ export default function JuiceScrollDemo() {
           background-position: center !important;
           background-repeat: no-repeat !important;
         }
+
+        .bg-layer-juice canvas {
+          touch-action: pan-y !important;
+        }
         
         .bg-limon {
           background-color: #f3ffeb;
@@ -1055,7 +1101,7 @@ export default function JuiceScrollDemo() {
             filter: blur(25px) !important;
             opacity: 0.25 !important;
           }
-          .stacked-card-wrapper {
+          .message-column-left .stacked-card-wrapper {
             width: 90% !important;
             max-width: none !important;
             left: 5% !important;
@@ -1077,7 +1123,7 @@ export default function JuiceScrollDemo() {
           .stacked-card-front p {
             font-size: 0.95rem !important;
           }
-          .plain-juice-desc {
+          .message-column-right .plain-juice-desc {
             width: 90% !important;
             max-width: none !important;
             left: 5% !important;
@@ -1112,6 +1158,15 @@ export default function JuiceScrollDemo() {
           }
           .floating-element {
             font-size: 1.6rem !important;
+          }
+          .juice-demo-bar {
+            bottom: 8px !important;
+            padding: 4px 8px !important;
+            gap: 6px !important;
+          }
+          .juice-demo-bar a {
+            padding: 5px 12px !important;
+            font-size: 0.72rem !important;
           }
         }
 
@@ -1178,8 +1233,12 @@ export default function JuiceScrollDemo() {
           </div>
 
           {/* Background Layers */}
-          <div ref={bgLimonRef} className="bg-layer-juice bg-limon">
-            {isPreloaded && (
+          <div 
+            ref={bgLimonRef} 
+            className="bg-layer-juice bg-limon"
+            style={isMobile ? { backgroundImage: `url(${limonBgImgMobile.src})` } : undefined}
+          >
+            {isPreloaded && !isMobile && (
               <LiquidBackground 
                 imageUrl={limonBgImg.src} 
                 metalness={0.7}
@@ -1188,8 +1247,12 @@ export default function JuiceScrollDemo() {
               />
             )}
           </div>
-          <div ref={bgNaranjaRef} className="bg-layer-juice bg-naranja">
-            {isPreloaded && (
+          <div 
+            ref={bgNaranjaRef} 
+            className="bg-layer-juice bg-naranja"
+            style={isMobile ? { backgroundImage: `url(${naranjaBgImgMobile.src})` } : undefined}
+          >
+            {isPreloaded && !isMobile && (
               <LiquidBackground 
                 imageUrl={naranjaBgImg.src} 
                 metalness={0.7}
@@ -1198,8 +1261,12 @@ export default function JuiceScrollDemo() {
               />
             )}
           </div>
-          <div ref={bgUvaRef} className="bg-layer-juice bg-uva">
-            {isPreloaded && (
+          <div 
+            ref={bgUvaRef} 
+            className="bg-layer-juice bg-uva"
+            style={isMobile ? { backgroundImage: `url(${uvaBgImgMobile.src})` } : undefined}
+          >
+            {isPreloaded && !isMobile && (
               <LiquidBackground 
                 imageUrl={uvaBgImg.src} 
                 metalness={0.7}
