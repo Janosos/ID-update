@@ -31,9 +31,13 @@ export default function ScrollLandingDemo() {
 
   const totalFrames = 240;
 
-  // Set document title dynamically on client
+  // Set document title dynamically on client and reset scroll to top on mount
   useEffect(() => {
     document.title = "Demo de Landing Page - ImperioDev";
+    window.scrollTo(0, 0);
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
   }, []);
 
   // Preload scroll animation frames

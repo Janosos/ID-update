@@ -29,108 +29,487 @@ const LiquidBackground = ({
 }: LiquidBackgroundProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const propsRef = useRef({ imageUrl, displacementScale, metalness, roughness });
   useEffect(() => {
-    let appInstance: any;
-    
-    // Store original functions to restore on unmount
-    const originalWindowAdd = window.addEventListener;
-    const originalDocAdd = document.addEventListener;
+    propsRef.current = { imageUrl, displacementScale, metalness, roughness };
+  }, [imageUrl, displacementScale, metalness, roughness]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const originalCanvasAdd = canvas.addEventListener;
-    
-    const originalDPR = window.devicePixelRatio;
 
-    // Helper to make touch events passive, preventing scroll blocking
-    const makePassive = (type: string, listener: any, options: any) => {
-      if (type && typeof type === "string" && type.startsWith("touch")) {
-        let passiveOptions = typeof options === "object" ? { ...options, passive: true } : { passive: true };
-        if (typeof options === "boolean") passiveOptions.capture = options;
-        return passiveOptions;
-      }
-      return options;
-    };
-
-    // Override addEventListener
-    window.addEventListener = function(type: string, listener: any, options?: any) {
-      return originalWindowAdd.call(window, type, listener, makePassive(type, listener, options));
-    };
-    document.addEventListener = function(type: string, listener: any, options?: any) {
-      return originalDocAdd.call(document, type, listener, makePassive(type, listener, options));
-    };
-    canvas.addEventListener = function(type: string, listener: any, options?: any) {
-      return originalCanvasAdd.call(canvas, type, listener, makePassive(type, listener, options));
-    };
-
-    // Temporarily limit devicePixelRatio on mobile to drastically reduce GPU rendering load and prevent lag
-    if (window.innerWidth < 992) {
-      Object.defineProperty(window, "devicePixelRatio", {
-        get: () => 1.2,
-        configurable: true
-      });
+    const gl = canvas.getContext('webgl', {
+      alpha: false,
+      depth: false,
+      stencil: false,
+      antialias: false,
+      powerPreference: "high-performance"
+    });
+    if (!gl) {
+      console.warn("WebGL not supported, falling back to static background image.");
+      canvas.style.backgroundImage = `url(${imageUrl})`;
+      canvas.style.backgroundSize = "cover";
+      canvas.style.backgroundPosition = "center";
+      return;
     }
 
-    const loadEffect = async () => {
-      try {
-        // Import dynamic library using eval to bypass static bundler checking for remote CDN URLs
-        // @ts-ignore
-        const module = await eval("import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js')");
-        const LiquidEffect = module.default || module;
+    // Vertex Shader Source
+    const vsSource = `
+      attribute vec2 position;
+      varying vec2 vUv;
+      void main() {
+        vUv = position * 0.5 + 0.5;
+        gl_Position = vec4(position, 0.0, 1.0);
+      }
+    `;
 
-        appInstance = LiquidEffect(canvas);
-        appInstance.loadImage(imageUrl);
+    // Optimized single-pass Fragment Shader with analytical gradient computation
+    const fsSource = `
+      precision highp float;
+      varying vec2 vUv;
+      uniform sampler2D uTexture;
+      uniform vec3 uRipples[24]; // array of vec3 [x, y, age]
+      uniform float uTime;
+      uniform float uDisplacementScale;
+      uniform float uAspect;
+      uniform vec2 uUvMapScale;
+      uniform float uMetalness;
+      uniform float uRoughness;
+
+      vec3 getWaveAndSlope(vec2 aspectUv, float time) {
+        // Ambient waves
+        float w1_x = aspectUv.x * 4.0 + time * 0.4;
+        float w1_y = aspectUv.y * 4.0 + time * 0.3;
+        float wave1 = sin(w1_x) * cos(w1_y) * 0.003;
+        float wave1_dx = 4.0 * cos(w1_x) * cos(w1_y) * 0.003;
+        float wave1_dy = -4.0 * sin(w1_x) * sin(w1_y) * 0.003;
         
-        if (appInstance.liquidPlane) {
-          appInstance.liquidPlane.material.metalness = metalness;
-          appInstance.liquidPlane.material.roughness = roughness;
-          if (appInstance.liquidPlane.uniforms?.displacementScale) {
-            appInstance.liquidPlane.uniforms.displacementScale.value = displacementScale;
+        float w2_y = aspectUv.y * 8.0 - time * 0.6;
+        float w2_x = aspectUv.x * 6.0 + time * 0.5;
+        float wave2 = sin(w2_y) * cos(w2_x) * 0.0015;
+        float wave2_dx = -6.0 * sin(w2_y) * sin(w2_x) * 0.0015;
+        float wave2_dy = 8.0 * cos(w2_y) * cos(w2_x) * 0.0015;
+        
+        float h = wave1 + wave2;
+        vec2 slope = vec2(wave1_dx + wave2_dx, wave1_dy + wave2_dy);
+        
+        for (int i = 0; i < 24; i++) {
+          vec3 r = uRipples[i];
+          float age = r.z;
+          if (age < 0.99) {
+            vec2 rPos = r.xy; // Aspect pre-scaled in JS
+            vec2 diff = aspectUv - rPos;
+            float dist = length(diff);
+            if (dist > 0.0001) {
+              vec2 dir = diff / dist;
+              float waveSpeed = 1.8; // Slower wave expansion speed
+              float front = age * waveSpeed;
+              
+              float distFromFront = dist - front;
+              float absDistFromFront = abs(distFromFront);
+              
+              float envelope = exp(-absDistFromFront * 28.0);
+              float force = pow(1.0 - age, 1.2);
+              
+              float phase = distFromFront * 38.0;
+              float s = sin(phase);
+              float c = cos(phase);
+              
+              float amp = 0.16 * force * envelope;
+              h += s * amp;
+              
+              float signFactor = sign(distFromFront);
+              float dRipple_dDist = amp * (38.0 * c - 28.0 * s * signFactor);
+              
+              slope += dRipple_dDist * dir;
+            }
           }
         }
         
-        appInstance.setRain(false);
-      } catch (error) {
-        console.error("Error loading liquid background effect:", error);
-      } finally {
-        // Restore original devicePixelRatio
-        if (window.innerWidth < 992) {
-          Object.defineProperty(window, "devicePixelRatio", {
-            get: () => originalDPR,
-            configurable: true
-          });
+        return vec3(h, slope.x, slope.y);
+      }
+
+      void main() {
+        vec2 aspectUv = vec2(vUv.x * uAspect, vUv.y);
+        
+        vec3 waveData = getWaveAndSlope(aspectUv, uTime);
+        float h = waveData.x;
+        vec2 slope = waveData.yz;
+        
+        // Calculate normal from height gradient (slope) - steeper for 3D look
+        float totalBump = uDisplacementScale * 0.0018;
+        vec3 normal = normalize(vec3(-slope.x * totalBump, -slope.y * totalBump, 0.045));
+        
+        // Chromatic aberration offsets
+        float redOffset   = 0.006;
+        float greenOffset = 0.012;
+        float blueOffset  = 0.018;
+        
+        vec2 dUv = normal.xy * uDisplacementScale * 0.035;
+        
+        // Apply cover texture coordinates
+        vec2 coverUv = (vUv - 0.5) * uUvMapScale + 0.5;
+        
+        float st = smoothstep(0.0, 0.08, length(dUv));
+        vec4 texColor = vec4(0.0);
+        texColor.r = texture2D(uTexture, clamp(coverUv + dUv + redOffset * st, 0.001, 0.999)).r;
+        texColor.g = texture2D(uTexture, clamp(coverUv + dUv + greenOffset * st, 0.001, 0.999)).g;
+        texColor.b = texture2D(uTexture, clamp(coverUv + dUv + blueOffset * st, 0.001, 0.999)).b;
+        texColor.a = 1.0;
+        
+        // Specular & Fresnel highlights for metallic chrome reflection (matching mercury/glass)
+        vec3 lightDir = normalize(vec3(0.3, 0.5, 0.8));
+        vec3 viewDir = vec3(0.0, 0.0, 1.0);
+        vec3 halfDir = normalize(lightDir + viewDir);
+        
+        float spec = pow(max(dot(normal, halfDir), 0.0), 64.0);
+        float fresnel = pow(1.0 - normal.z, 3.0);
+        
+        float shine = spec * (1.0 - uRoughness) * 2.0 + fresnel * uMetalness * 0.8;
+        vec3 specular = vec3(shine);
+        
+        gl_FragColor = vec4(texColor.rgb + specular, 1.0);
+      }
+    `;
+
+    const compileShader = (source: string, type: number) => {
+      const shader = gl.createShader(type);
+      if (!shader) return null;
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error("Shader compilation error:", gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+      }
+      return shader;
+    };
+
+    const vs = compileShader(vsSource, gl.VERTEX_SHADER);
+    const fs = compileShader(fsSource, gl.FRAGMENT_SHADER);
+    if (!vs || !fs) return;
+
+    const program = gl.createProgram();
+    if (!program) return;
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error("Shader program linking error:", gl.getProgramInfoLog(program));
+      return;
+    }
+
+    gl.useProgram(program);
+
+    const positionLoc = gl.getAttribLocation(program, "position");
+    const uTextureLoc = gl.getUniformLocation(program, "uTexture");
+    const uRipplesLoc = gl.getUniformLocation(program, "uRipples");
+    const uTimeLoc = gl.getUniformLocation(program, "uTime");
+    const uDisplacementScaleLoc = gl.getUniformLocation(program, "uDisplacementScale");
+    const uAspectLoc = gl.getUniformLocation(program, "uAspect");
+    const uUvMapScaleLoc = gl.getUniformLocation(program, "uUvMapScale");
+    const uMetalnessLoc = gl.getUniformLocation(program, "uMetalness");
+    const uRoughnessLoc = gl.getUniformLocation(program, "uRoughness");
+
+    const vertices = new Float32Array([
+      -1, -1,
+      1, -1,
+      -1, 1,
+      -1, 1,
+      1, -1,
+      1, 1
+    ]);
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+    gl.enableVertexAttribArray(positionLoc);
+    gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]));
+
+    let imageLoaded = false;
+    let imageWidth = 1;
+    let imageHeight = 1;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      if (!gl) return;
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      imageWidth = img.naturalWidth || img.width;
+      imageHeight = img.naturalHeight || img.height;
+      imageLoaded = true;
+    };
+    img.src = imageUrl;
+
+    // Maintain JavaScript ripple states for motion and collision simulation
+    const ripples = Array.from({ length: 24 }, () => ({
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      age: 1.0
+    }));
+
+    // Buffer for 24 active ripples [x, y, age] (initialized to 1.0 = dead)
+    const ripplesData = new Float32Array(24 * 3);
+    for (let i = 0; i < 24; i++) {
+      ripplesData[i * 3 + 2] = 1.0;
+    }
+    let rippleIndex = 0;
+    let lastRippleX = -1;
+    let lastRippleY = -1;
+
+    const addRipple = (x: number, y: number) => {
+      // Distance check to only add ripple if cursor moves a meaningful distance (prevents overwhelming buffer)
+      const dx = x - lastRippleX;
+      const dy = y - lastRippleY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      // Increased threshold to 0.035 to leave distinct, spaced-out independent touches along the drag path
+      if (lastRippleX === -1 || dist > 0.035) {
+        const r = ripples[rippleIndex];
+        r.x = x;
+        r.y = y;
+        r.vx = 0.0;
+        r.vy = 0.0;
+        r.age = 0.0; // brand new
+
+        rippleIndex = (rippleIndex + 1) % 24;
+        lastRippleX = x;
+        lastRippleY = y;
+      }
+    };
+
+    const updateMousePos = (clientX: number, clientY: number, forceAdd = false) => {
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      const x = (clientX - rect.left) / rect.width;
+      const y = 1.0 - (clientY - rect.top) / rect.height;
+
+      // Only register ripples if the cursor is within the viewport bounds of the canvas
+      if (x >= 0.0 && x <= 1.0 && y >= 0.0 && y <= 1.0) {
+        if (forceAdd) {
+          const r = ripples[rippleIndex];
+          r.x = x;
+          r.y = y;
+          r.vx = 0.0;
+          r.vy = 0.0;
+          r.age = 0.0;
+
+          rippleIndex = (rippleIndex + 1) % 24;
+          lastRippleX = x;
+          lastRippleY = y;
+        } else {
+          addRipple(x, y);
         }
       }
     };
 
-    loadEffect();
+    const onMouseMove = (e: MouseEvent) => {
+      updateMousePos(e.clientX, e.clientY);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        updateMousePos(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        updateMousePos(e.touches[0].clientX, e.touches[0].clientY, true);
+      }
+    };
+
+    const onMouseDown = (e: MouseEvent) => {
+      updateMousePos(e.clientX, e.clientY, true);
+    };
+
+    // Attach to window globally so movements over text, cans, and overlays trigger ripples
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('mousedown', onMouseDown, { passive: true });
+
+    let animationFrameId = 0;
+    let isDisposed = false;
+    let time = 0.0;
+
+    // Use reduced ratio on mobile for ultra performance
+    const dpr = typeof window !== 'undefined' ? (window.innerWidth < 992 ? 1.0 : Math.min(window.devicePixelRatio, 2)) : 1;
+
+    const resizeCanvas = () => {
+      const displayWidth = Math.floor(canvas.clientWidth * dpr);
+      const displayHeight = Math.floor(canvas.clientHeight * dpr);
+      if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+        canvas.width = displayWidth;
+        canvas.height = displayHeight;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+    };
+
+    const render = () => {
+      if (isDisposed || !gl) return;
+
+      resizeCanvas();
+
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      // Compute aspect ratio for coordinate adjustments
+      const aspect = canvas.width / canvas.height;
+
+      // 1. Advance age of each ripple
+      for (let i = 0; i < 24; i++) {
+        const ripple = ripples[i];
+        if (ripple.age < 1.0) {
+          ripple.age += 0.002; // slow age increment
+          if (ripple.age >= 1.0) {
+            ripple.age = 1.0;
+          }
+        }
+      }
+
+      // 2. Ripple-to-Ripple Overlap Resolution (Pushing overlapping waves apart)
+      for (let i = 0; i < 24; i++) {
+        const r1 = ripples[i];
+        if (r1.age >= 1.0) continue;
+
+        // Radius grows as the wavefront spreads
+        const rad1 = 0.035 + r1.age * 0.08;
+
+        for (let j = i + 1; j < 24; j++) {
+          const r2 = ripples[j];
+          if (r2.age >= 1.0) continue;
+
+          const rad2 = 0.035 + r2.age * 0.08;
+
+          // Calculate distance in aspect ratio space so collision zones are perfectly circular
+          const dx = (r2.x - r1.x) * aspect;
+          const dy = r2.y - r1.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const minDist = rad1 + rad2;
+
+          if (dist < minDist && dist > 0.001) {
+            // Collision normal unit vector
+            const nx = dx / dist;
+            const ny = dy / dist;
+
+            // Resolve overlap (penetration separation)
+            const overlap = minDist - dist;
+            const shiftX = (overlap * 0.5 * nx) / aspect;
+            const shiftY = overlap * 0.5 * ny;
+
+            r1.x -= shiftX;
+            r1.y -= shiftY;
+            r2.x += shiftX;
+            r2.y += shiftY;
+
+            // Clamp coordinates to keep ripple centers inside canvas bounds [0, 1]
+            r1.x = Math.max(0.0, Math.min(1.0, r1.x));
+            r1.y = Math.max(0.0, Math.min(1.0, r1.y));
+            r2.x = Math.max(0.0, Math.min(1.0, r2.x));
+            r2.y = Math.max(0.0, Math.min(1.0, r2.y));
+          }
+        }
+      }
+
+      // 3. Write JavaScript state back to ripplesData array for GPU consumption
+      for (let i = 0; i < 24; i++) {
+        ripplesData[i * 3] = ripples[i].x;
+        ripplesData[i * 3 + 1] = ripples[i].y;
+        ripplesData[i * 3 + 2] = ripples[i].age;
+      }
+
+      time += 0.015;
+
+      // Compute cover sizing uv scale
+      const imgAspect = imageWidth / imageHeight;
+      let uvMapScale = [1.0, 1.0];
+      if (aspect > imgAspect) {
+        uvMapScale = [imgAspect / aspect, 1.0];
+      } else {
+        uvMapScale = [1.0, aspect / imgAspect];
+      }
+
+      // Pre-scale x by aspect ratio in JS to avoid computing aspect division inside loop in fragment shader
+      const gpuRipplesData = new Float32Array(24 * 3);
+      for (let i = 0; i < 24; i++) {
+        gpuRipplesData[i * 3] = ripplesData[i * 3] * aspect;
+        gpuRipplesData[i * 3 + 1] = ripplesData[i * 3 + 1];
+        gpuRipplesData[i * 3 + 2] = ripplesData[i * 3 + 2];
+      }
+
+      gl.useProgram(program);
+
+      // Bind buffer and enable attributes
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.enableVertexAttribArray(positionLoc);
+      gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+      // Bind background image texture to TEXTURE0
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.uniform1i(uTextureLoc, 0);
+
+      gl.uniform3fv(uRipplesLoc, gpuRipplesData);
+      gl.uniform1f(uTimeLoc, time);
+      gl.uniform1f(uDisplacementScaleLoc, propsRef.current.displacementScale);
+      gl.uniform1f(uAspectLoc, aspect);
+      gl.uniform2f(uUvMapScaleLoc, uvMapScale[0], uvMapScale[1]);
+      gl.uniform1f(uMetalnessLoc, propsRef.current.metalness);
+      gl.uniform1f(uRoughnessLoc, propsRef.current.roughness);
+
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    };
+
+    const tick = () => {
+      if (isDisposed) return;
+
+      // Zero-GPU performance check: only draw when active/visible
+      if (canvas.offsetParent !== null && canvas.clientWidth > 0 && canvas.clientHeight > 0 && imageLoaded) {
+        render();
+      }
+
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    tick();
 
     return () => {
-      // Restore original functions
-      window.addEventListener = originalWindowAdd;
-      document.addEventListener = originalDocAdd;
-      canvas.addEventListener = originalCanvasAdd;
+      isDisposed = true;
+      cancelAnimationFrame(animationFrameId);
 
-      if (window.innerWidth < 992) {
-        Object.defineProperty(window, "devicePixelRatio", {
-          get: () => originalDPR,
-          configurable: true
-        });
-      }
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('mousedown', onMouseDown);
 
-      if (appInstance && typeof appInstance.destroy === 'function') {
-        try {
-          appInstance.destroy();
-        } catch (e) {
-          console.error("Error destroying liquid background instance:", e);
-        }
+      if (gl) {
+        gl.deleteBuffer(buffer);
+        gl.deleteTexture(texture);
+        gl.deleteProgram(program);
+        gl.deleteShader(vs);
+        gl.deleteShader(fs);
       }
     };
-  }, [imageUrl, metalness, roughness, displacementScale]);
+  }, [imageUrl]);
 
   return (
-    <canvas 
-      ref={canvasRef} 
+    <canvas
+      ref={canvasRef}
       className={`d-block w-100 h-100 ${className}`}
+      style={{ touchAction: 'pan-y' }}
     />
   );
 };
@@ -163,7 +542,7 @@ export default function JuiceScrollDemo() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // Refs for the 3 bottles
   const bottleLimonRef = useRef<HTMLDivElement>(null);
   const bottleNaranjaRef = useRef<HTMLDivElement>(null);
@@ -239,13 +618,13 @@ export default function JuiceScrollDemo() {
     { emoji: "🌿", left: "85%", top: "18%", speed: -0.8, rotateSpeed: -0.2, blur: 6, scale: 1.2, phase: "limon" },
     { emoji: "🍃", left: "12%", top: "65%", speed: 0.9, rotateSpeed: 0.4, blur: 8, scale: 1.3, phase: "limon" },
     { emoji: "🍋", left: "80%", top: "60%", speed: -1.1, rotateSpeed: -0.3, blur: 9, scale: 1.1, phase: "limon" },
-    
+
     // Orange phase (0.3 to 0.7)
     { emoji: "🍊", left: "86%", top: "14%", speed: 1.3, rotateSpeed: -0.4, blur: 7, scale: 1.4, phase: "naranja" },
     { emoji: "🌿", left: "10%", top: "25%", speed: -0.7, rotateSpeed: 0.3, blur: 6, scale: 1.3, phase: "naranja" },
     { emoji: "🍃", left: "82%", top: "68%", speed: 0.8, rotateSpeed: -0.2, blur: 8, scale: 1.5, phase: "naranja" },
     { emoji: "🍊", left: "15%", top: "62%", speed: -1.0, rotateSpeed: 0.5, blur: 9, scale: 1.2, phase: "naranja" },
-    
+
     // Grape phase (0.65 to 1.0)
     { emoji: "🍇", left: "9%", top: "16%", speed: 1.2, rotateSpeed: 0.3, blur: 7, scale: 1.5, phase: "uva" },
     { emoji: "🌿", left: "88%", top: "20%", speed: -0.9, rotateSpeed: -0.3, blur: 6, scale: 1.3, phase: "uva" },
@@ -261,6 +640,13 @@ export default function JuiceScrollDemo() {
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
+
+    // Force scroll to top on mount
+    window.scrollTo(0, 0);
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
@@ -368,9 +754,13 @@ export default function JuiceScrollDemo() {
     return (1 - opacity) * 50; // Translate up/down by 50px
   };
 
-  // Performant scroll loop (LERP + direct DOM modifications)
+  // Performant scroll loop (LERP + direct DOM modifications + idle loop suspension)
   useEffect(() => {
     if (!isPreloaded) return;
+
+    let active = true;
+    let loopRunning = false;
+    let lastTime = typeof window !== 'undefined' ? performance.now() : 0;
 
     const handleScroll = () => {
       isMobileRef.current = window.innerWidth < 992;
@@ -380,7 +770,7 @@ export default function JuiceScrollDemo() {
       const rect = container.getBoundingClientRect();
       const containerTop = window.pageYOffset + rect.top;
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-      
+
       const scrollStart = containerTop;
       const scrollRange = container.offsetHeight - window.innerHeight;
 
@@ -388,23 +778,44 @@ export default function JuiceScrollDemo() {
 
       const progress = Math.min(1, Math.max(0, (scrollTop - scrollStart) / scrollRange));
       scrollInfoRef.current.targetProgress = progress;
+
+      // Wake up the rendering loop if it was suspended
+      startLoop();
     };
 
-    let active = true;
+    const startLoop = () => {
+      if (loopRunning || !active) return;
+      loopRunning = true;
+      lastTime = performance.now();
+      scrollInfoRef.current.animationFrameId = requestAnimationFrame(renderLoop);
+    };
+
     const renderLoop = () => {
-      if (!active) return;
+      if (!active) {
+        loopRunning = false;
+        return;
+      }
 
       const info = scrollInfoRef.current;
       const diff = info.targetProgress - info.currentProgress;
-      
+
+      // Calculate time-delta for frame-rate independence (normalized to 60fps)
+      const now = performance.now();
+      const dt = Math.min(50, now - lastTime) / 16.666;
+      lastTime = now;
+
+      // Snappier LERP on mobile so scroll matches finger tracking instantly
+      const isMobile = isMobileRef.current;
+      const baseLerp = isMobile ? 0.35 : 0.15;
+      const lerpFactor = 1.0 - Math.pow(1.0 - baseLerp, dt);
+
       if (Math.abs(diff) > 0.0001) {
-        info.currentProgress += diff * 0.15; // Smooth LERP matching Aeropods
+        info.currentProgress += diff * lerpFactor;
       } else {
         info.currentProgress = info.targetProgress;
       }
 
       const p = info.currentProgress;
-      const isMobile = isMobileRef.current;
 
       // 1. Backgrounds crossfade opacities
       const oLimonBg = getProgressOpacity(p, 0.0, 0.23, 0.12);
@@ -436,7 +847,6 @@ export default function JuiceScrollDemo() {
       }
 
       // 2. Bottle animations (scale, translation, rotation)
-      // Lemon bottle (transitions out between 0.23 and 0.35)
       let limScale = 1;
       let limRot = 0;
       let limTransX = 0;
@@ -447,12 +857,11 @@ export default function JuiceScrollDemo() {
         const t = Math.min(1, (p - 0.23) / 0.12);
         limOpacity = 1 - t;
         limScale = 1 - t * 0.35;
-        limRot = -t * 60; // Gira hacia la izquierda
-        limTransX = -t * 400; // Se va a la izquierda
+        limRot = -t * 60;
+        limTransX = -t * 400;
         limTransY = t * 60;
       }
 
-      // Orange bottle (transitions in between 0.23 and 0.35, transitions out between 0.58 and 0.70)
       let narScale = 0.65;
       let narRot = 60;
       let narTransX = 400;
@@ -481,7 +890,6 @@ export default function JuiceScrollDemo() {
         narTransY = t * 60;
       }
 
-      // Grape bottle (transitions in between 0.58 and 0.70)
       let uvaScale = 0.65;
       let uvaRot = 60;
       let uvaTransX = 400;
@@ -503,7 +911,6 @@ export default function JuiceScrollDemo() {
         uvaTransY = 0;
       }
 
-      // Apply style values to bottle containers using GPU layers
       const limTransformStr = `translate3d(${limTransX.toFixed(1)}px, ${(limTransY + (isMobile ? 30 : 0)).toFixed(1)}px, 0) scale3d(${limScale.toFixed(3)}, ${limScale.toFixed(3)}, 1) rotate3d(0, 0, 1, ${limRot.toFixed(1)}deg)`;
       const limPointerStr = limOpacity > 0.5 ? "auto" : "none";
       if (Math.abs(cache.limonOpacity - limOpacity) > 0.001 || cache.limonTransform !== limTransformStr || cache.limonPointerEvents !== limPointerStr) {
@@ -544,10 +951,9 @@ export default function JuiceScrollDemo() {
       }
 
       // 3. Side Text opacities and sliding transitions
-      // Lemon Texts
       const oLimText = getProgressOpacity(p, 0.0, 0.20, 0.08);
       const tyLimText = getProgressTranslateY(oLimText);
-      
+
       const limLeftTransStr = `translate3d(0, ${tyLimText.toFixed(1)}px, 0)`;
       const limLeftPointerStr = oLimText > 0.5 ? "auto" : "none";
       if (Math.abs(cache.textLimonLeftOpacity - oLimText) > 0.001 || cache.textLimonLeftTransform !== limLeftTransStr || cache.textLimonLeftPointerEvents !== limLeftPointerStr) {
@@ -577,7 +983,6 @@ export default function JuiceScrollDemo() {
         }
       }
 
-      // Orange Texts
       const oNarText = getProgressOpacity(p, 0.38, 0.55, 0.08);
       const tyNarText = getProgressTranslateY(oNarText);
 
@@ -607,7 +1012,6 @@ export default function JuiceScrollDemo() {
         }
       }
 
-      // Grape Texts
       const oUvaText = getProgressOpacity(p, 0.73, 0.95, 0.08);
       const tyUvaText = getProgressTranslateY(oUvaText);
 
@@ -670,11 +1074,11 @@ export default function JuiceScrollDemo() {
       // Calculate brand accent color based on active section
       let targetColor = "";
       if (p < 0.29) {
-        targetColor = "#5c8b05"; // Lemon Green
+        targetColor = "#5c8b05";
       } else if (p >= 0.29 && p < 0.64) {
-        targetColor = "#d95d14"; // Orange
+        targetColor = "#d95d14";
       } else {
-        targetColor = "#692fb8"; // Grape Purple
+        targetColor = "#692fb8";
       }
 
       if (cache.brandAccentColor !== targetColor) {
@@ -685,21 +1089,25 @@ export default function JuiceScrollDemo() {
         }
       }
 
-      info.animationFrameId = requestAnimationFrame(renderLoop);
+      // Suspend render loop when target is reached to free CPU/GPU resources
+      const finalDiff = info.targetProgress - info.currentProgress;
+      if (Math.abs(finalDiff) > 0.0001 && active) {
+        info.animationFrameId = requestAnimationFrame(renderLoop);
+      } else {
+        info.currentProgress = info.targetProgress;
+        loopRunning = false;
+      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    document.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll, { passive: true });
 
     handleScroll();
-    renderLoop();
 
     return () => {
       active = false;
       cancelAnimationFrame(scrollInfoRef.current.animationFrameId);
       window.removeEventListener("scroll", handleScroll);
-      document.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
   }, [isPreloaded]);
@@ -761,15 +1169,72 @@ export default function JuiceScrollDemo() {
 
   return (
     <div data-bs-theme="light" className="bg-white text-black min-vh-100 position-relative" style={{ fontFamily: "'Outfit', var(--font-sans)", overflow: "visible" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
-      
-      <style dangerouslySetInnerHTML={{ __html: `
+      <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
         /* Overrides to ensure CSS position: sticky works perfectly */
         html, body, #id-global-wrapper, main {
           overflow: visible !important;
           overflow-x: visible !important;
           height: auto !important;
         }
+
+        .glass-panel {
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(195, 200, 193, 0.4);
+          box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.04);
+        }
+        .organic-shadow {
+          box-shadow: 0 20px 40px -10px rgba(27, 48, 34, 0.06);
+        }
+        .hover-translate-up {
+          transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+        }
+        .hover-translate-up:hover {
+          transform: translateY(-4px) !important;
+          box-shadow: 0 15px 35px -5px rgba(27, 48, 34, 0.08) !important;
+        }
+        .font-headline-lg-mobile {
+          font-family: 'Playfair Display', serif;
+          font-size: 32px !important;
+          line-height: 40px !important;
+          font-weight: 600 !important;
+        }
+        .font-display-lg {
+          font-family: 'Playfair Display', serif;
+          font-size: 64px !important;
+          line-height: 72px !important;
+          font-weight: 700 !important;
+        }
+        .font-label-caps {
+          font-family: 'Inter', sans-serif;
+          font-size: 12px !important;
+          line-height: 16px !important;
+          letter-spacing: 0.1em !important;
+          font-weight: 600 !important;
+        }
+        .font-headline-md {
+          font-family: 'Playfair Display', serif;
+          font-size: 28px !important;
+          line-height: 36px !important;
+          font-weight: 500 !important;
+        }
+        .font-body-md {
+          font-family: 'Inter', sans-serif;
+          font-size: 16px !important;
+          line-height: 24px !important;
+          font-weight: 400 !important;
+        }
+        .font-body-lg {
+          font-family: 'Inter', sans-serif;
+          font-size: 18px !important;
+          line-height: 28px !important;
+          font-weight: 400 !important;
+        }
+
 
         [data-bs-theme="light"] {
           --bs-body-bg: #ffffff !important;
@@ -1268,13 +1733,13 @@ export default function JuiceScrollDemo() {
       </div>
 
       {/* Sticky Main Header Navigation (Removed to meet request) */}
-      
+
       {/* Giant Hero Scrollable Section (350vh height) */}
       <div ref={containerRef} style={{ height: "350vh", overflow: "visible" }} className="position-relative">
-        
+
         {/* Sticky Viewport */}
         <div className="sticky-viewport-juice">
-          
+
           {/* Brand Title (Top Center) */}
           <div className="position-absolute top-0 start-0 w-100 py-4 d-flex justify-content-center pointer-events-none" style={{ zIndex: 10 }}>
             <h1 className="text-black text-uppercase font-display text-center m-0" style={{ fontSize: "1.65rem", fontWeight: 900, letterSpacing: "0.25em", opacity: 0.95 }}>
@@ -1285,8 +1750,8 @@ export default function JuiceScrollDemo() {
           {/* Background Layers */}
           <div ref={bgLimonRef} className="bg-layer-juice bg-limon">
             {isPreloaded && (
-              <LiquidBackground 
-                imageUrl={isMobile ? limonBgImgMobile.src : limonBgImg.src} 
+              <LiquidBackground
+                imageUrl={isMobile ? limonBgImgMobile.src : limonBgImg.src}
                 metalness={0.7}
                 roughness={0.3}
                 displacementScale={5}
@@ -1295,8 +1760,8 @@ export default function JuiceScrollDemo() {
           </div>
           <div ref={bgNaranjaRef} className="bg-layer-juice bg-naranja">
             {isPreloaded && (
-              <LiquidBackground 
-                imageUrl={isMobile ? naranjaBgImgMobile.src : naranjaBgImg.src} 
+              <LiquidBackground
+                imageUrl={isMobile ? naranjaBgImgMobile.src : naranjaBgImg.src}
                 metalness={0.7}
                 roughness={0.3}
                 displacementScale={5}
@@ -1305,8 +1770,8 @@ export default function JuiceScrollDemo() {
           </div>
           <div ref={bgUvaRef} className="bg-layer-juice bg-uva">
             {isPreloaded && (
-              <LiquidBackground 
-                imageUrl={isMobile ? uvaBgImgMobile.src : uvaBgImg.src} 
+              <LiquidBackground
+                imageUrl={isMobile ? uvaBgImgMobile.src : uvaBgImg.src}
                 metalness={0.7}
                 roughness={0.3}
                 displacementScale={5}
@@ -1336,14 +1801,14 @@ export default function JuiceScrollDemo() {
 
           {/* Central Bottles Layout */}
           <div ref={canvasContainerRef} className="bottles-center-container">
-            
+
             {/* Lemon Juice Bottle */}
             <div ref={bottleLimonRef} className="juice-bottle-wrapper bottle-limon">
               <div className="bottle-inner-floating">
                 <div className="bottle-glow" />
-                <img 
-                  src={limonImg.src} 
-                  alt="Oasis Limón" 
+                <img
+                  src={limonImg.src}
+                  alt="Oasis Limón"
                   className="juice-bottle-img"
                 />
               </div>
@@ -1353,9 +1818,9 @@ export default function JuiceScrollDemo() {
             <div ref={bottleNaranjaRef} className="juice-bottle-wrapper bottle-naranja">
               <div className="bottle-inner-floating">
                 <div className="bottle-glow" />
-                <img 
-                  src={naranjaImg.src} 
-                  alt="Oasis Naranja" 
+                <img
+                  src={naranjaImg.src}
+                  alt="Oasis Naranja"
                   className="juice-bottle-img"
                 />
               </div>
@@ -1365,9 +1830,9 @@ export default function JuiceScrollDemo() {
             <div ref={bottleUvaRef} className="juice-bottle-wrapper bottle-uva">
               <div className="bottle-inner-floating">
                 <div className="bottle-glow" />
-                <img 
-                  src={uvaImg.src} 
-                  alt="Oasis Uva" 
+                <img
+                  src={uvaImg.src}
+                  alt="Oasis Uva"
                   className="juice-bottle-img"
                 />
               </div>
@@ -1379,7 +1844,7 @@ export default function JuiceScrollDemo() {
           <div className="message-overlay-container">
             <div className="container-fluid h-100 px-3 px-lg-5">
               <div className="row h-100 align-items-center">
-                
+
                 {/* Left Column (Stacked Cards) */}
                 <div className="col-12 col-lg-3 position-relative h-100 d-flex align-items-center justify-content-start message-column-left">
                   {/* Lemon Left Text */}
@@ -1475,80 +1940,120 @@ export default function JuiceScrollDemo() {
       </div>
 
       {/* Specs Grid & Booking Section */}
-      <section className="py-5 bg-white border-top border-bottom position-relative" id="comprar" style={{ zIndex: 10 }}>
-        <div className="container-xl px-4 py-5">
-          <div className="row g-5 align-items-center">
-            
-            {/* Left Column: Benefits Specs */}
-            <div className="col-12 col-lg-6">
-              <span className="text-success fw-bold uppercase tracking-wider small d-block mb-2 text-uppercase">El Secreto de Nuestra Calidad</span>
-              <h2 className="display-5 fw-extrabold text-black mb-4 font-display">Bebidas vivas y nutritivas.</h2>
-              
-              <div className="row g-4 mt-2">
-                <div className="col-12 col-sm-6">
-                  <div className="p-4 h-100 specs-card-juice">
-                    <span className="fs-3 mb-2 d-block">❄️</span>
-                    <h4 className="h6 fw-bold text-black mb-2">Cold Pressed (Prensado en frío)</h4>
-                    <p className="small text-secondary mb-0">Evitamos la fricción y el calor de las licuadoras tradicionales para preservar el 100% de las enzimas vivas, vitaminas y minerales de las frutas.</p>
+      <section className="position-relative overflow-hidden py-5 px-2 px-md-4" id="comprar" style={{ zIndex: 10, minHeight: "100vh" }}>
+
+        {/* Atmospheric Background */}
+        <div className="position-absolute top-0 start-0 w-100 h-100 pointer-events-none" style={{ zIndex: 0 }}>
+          <img
+            alt="Atmospheric background image"
+            className="w-100 h-100"
+            style={{ objectFit: "cover", opacity: 0.7 }}
+            src="https://lh3.googleusercontent.com/aida/ADBb0ui-W34_45ae33Iz02Hw0agNvzx8-CtekX3bu_hDatPnMd8O5hmHIdgwYQZMI-I1Bz8E3jLAmtO6ziUgNQhz5OK00UFp9HG8bmh2bH9pfEqXnkTjWoGc4fX8_Xck4BcYpmTEVkXgt_CR9or7LRPONZXaaP1T6o5pgyBv1ptdj_lekMGA_dux4ligj5bNq5P18BLzMFj4rb4LHcd6mQ7OLOHKLWSpmK3MrsijlUH0QElD6woi-LkRVOMSpx7y"
+          />
+          <div
+            className="position-absolute w-100 h-100"
+            style={{
+              top: 0, left: 0,
+              background: "linear-gradient(to bottom, rgba(250, 249, 244, 0.4) 0%, transparent 50%, rgba(250, 249, 244, 0.8) 100%)"
+            }}
+          />
+        </div>
+
+        <div className="container-xl position-relative py-5" style={{ zIndex: 10 }}>
+          <div className="row g-4 g-lg-5 align-items-start">
+
+            {/* Left Column: Quality Section (7 cols) */}
+            <div className="col-12 col-lg-7 d-flex flex-column justify-content-center">
+              <header className="mb-5">
+                <p className="font-label-caps text-on-surface-variant text-uppercase mb-2" style={{ color: "#434843" }}>
+                  EL SECRETO DE NUESTRA CALIDAD
+                </p>
+                <h2 className="fw-bold mb-0 text-black" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "2.5rem", color: "#1b1c19", fontWeight: 800 }}>
+                  Bebidas vivas y nutritivas.
+                </h2>
+              </header>
+
+              <div className="row g-4">
+                {/* Feature 1 */}
+                <div className="col-12 col-md-6">
+                  <div className="glass-panel p-4 rounded-4 hover-translate-up h-100" style={{ borderRadius: "16px" }}>
+                    <div className="rounded-circle flex items-center justify-center mb-4 text-on-primary-container d-flex align-items-center justify-content-center" style={{ width: "48px", height: "48px", backgroundColor: "#efeee9", border: "1px solid rgba(195, 200, 193, 0.3)" }}>
+                      <span className="material-symbols-outlined fs-4" style={{ fontVariationSettings: "'wght' 300", color: "#1b3022" }}>ac_unit</span>
+                    </div>
+                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>Cold Pressed (Prensado en frío)</h3>
+                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>Evitamos la fricción y el calor de las licuadoras tradicionales para preservar el 100% de las enzimas vivas, vitaminas y minerales de las frutas.</p>
                   </div>
                 </div>
-                <div className="col-12 col-sm-6">
-                  <div className="p-4 h-100 specs-card-juice">
-                    <span className="fs-3 mb-2 d-block">🚜</span>
-                    <h4 className="h6 fw-bold text-black mb-2">Agricultura Local</h4>
-                    <p className="small text-secondary mb-0">Apoyamos a agricultores locales que practican la agricultura regenerativa libre de pesticidas químicos. Directo del campo a tu botella.</p>
+
+                {/* Feature 2 */}
+                <div className="col-12 col-md-6">
+                  <div className="glass-panel p-4 rounded-4 hover-translate-up h-100" style={{ borderRadius: "16px" }}>
+                    <div className="rounded-circle flex items-center justify-center mb-4 text-on-primary-container d-flex align-items-center justify-content-center" style={{ width: "48px", height: "48px", backgroundColor: "#efeee9", border: "1px solid rgba(195, 200, 193, 0.3)" }}>
+                      <span className="material-symbols-outlined fs-4" style={{ fontVariationSettings: "'wght' 300", color: "#1b3022" }}>agriculture</span>
+                    </div>
+                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>Agricultura Local</h3>
+                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>Apoyamos a agricultores locales que practican la agricultura regenerativa libre de pesticidas químicos. Directo del campo a tu botella.</p>
                   </div>
                 </div>
-                <div className="col-12 col-sm-6">
-                  <div className="p-4 h-100 specs-card-juice">
-                    <span className="fs-3 mb-2 d-block">🛡️</span>
-                    <h4 className="h6 fw-bold text-black mb-2">Sin Pasteurizar / HPP</h4>
-                    <p className="small text-secondary mb-0">Utilizamos procesamiento por alta presión (HPP) para garantizar la seguridad alimentaria sin someter el jugo a calor, manteniendo el sabor original fresco.</p>
+
+                {/* Feature 3 */}
+                <div className="col-12 col-md-6">
+                  <div className="glass-panel p-4 rounded-4 hover-translate-up h-100" style={{ borderRadius: "16px" }}>
+                    <div className="rounded-circle flex items-center justify-center mb-4 text-on-primary-container d-flex align-items-center justify-content-center" style={{ width: "48px", height: "48px", backgroundColor: "#efeee9", border: "1px solid rgba(195, 200, 193, 0.3)" }}>
+                      <span className="material-symbols-outlined fs-4" style={{ fontVariationSettings: "'wght' 300", color: "#1b3022" }}>health_and_safety</span>
+                    </div>
+                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>Sin Pasteurizar / HPP</h3>
+                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>Utilizamos procesamiento por alta presión (HPP) para garantizar la seguridad alimentaria sin someter el jugo a calor, manteniendo el sabor original fresco.</p>
                   </div>
                 </div>
-                <div className="col-12 col-sm-6">
-                  <div className="p-4 h-100 specs-card-juice">
-                    <span className="fs-3 mb-2 d-block">♻️</span>
-                    <h4 className="h6 fw-bold text-black mb-2">Empaques Biodegradables</h4>
-                    <p className="small text-secondary mb-0">Nuestras botellas están hechas de PET 100% reciclado y son completamente compostables. Cuidamos de tu salud y también de nuestro planeta.</p>
+
+                {/* Feature 4 */}
+                <div className="col-12 col-md-6">
+                  <div className="glass-panel p-4 rounded-4 hover-translate-up h-100" style={{ borderRadius: "16px" }}>
+                    <div className="rounded-circle flex items-center justify-center mb-4 text-on-primary-container d-flex align-items-center justify-content-center" style={{ width: "48px", height: "48px", backgroundColor: "#efeee9", border: "1px solid rgba(195, 200, 193, 0.3)" }}>
+                      <span className="material-symbols-outlined fs-4" style={{ fontVariationSettings: "'wght' 300", color: "#1b3022" }}>recycling</span>
+                    </div>
+                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>Empaques Biodegradables</h3>
+                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>Nuestras botellas están hechas de PET 100% reciclado y son completamente compostables. Cuidamos de tu salud y también de nuestro planeta.</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Pre-order Simulator form */}
-            <div className="col-12 col-lg-5 offset-lg-1">
-              <div className="p-4 p-md-5 position-relative specs-card-juice" style={{ 
-                backgroundColor: "#ffffff", 
-                border: `1px solid ${themeColors.border}`, 
-                borderRadius: "2.25rem",
-                boxShadow: `0 30px 60px ${themeColors.shadow}, 0 4px 15px rgba(0,0,0,0.01)`,
-                transition: "all 0.4s ease"
-              }}>
+            {/* Right Column: Reservation Form (5 cols) */}
+            <div className="col-12 col-lg-5 position-relative mt-5 mt-lg-0">
+              <div className="glass-panel rounded-4 p-4 p-md-5 organic-shadow position-sticky" style={{ top: "120px", borderRadius: "24px" }}>
+
                 {/* Price Badge */}
-                <div className="position-absolute top-0 end-0 translate-middle-y me-4 me-md-5 px-3 py-1.5 rounded-pill text-white fw-bold shadow-sm" style={{
-                  fontSize: "0.85rem",
-                  background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.dark})`,
-                  transition: "all 0.4s ease",
+                <div className="position-absolute font-label-caps px-4 py-2 rounded-pill shadow-sm" style={{
+                  top: "-16px",
+                  right: "32px",
+                  backgroundColor: "#d4e9c4",
+                  color: "#101f09",
+                  border: "1px solid rgba(184, 205, 170, 0.5)",
+                  fontSize: "12px",
+                  fontWeight: 600,
                   zIndex: 15
                 }}>
                   {planPrices.price} / {subscriptionPlan === 'semanal' ? 'semana' : subscriptionPlan === 'quincenal' ? 'quincena' : 'mes'}
                 </div>
 
-                <span className="fw-bold uppercase tracking-wider small d-block mb-1 text-uppercase" style={{ color: themeColors.dark, transition: "color 0.4s ease" }}>Degustación Premium</span>
-                <h3 className="h4 fw-extrabold text-black mb-2 font-display">Reserva tu Experiencia</h3>
-                <p className="small text-secondary mb-4">Garantiza tu suscripción especial con entrega semanal refrigerada directamente desde nuestros huertos locales.</p>
-                
+                <div className="mb-4">
+                  <p className="font-label-caps text-uppercase mb-2" style={{ color: "#819986" }}>DEGUSTACIÓN PREMIUM</p>
+                  <h3 className="fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "1.75rem", color: "#1b1c19", fontWeight: 700 }}>Reserva tu Experiencia</h3>
+                  <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "14px", color: "#434843" }}>Garantiza tu suscripción especial con entrega semanal refrigerada directamente desde nuestros huertos locales.</p>
+                </div>
+
                 {formSubmitted ? (
-                  <div className="p-4 rounded-3 d-flex flex-column align-items-center text-center gap-3" style={{ backgroundColor: "rgba(34, 197, 94, 0.05)", border: "1px solid rgba(34, 197, 94, 0.15)" }}>
+                  <div className="p-4 rounded-4 d-flex flex-column align-items-center text-center gap-3" style={{ backgroundColor: "rgba(34, 197, 94, 0.05)", border: "1px solid rgba(34, 197, 94, 0.15)" }}>
                     <div className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm" style={{ width: "56px", height: "56px", fontSize: "1.5rem" }}>
                       ✓
                     </div>
                     <div>
-                      <h5 className="fw-extrabold text-success mb-1">¡Suscripción Reservada!</h5>
+                      <h5 className="fw-bold text-success mb-1 font-headline-md" style={{ fontSize: "1.25rem" }}>¡Suscripción Reservada!</h5>
                       <p className="small text-secondary mb-0">Hemos registrado tu solicitud de preventa especial con éxito.</p>
                     </div>
-                    
+
                     <div className="w-100 bg-white p-3 rounded-3 text-start border d-flex flex-column gap-2" style={{ fontSize: "0.82rem" }}>
                       <div className="d-flex justify-content-between"><span className="text-muted">Pedido ID:</span><span className="fw-bold text-black font-monospace">#ON-2026-{Math.floor(1000 + Math.random() * 9000)}</span></div>
                       <div className="d-flex justify-content-between"><span className="text-muted">Frecuencia:</span><span className="fw-bold text-black text-capitalize">{subscriptionPlan}</span></div>
@@ -1560,9 +2065,9 @@ export default function JuiceScrollDemo() {
                         <span>Próximo Martes (Refrigerado)</span>
                       </div>
                     </div>
-                    
-                    <button 
-                      type="button" 
+
+                    <button
+                      type="button"
                       onClick={() => setFormSubmitted(false)}
                       className="btn btn-sm btn-outline-secondary rounded-pill px-4 mt-1"
                       style={{ fontSize: "0.8rem" }}
@@ -1571,253 +2076,196 @@ export default function JuiceScrollDemo() {
                     </button>
                   </div>
                 ) : (
-                  <form onSubmit={handleBookingSubmit} className="d-flex flex-column gap-3">
-                    
-                    {/* Flavor Selection Cards */}
-                    <div className="mb-1">
-                      <label className="form-label small fw-bold text-black mb-2">1. Selecciona tu sabor inicial</label>
+                  <form onSubmit={handleBookingSubmit} className="d-flex flex-column gap-4">
+
+                    {/* Flavour Selection */}
+                    <fieldset className="border-0 p-0 m-0">
+                      <legend className="font-body-md text-black fw-semibold mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>1. Selecciona tu sabor inicial</legend>
                       <div className="row g-2">
-                        
-                        <div className="col-4">
-                          <div 
-                            className={`text-center p-2.5 h-100 d-flex flex-column align-items-center justify-content-center gap-1.5`}
-                            style={{ 
-                              background: "#ffffff", 
-                              border: selectedFlavor === 'limon' ? `2px solid #8ade28` : '1px solid #eef2e7',
-                              boxShadow: selectedFlavor === 'limon' ? '0 8px 15px rgba(138, 222, 40, 0.15)' : 'none',
-                              borderRadius: "1.25rem",
-                              cursor: "pointer",
-                              transition: "all 0.3s ease"
-                            }}
-                            onClick={() => setSelectedFlavor("limon")}
-                          >
-                            <span className="fs-3">🍋</span>
-                            <span className="fw-bold d-block" style={{ fontSize: "0.78rem", color: selectedFlavor === 'limon' ? '#3e6302' : '#6c757d' }}>Limón</span>
-                            <span className="text-muted d-block" style={{ fontSize: "0.58rem" }}>Eureka+Menta</span>
-                          </div>
-                        </div>
-
-                        <div className="col-4">
-                          <div 
-                            className={`text-center p-2.5 h-100 d-flex flex-column align-items-center justify-content-center gap-1.5`}
-                            style={{ 
-                              background: "#ffffff", 
-                              border: selectedFlavor === 'naranja' ? '2px solid #ff7c33' : '1px solid #eef2e7',
-                              boxShadow: selectedFlavor === 'naranja' ? '0 8px 15px rgba(255, 124, 51, 0.15)' : 'none',
-                              borderRadius: "1.25rem",
-                              cursor: "pointer",
-                              transition: "all 0.3s ease"
-                            }}
-                            onClick={() => setSelectedFlavor("naranja")}
-                          >
-                            <span className="fs-3">🍊</span>
-                            <span className="fw-bold d-block" style={{ fontSize: "0.78rem", color: selectedFlavor === 'naranja' ? '#a84203' : '#6c757d' }}>Naranja</span>
-                            <span className="text-muted d-block" style={{ fontSize: "0.58rem" }}>Valencia+Mand.</span>
-                          </div>
-                        </div>
-
-                        <div className="col-4">
-                          <div 
-                            className={`text-center p-2.5 h-100 d-flex flex-column align-items-center justify-content-center gap-1.5`}
-                            style={{ 
-                              background: "#ffffff", 
-                              border: selectedFlavor === 'uva' ? '2px solid #a275e3' : '1px solid #eef2e7',
-                              boxShadow: selectedFlavor === 'uva' ? '0 8px 15px rgba(162, 117, 227, 0.15)' : 'none',
-                              borderRadius: "1.25rem",
-                              cursor: "pointer",
-                              transition: "all 0.3s ease"
-                            }}
-                            onClick={() => setSelectedFlavor("uva")}
-                          >
-                            <span className="fs-3">🍇</span>
-                            <span className="fw-bold d-block" style={{ fontSize: "0.78rem", color: selectedFlavor === 'uva' ? '#4e199c' : '#6c757d' }}>Uva</span>
-                            <span className="text-muted d-block" style={{ fontSize: "0.58rem" }}>Isabela+Aránd.</span>
-                          </div>
-                        </div>
-
+                        {[
+                          { id: "limon", emoji: "🍋", label: "Limón", desc: "Eureka+Menta" },
+                          { id: "naranja", emoji: "🍊", label: "Naranja", desc: "Valencia+Mand." },
+                          { id: "uva", emoji: "🍇", label: "Uva", desc: "Isabela+Aránd." }
+                        ].map((item) => {
+                          const isChecked = selectedFlavor === item.id;
+                          return (
+                            <div key={item.id} className="col-4">
+                              <div
+                                onClick={() => setSelectedFlavor(item.id)}
+                                className="p-3 text-center border rounded-3 cursor-pointer d-flex flex-column align-items-center justify-content-center h-100"
+                                style={{
+                                  backgroundColor: isChecked ? "rgba(212, 233, 196, 0.3)" : "#faf9f4",
+                                  borderColor: isChecked ? "#1b3022" : "rgba(195, 200, 193, 0.4)",
+                                  borderWidth: isChecked ? "2px" : "1px",
+                                  transition: "all 0.3s ease",
+                                  borderRadius: "12px"
+                                }}
+                              >
+                                <span className="fs-3 mb-2">{item.emoji}</span>
+                                <span className="font-body-md fw-bold d-block text-black" style={{ fontSize: "14px", color: "#1b1c19" }}>{item.label}</span>
+                                <span className="font-body-md text-on-surface-variant d-block leading-tight" style={{ fontSize: "11px", color: "#434843" }}>{item.desc}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    </div>
+                    </fieldset>
 
-                    {/* Subscription Plan Cards */}
-                    <div className="mb-1">
-                      <label className="form-label small fw-bold text-black mb-2">2. Frecuencia de entrega</label>
+                    {/* Frequency Selection */}
+                    <fieldset className="border-0 p-0 m-0">
+                      <legend className="font-body-md text-black fw-semibold mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>2. Frecuencia de entrega</legend>
                       <div className="row g-2">
-                        
-                        <div className="col-4">
-                          <button
-                            type="button"
-                            onClick={() => setSubscriptionPlan("semanal")}
-                            className="btn w-100 p-2.5 d-flex flex-column align-items-center justify-content-center border"
-                            style={{
-                              border: subscriptionPlan === 'semanal' ? `2px solid ${themeColors.dark}` : '1px solid #eef2e7',
-                              background: subscriptionPlan === 'semanal' ? themeColors.bgLight : '#ffffff',
-                              borderRadius: "0.95rem",
-                              transition: "all 0.25s ease"
-                            }}
-                          >
-                            <span className="fw-bold" style={{ fontSize: "0.8rem", color: subscriptionPlan === 'semanal' ? themeColors.text : '#4a5568' }}>Semanal</span>
-                            <span className="text-muted" style={{ fontSize: "0.62rem" }}>$39.99/mes</span>
-                          </button>
+                        {[
+                          { id: "semanal", label: "Semanal", price: "$39.99/mes" },
+                          { id: "quincenal", label: "Quincenal", price: "$29.99/mes" },
+                          { id: "mensual", label: "Mensual", price: "$19.99/mes" }
+                        ].map((item) => {
+                          const isChecked = subscriptionPlan === item.id;
+                          return (
+                            <div key={item.id} className="col-4">
+                              <div
+                                onClick={() => setSubscriptionPlan(item.id)}
+                                className="p-3 text-center border rounded-3 cursor-pointer d-flex flex-column align-items-center justify-content-center h-100"
+                                style={{
+                                  backgroundColor: isChecked ? "rgba(212, 233, 196, 0.3)" : "#faf9f4",
+                                  borderColor: isChecked ? "#1b3022" : "rgba(195, 200, 193, 0.4)",
+                                  borderWidth: isChecked ? "2px" : "1px",
+                                  transition: "all 0.3s ease",
+                                  borderRadius: "12px"
+                                }}
+                              >
+                                <span className="font-body-md fw-bold d-block text-black" style={{ fontSize: "13px", color: "#1b1c19" }}>{item.label}</span>
+                                <span className="font-body-md text-on-surface-variant d-block" style={{ fontSize: "11px", color: "#434843" }}>{item.price}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Included Benefits Box */}
+                      <div className="mt-4 p-4 rounded-3 border" style={{ backgroundColor: "#f5f4ef", borderColor: "rgba(195, 200, 193, 0.2)" }}>
+                        <div className="d-flex align-items-center gap-2 mb-2" style={{ color: "#819986" }}>
+                          <span className="material-symbols-outlined text-[18px]">bolt</span>
+                          <span className="font-body-md fw-semibold" style={{ fontSize: "14px" }}>Incluido en tu Plan:</span>
                         </div>
+                        <ul className="list-unstyled space-y-2 font-body-md m-0 d-flex flex-column gap-2 text-on-surface-variant" style={{ fontSize: "14px", color: "#434843" }}>
+                          <li className="d-flex align-items-start gap-2">
+                            <span className="material-symbols-outlined fs-6 text-success" style={{ fontWeight: "bold" }}>check</span>
+                            <span>{planPrices.desc}</span>
+                          </li>
+                          <li className="d-flex align-items-start gap-2">
+                            <span className="material-symbols-outlined fs-6 text-success" style={{ fontWeight: "bold" }}>check</span>
+                            <span>Envío express refrigerado sin costo adicional</span>
+                          </li>
+                          <li className="d-flex align-items-start gap-2">
+                            <span className="material-symbols-outlined fs-6 text-success" style={{ fontWeight: "bold" }}>check</span>
+                            <span>Regalo: Botella térmica de acero inoxidable Oasis</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </fieldset>
 
-                        <div className="col-4">
-                          <button
-                            type="button"
-                            onClick={() => setSubscriptionPlan("quincenal")}
-                            className="btn w-100 p-2.5 d-flex flex-column align-items-center justify-content-center border"
+                    {/* User Info */}
+                    <div className="d-flex flex-column gap-3">
+                      <div>
+                        <label className="font-body-md fw-semibold text-black mb-2 d-block" htmlFor="fullName" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>3. Nombre Completo</label>
+                        <div className="position-relative">
+                          <div className="position-absolute start-0 top-50 translate-middle-y ps-3 text-secondary pointer-events-none d-flex align-items-center" style={{ color: "#434843" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>person</span>
+                          </div>
+                          <input
+                            type="text"
+                            id="fullName"
+                            placeholder="Ej. Alejandra Gómez"
+                            className="w-100 py-3 bg-white font-body-md text-black"
+                            required
                             style={{
-                              border: subscriptionPlan === 'quincenal' ? `2px solid ${themeColors.dark}` : '1px solid #eef2e7',
-                              background: subscriptionPlan === 'quincenal' ? themeColors.bgLight : '#ffffff',
-                              borderRadius: "0.95rem",
-                              transition: "all 0.25s ease"
+                              paddingLeft: "44px",
+                              paddingRight: "16px",
+                              border: "1px solid rgba(195, 200, 193, 0.5)",
+                              borderRadius: "12px",
+                              fontSize: "16px",
+                              outline: "none",
+                              backgroundColor: "#faf9f4",
+                              color: "#1b1c19",
+                              transition: "box-shadow 0.2s ease"
                             }}
-                          >
-                            <span className="fw-bold" style={{ fontSize: "0.8rem", color: subscriptionPlan === 'quincenal' ? themeColors.text : '#4a5568' }}>Quincenal</span>
-                            <span className="text-muted" style={{ fontSize: "0.62rem" }}>$29.99/mes</span>
-                          </button>
+                            onFocus={(e) => {
+                              e.target.style.boxShadow = "0 0 0 1px #1b3022";
+                              e.target.style.borderColor = "#1b3022";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.boxShadow = "none";
+                              e.target.style.borderColor = "rgba(195, 200, 193, 0.5)";
+                            }}
+                          />
                         </div>
+                      </div>
 
-                        <div className="col-4">
-                          <button
-                            type="button"
-                            onClick={() => setSubscriptionPlan("mensual")}
-                            className="btn w-100 p-2.5 d-flex flex-column align-items-center justify-content-center border"
+                      <div>
+                        <label className="font-body-md fw-semibold text-black mb-2 d-block" htmlFor="email" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>4. Correo Electrónico</label>
+                        <div className="position-relative">
+                          <div className="position-absolute start-0 top-50 translate-middle-y ps-3 text-secondary pointer-events-none d-flex align-items-center" style={{ color: "#434843" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>mail</span>
+                          </div>
+                          <input
+                            type="email"
+                            id="email"
+                            placeholder="ejemplo@correo.com"
+                            className="w-100 py-3 bg-white font-body-md text-black"
+                            required
                             style={{
-                              border: subscriptionPlan === 'mensual' ? `2px solid ${themeColors.dark}` : '1px solid #eef2e7',
-                              background: subscriptionPlan === 'mensual' ? themeColors.bgLight : '#ffffff',
-                              borderRadius: "0.95rem",
-                              transition: "all 0.25s ease"
+                              paddingLeft: "44px",
+                              paddingRight: "16px",
+                              border: "1px solid rgba(195, 200, 193, 0.5)",
+                              borderRadius: "12px",
+                              fontSize: "16px",
+                              outline: "none",
+                              backgroundColor: "#faf9f4",
+                              color: "#1b1c19",
+                              transition: "box-shadow 0.2s ease"
                             }}
-                          >
-                            <span className="fw-bold" style={{ fontSize: "0.8rem", color: subscriptionPlan === 'mensual' ? themeColors.text : '#4a5568' }}>Mensual</span>
-                            <span className="text-muted" style={{ fontSize: "0.62rem" }}>$19.99/mes</span>
-                          </button>
+                            onFocus={(e) => {
+                              e.target.style.boxShadow = "0 0 0 1px #1b3022";
+                              e.target.style.borderColor = "#1b3022";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.boxShadow = "none";
+                              e.target.style.borderColor = "rgba(195, 200, 193, 0.5)";
+                            }}
+                          />
                         </div>
-
                       </div>
                     </div>
 
-                    {/* Included Plan Info */}
-                    <div className="bg-light p-3 rounded-3 mb-1" style={{ border: "1px solid #f1f5f9" }}>
-                      <div className="d-flex align-items-center gap-2 mb-1.5">
-                        <span style={{ color: themeColors.dark, fontSize: "0.82rem", transition: "color 0.4s ease" }} className="fw-bold">⚡ Incluido en tu Plan:</span>
-                      </div>
-                      <ul className="list-unstyled m-0 d-flex flex-column gap-1" style={{ fontSize: "0.78rem" }}>
-                        <li className="d-flex align-items-center gap-2 text-secondary">
-                          <span className="text-success fw-bold">✓</span> {planPrices.desc}
-                        </li>
-                        <li className="d-flex align-items-center gap-2 text-secondary">
-                          <span className="text-success fw-bold">✓</span> Envío express refrigerado sin costo adicional
-                        </li>
-                        <li className="d-flex align-items-center gap-2 text-secondary">
-                          <span className="text-success fw-bold">✓</span> Regalo: Botella térmica de acero inoxidable Oasis
-                        </li>
-                      </ul>
-                    </div>
-
-                    {/* Personal Information */}
-                    <div>
-                      <label className="form-label small fw-bold text-black" htmlFor="juice-client-name">3. Nombre Completo</label>
-                      <div className="input-group">
-                        <span 
-                          className="input-group-text bg-white text-muted" 
-                          style={{ 
-                            borderTopLeftRadius: "1rem", 
-                            borderBottomLeftRadius: "1rem", 
-                            border: nameFocused ? `1px solid ${themeColors.dark}` : "1px solid #eef2e7",
-                            borderRight: "none",
-                            transition: "all 0.2s ease" 
-                          }}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-person-fill" viewBox="0 0 16 16">
-                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
-                          </svg>
-                        </span>
-                        <input 
-                          type="text" 
-                          id="juice-client-name" 
-                          className="form-control" 
-                          placeholder="Ej. Alejandra Gómez" 
-                          required 
-                          onFocus={() => setNameFocused(true)}
-                          onBlur={() => setNameFocused(false)}
-                          style={{ 
-                            borderTopRightRadius: "1rem", 
-                            borderBottomRightRadius: "1rem", 
-                            border: nameFocused ? `1px solid ${themeColors.dark}` : "1px solid #eef2e7", 
-                            borderLeft: "none",
-                            boxShadow: nameFocused ? `0 0 0 3px ${themeColors.shadow}` : "none",
-                            padding: "0.85rem 1rem",
-                            fontSize: "0.92rem",
-                            fontWeight: 500,
-                            transition: "all 0.2s ease"
-                          }} 
-                        />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="form-label small fw-bold text-black" htmlFor="juice-client-email">4. Correo Electrónico</label>
-                      <div className="input-group">
-                        <span 
-                          className="input-group-text bg-white text-muted" 
-                          style={{ 
-                            borderTopLeftRadius: "1rem", 
-                            borderBottomLeftRadius: "1rem", 
-                            border: emailFocused ? `1px solid ${themeColors.dark}` : "1px solid #eef2e7",
-                            borderRight: "none",
-                            transition: "all 0.2s ease" 
-                          }}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-envelope-fill" viewBox="0 0 16 16">
-                            <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zM15 11.801V4.697l-5.803 3.546z"/>
-                          </svg>
-                        </span>
-                        <input 
-                          type="email" 
-                          id="juice-client-email" 
-                          className="form-control" 
-                          placeholder="ejemplo@correo.com" 
-                          required 
-                          onFocus={() => setEmailFocused(true)}
-                          onBlur={() => setEmailFocused(false)}
-                          style={{ 
-                            borderTopRightRadius: "1rem", 
-                            borderBottomRightRadius: "1rem", 
-                            border: emailFocused ? `1px solid ${themeColors.dark}` : "1px solid #eef2e7", 
-                            borderLeft: "none",
-                            boxShadow: emailFocused ? `0 0 0 3px ${themeColors.shadow}` : "none",
-                            padding: "0.85rem 1rem",
-                            fontSize: "0.92rem",
-                            fontWeight: 500,
-                            transition: "all 0.2s ease"
-                          }} 
-                        />
-                      </div>
-                    </div>
-                    
-                    <button 
-                      type="submit" 
-                      className="btn w-100 py-3 mt-2 fw-bold text-white border-0 shadow-sm" 
-                      style={{ 
-                        background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.dark})`,
-                        borderRadius: "50px",
+                    {/* Submit Button */}
+                    <button
+                      type="submit"
+                      className="w-100 text-white py-3 font-body-md fw-medium shadow-md border-0 d-flex align-items-center justify-content-center gap-2"
+                      style={{
+                        backgroundColor: "#1b3022",
                         transition: "all 0.3s ease",
-                        boxShadow: `0 8px 20px ${themeColors.shadow}`
+                        cursor: "pointer",
+                        borderRadius: "12px"
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "translateY(-2px) scale(1.01)";
-                        e.currentTarget.style.boxShadow = `0 12px 25px ${themeColors.shadow}`;
+                        e.currentTarget.style.backgroundColor = "#1f3017";
+                        const arrow = e.currentTarget.querySelector('.arrow-icon') as HTMLElement;
+                        if (arrow) arrow.style.transform = "translateX(4px)";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "none";
-                        e.currentTarget.style.boxShadow = `0 8px 20px ${themeColors.shadow}`;
+                        e.currentTarget.style.backgroundColor = "#1b3022";
+                        const arrow = e.currentTarget.querySelector('.arrow-icon') as HTMLElement;
+                        if (arrow) arrow.style.transform = "translateX(0px)";
                       }}
                     >
                       Completar Pre-Reserva
+                      <span className="material-symbols-outlined arrow-icon" style={{ fontSize: "20px", transition: "transform 0.3s ease" }}>arrow_forward</span>
                     </button>
+
                   </form>
                 )}
+
               </div>
             </div>
 
