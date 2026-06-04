@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslation, useLanguage } from "@/context/LanguageContext";
 
 export default function WhyUsPage() {
+  const t = useTranslation();
+  const { language } = useLanguage();
   const [animateProgress, setAnimateProgress] = useState(false);
 
   useEffect(() => {
@@ -73,12 +76,16 @@ export default function WhyUsPage() {
           <div className="row align-items-center g-5 text-center text-lg-start">
             {/* Left side: Heading */}
             <div className="col-12 col-lg-7 d-flex flex-column gap-3">
-              <span className="text-info text-sm font-bold uppercase tracking-wider">Nuestra Filosofía</span>
+              <span className="text-info text-sm font-bold uppercase tracking-wider">{t.whyUs.tag}</span>
               <h1 className="display-4 fw-bold text-body mt-2 leading-tight">
-                Más que diseño, <br /><span className="text-gradient">Creamos Resultados</span>
+                {language === "es" ? (
+                  <>Más que diseño, <br /><span className="text-gradient">Creamos Resultados</span></>
+                ) : (
+                  <>More than design, <br /><span className="text-gradient">We Create Results</span></>
+                )}
               </h1>
               <p className="lead text-secondary mt-3 max-w-lg mx-auto mx-lg-0 leading-relaxed font-medium">
-                En ImperioDev, no solo construimos páginas web, construimos herramientas para el crecimiento de tu negocio. Tu éxito es nuestra métrica principal.
+                {t.whyUs.subtitle}
               </p>
               <div className="mt-4 d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
                 <Link 
@@ -86,7 +93,7 @@ export default function WhyUsPage() {
                   className="btn btn-info text-white font-bold px-4 py-3 rounded-3 hover-grow-btn shadow-sm"
                   style={{ background: "#14b8a6", borderColor: "#14b8a6" }}
                 >
-                  Comenzar Ahora
+                  {t.whyUs.btnStart}
                 </Link>
               </div>
             </div>
@@ -95,14 +102,14 @@ export default function WhyUsPage() {
             <div className="col-12 col-lg-5">
               <div className="glass-panel p-4 p-md-5 border border-info border-opacity-25 shadow-lg">
                 <h3 className="h5 fw-bold text-body mb-4 d-flex align-items-center justify-content-center justify-content-lg-start gap-2">
-                  <i className="bi bi-graph-up-arrow text-info"></i> Impacto Digital
+                  <i className="bi bi-graph-up-arrow text-info"></i> {t.whyUs.impactTitle}
                 </h3>
                 
                 <div className="d-flex flex-column gap-4">
                   {/* Metric 1 */}
                   <div>
                     <div className="d-flex justify-content-between text-sm mb-2 text-secondary fw-bold">
-                      <span>Velocidad de Carga</span>
+                      <span>{t.whyUs.metricLoad}</span>
                       <span className="text-info">99%</span>
                     </div>
                     <div className="inner-panel rounded-pill overflow-hidden border-0" style={{ height: "10px" }}>
@@ -116,7 +123,7 @@ export default function WhyUsPage() {
                   {/* Metric 2 */}
                   <div>
                     <div className="d-flex justify-content-between text-sm mb-2 text-secondary fw-bold">
-                      <span>Optimización SEO</span>
+                      <span>{t.whyUs.metricSeo}</span>
                       <span className="text-primary">100%</span>
                     </div>
                     <div className="inner-panel rounded-pill overflow-hidden border-0" style={{ height: "10px" }}>
@@ -130,7 +137,7 @@ export default function WhyUsPage() {
                   {/* Metric 3 */}
                   <div>
                     <div className="d-flex justify-content-between text-sm mb-2 text-secondary fw-bold">
-                      <span>Satisfacción Cliente</span>
+                      <span>{t.whyUs.metricSatisf}</span>
                       <span className="text-purple-600 dark:text-purple-400">5.0 / 5</span>
                     </div>
                     <div className="inner-panel rounded-pill overflow-hidden border-0" style={{ height: "10px" }}>
@@ -151,8 +158,8 @@ export default function WhyUsPage() {
       <section className="py-5 my-5">
         <div className="container-xl px-4">
           <div className="text-center mb-5 max-w-2xl mx-auto">
-            <h2 className="display-5 font-display fw-bold text-body mb-3">¿Qué nos hace diferentes?</h2>
-            <p className="text-secondary font-medium">No somos otra agencia más. Somos tu socio tecnológico estratégico.</p>
+            <h2 className="display-5 font-display fw-bold text-body mb-3">{t.whyUs.differentTitle}</h2>
+            <p className="text-secondary font-medium">{t.whyUs.differentSubtitle}</p>
           </div>
 
           <div className="row g-4 pt-3">
@@ -165,9 +172,9 @@ export default function WhyUsPage() {
                 >
                   <i className="bi bi-brush fs-4"></i>
                 </div>
-                <h3 className="h5 fw-bold text-body mb-3">Diseño Personalizado</h3>
+                <h3 className="h5 fw-bold text-body mb-3">{t.whyUs.feat1Title}</h3>
                 <p className="text-secondary small leading-relaxed font-medium m-0">
-                  No usamos plantillas genéricas o aburridas. Diseñamos desde cero adaptándonos por completo a la identidad visual de tu marca.
+                  {t.whyUs.feat1Desc}
                 </p>
               </div>
             </div>
@@ -181,9 +188,9 @@ export default function WhyUsPage() {
                 >
                   <i className="bi bi-hand-index-thumb fs-4"></i>
                 </div>
-                <h3 className="h5 fw-bold text-body mb-3">Experiencia UX</h3>
+                <h3 className="h5 fw-bold text-body mb-3">{t.whyUs.feat2Title}</h3>
                 <p className="text-secondary small leading-relaxed font-medium m-0">
-                  Diseñamos pensando en el usuario final. Estructuras intuitivas y amigables que aumentan drásticamente tu tasa de conversión.
+                  {t.whyUs.feat2Desc}
                 </p>
               </div>
             </div>
@@ -197,9 +204,9 @@ export default function WhyUsPage() {
                 >
                   <i className="bi bi-search fs-4" style={{ color: "#a855f7" }}></i>
                 </div>
-                <h3 className="h5 fw-bold text-body mb-3">SEO Optimizado</h3>
+                <h3 className="h5 fw-bold text-body mb-3">{t.whyUs.feat3Title}</h3>
                 <p className="text-secondary small leading-relaxed font-medium m-0">
-                  Integramos las mejores prácticas de optimización en motores de búsqueda desde el primer día para que tus clientes te encuentren rápido.
+                  {t.whyUs.feat3Desc}
                 </p>
               </div>
             </div>
@@ -213,9 +220,9 @@ export default function WhyUsPage() {
                 >
                   <i className="bi bi-phone fs-4"></i>
                 </div>
-                <h3 className="h5 fw-bold text-body mb-3">Diseño Responsive</h3>
+                <h3 className="h5 fw-bold text-body mb-3">{t.whyUs.feat4Title}</h3>
                 <p className="text-secondary small leading-relaxed font-medium m-0">
-                  Tu sitio se adaptará de forma perfecta a cualquier resolución de pantalla: smartphones, tablets, laptops y pantallas 4K.
+                  {t.whyUs.feat4Desc}
                 </p>
               </div>
             </div>
@@ -229,9 +236,9 @@ export default function WhyUsPage() {
                 >
                   <i className="bi bi-lightning-charge fs-4"></i>
                 </div>
-                <h3 className="h5 fw-bold text-body mb-3">Rápido y Seguro</h3>
+                <h3 className="h5 fw-bold text-body mb-3">{t.whyUs.feat5Title}</h3>
                 <p className="text-secondary small leading-relaxed font-medium m-0">
-                  Velocidad de carga súper optimizada y configuración de seguridad avanzada (SSL) para la máxima seguridad.
+                  {t.whyUs.feat5Desc}
                 </p>
               </div>
             </div>
@@ -245,9 +252,9 @@ export default function WhyUsPage() {
                 >
                   <i className="bi bi-headset fs-4"></i>
                 </div>
-                <h3 className="h5 fw-bold text-body mb-3">Soporte Continuo</h3>
+                <h3 className="h5 fw-bold text-body mb-3">{t.whyUs.feat6Title}</h3>
                 <p className="text-secondary small leading-relaxed font-medium m-0">
-                  No te dejamos solo tras la entrega. Te brindamos soporte, mantenimiento y asesorías continuas para optimizar tu presencia.
+                  {t.whyUs.feat6Desc}
                 </p>
               </div>
             </div>
@@ -261,9 +268,9 @@ export default function WhyUsPage() {
                 >
                   <i className="bi bi-tags fs-4"></i>
                 </div>
-                <h3 className="h5 fw-bold text-body mb-3">Precios Competitivos y Claros</h3>
+                <h3 className="h5 fw-bold text-body mb-3">{t.whyUs.feat7Title}</h3>
                 <p className="text-secondary small leading-relaxed font-medium m-0">
-                  Creemos que una web de alto nivel no tiene que ser impagable. Ofrecemos paquetes personalizados y flexibles que se ajustan a tu presupuesto, sin cuotas sorpresa ni costos ocultos.
+                  {t.whyUs.feat7Desc}
                 </p>
               </div>
             </div>
@@ -280,14 +287,14 @@ export default function WhyUsPage() {
         ></div>
         
         <div className="container-xl px-4 text-center py-4 z-10 position-relative">
-          <h2 className="display-5 font-display fw-bold mb-4">Tu éxito es nuestro éxito</h2>
+          <h2 className="display-5 font-display fw-bold mb-4">{t.whyUs.ctaTitle}</h2>
           <p className="lead text-secondary mb-5 max-w-xl mx-auto font-medium">
-            Ya sea que necesites una página informativa, una tienda en línea compleja o una plataforma web avanzada, estamos listos para arrancar.
+            {t.whyUs.ctaSubtitle}
           </p>
           
           <div className="max-w-md mx-auto p-4 p-md-5 rounded-4 shadow-lg border glass-panel">
             <p className="text-secondary mb-4 small fw-bold">
-              Contáctanos directamente por WhatsApp para una atención inmediata.
+              {t.whyUs.ctaBoxTitle}
             </p>
             
             <a 
@@ -296,10 +303,10 @@ export default function WhyUsPage() {
               rel="noopener noreferrer"
               className="btn-whatsapp-cta"
             >
-              <i className="bi bi-whatsapp"></i> Solicitar Cotización Gratis
+              <i className="bi bi-whatsapp"></i> {t.whyUs.ctaBtn}
             </a>
             
-            <p className="text-muted small mt-3 mb-0">Sin compromiso. Respondemos en menos de 2 horas.</p>
+            <p className="text-muted small mt-3 mb-0">{t.whyUs.ctaBoxNote}</p>
           </div>
         </div>
       </section>

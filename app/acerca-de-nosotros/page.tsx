@@ -2,8 +2,12 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useTranslation, useLanguage } from "@/context/LanguageContext";
 
 export default function AboutUsPage() {
+  const t = useTranslation();
+  const { language } = useLanguage();
+
   useEffect(() => {
     // Scroll Reveal Animation
     const revealElements = document.querySelectorAll(".reveal");
@@ -134,12 +138,16 @@ export default function AboutUsPage() {
         ></div>
 
         <div className="container-xl px-4 text-center position-relative z-10 reveal active py-5">
-          <span className="text-info font-bold tracking-widest text-uppercase small mb-3 d-block">Sobre Nosotros</span>
+          <span className="text-info font-bold tracking-widest text-uppercase small mb-3 d-block">{t.about.tag}</span>
           <h1 className="display-4 fw-bold leading-tight text-body mb-4">
-            Construyendo el <br /><span className="text-gradient">Imperio Digital</span> de Tu Negocio
+            {language === "es" ? (
+              <>Construyendo el <br /><span className="text-gradient">Imperio Digital</span> de Tu Negocio</>
+            ) : (
+              <>Building the <br /><span className="text-gradient">Digital Empire</span> of Your Business</>
+            )}
           </h1>
           <p className="lead text-secondary max-w-2xl mx-auto font-medium">
-            En ImperioDev, no solo creamos páginas web, construimos experiencias digitales que transforman negocios. Somos un equipo apasionado de diseñadores, desarrolladores y estrategas digitales.
+            {t.about.subtitle}
           </p>
         </div>
       </header>
@@ -156,9 +164,9 @@ export default function AboutUsPage() {
                 >
                   <i className="bi bi-rocket-takeoff-fill"></i>
                 </div>
-                <h2 className="h3 fw-bold text-body mb-3 font-display">Nuestra Misión</h2>
+                <h2 className="h3 fw-bold text-body mb-3 font-display">{t.about.misionTitle}</h2>
                 <p className="text-secondary font-medium m-0">
-                  Convertir tus ideas en soluciones digitales innovadoras, estéticas y altamente funcionales que impulsen tu éxito comercial.
+                  {t.about.misionDesc}
                 </p>
               </div>
             </div>
@@ -171,9 +179,9 @@ export default function AboutUsPage() {
                 >
                   <i className="bi bi-eye-fill"></i>
                 </div>
-                <h2 className="h3 fw-bold text-body mb-3 font-display">Nuestra Visión</h2>
+                <h2 className="h3 fw-bold text-body mb-3 font-display">{t.about.visionTitle}</h2>
                 <p className="text-secondary font-medium m-0">
-                  Ser el socio tecnológico estratégico preferido para los emprendedores y empresas que buscan liderar y dominar su nicho de mercado.
+                  {t.about.visionDesc}
                 </p>
               </div>
             </div>
@@ -184,7 +192,7 @@ export default function AboutUsPage() {
       {/* Creative Team Section */}
       <section className="py-5 bg-transparent border-top border-bottom">
         <div className="container-xl px-4 py-5 text-center">
-          <h2 className="display-5 font-display fw-bold mb-5 text-body reveal">Mentes Creativas</h2>
+          <h2 className="display-5 font-display fw-bold mb-5 text-body reveal">{t.about.teamTitle}</h2>
           <div className="row g-5 justify-content-center">
             
             {/* Founder 1 */}
@@ -209,6 +217,7 @@ export default function AboutUsPage() {
                   rel="noopener noreferrer"
                   className="btn btn-light rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm border"
                   style={{ width: "40px", height: "40px" }}
+                  title="Instagram"
                 >
                   <i className="bi bi-instagram fs-5"></i>
                 </a>
@@ -218,6 +227,7 @@ export default function AboutUsPage() {
                   rel="noopener noreferrer"
                   className="btn btn-light rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm border"
                   style={{ width: "40px", height: "40px" }}
+                  title="LinkedIn"
                 >
                   <i className="bi bi-linkedin fs-5"></i>
                 </a>
@@ -246,6 +256,7 @@ export default function AboutUsPage() {
                   rel="noopener noreferrer"
                   className="btn btn-light rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm border"
                   style={{ width: "40px", height: "40px" }}
+                  title="Instagram"
                 >
                   <i className="bi bi-instagram fs-5"></i>
                 </a>
@@ -255,6 +266,7 @@ export default function AboutUsPage() {
                   rel="noopener noreferrer"
                   className="btn btn-light rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm border"
                   style={{ width: "40px", height: "40px" }}
+                  title="LinkedIn"
                 >
                   <i className="bi bi-linkedin fs-5"></i>
                 </a>
@@ -272,14 +284,14 @@ export default function AboutUsPage() {
           style={{ width: "300px", height: "300px", top: "0", left: "calc(50% - 150px)", filter: "blur(100px)", zIndex: -1 }}
         ></div>
         <div className="container-xl px-4 text-center reveal py-4">
-          <h2 className="display-5 font-display fw-bold mb-4">Empecemos a construir</h2>
+          <h2 className="display-5 font-display fw-bold mb-4">{t.about.ctaTitle}</h2>
           <p className="lead text-secondary mb-5 max-w-xl mx-auto font-medium">
-            ¿Tienes una idea? Nosotros tenemos las herramientas y el conocimiento para hacerla realidad.
+            {t.about.ctaSubtitle}
           </p>
           
           <div className="max-w-md mx-auto p-4 p-md-5 rounded-4 shadow-lg border glass-panel">
             <p className="text-secondary mb-4 small fw-bold">
-              Contáctanos directamente por WhatsApp para una atención inmediata.
+              {t.about.ctaBoxTitle}
             </p>
             
             <a 
@@ -288,10 +300,10 @@ export default function AboutUsPage() {
               rel="noopener noreferrer"
               className="btn-whatsapp-cta"
             >
-              <i className="bi bi-whatsapp"></i> Solicitar Cotización Gratis
+              <i className="bi bi-whatsapp"></i> {t.about.ctaBtn}
             </a>
             
-            <p className="text-muted small mt-3 mb-0">Sin compromiso. Respondemos en menos de 2 horas.</p>
+            <p className="text-muted small mt-3 mb-0">{t.about.ctaBoxNote}</p>
           </div>
         </div>
       </section>

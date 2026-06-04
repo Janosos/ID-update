@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import GlobalLayout from "@/components/GlobalLayout";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -106,7 +107,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <GlobalLayout>{children}</GlobalLayout>
+        <LanguageProvider>
+          <GlobalLayout>{children}</GlobalLayout>
+        </LanguageProvider>
       </body>
     </html>
   );

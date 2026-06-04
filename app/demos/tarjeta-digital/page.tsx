@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function TarjetaDigitalDemo() {
   const [popupText, setPopupText] = useState<string | null>(null);
+  const { language } = useLanguage();
 
   // Set page document title dynamically on client
   useEffect(() => {
-    document.title = "Demo de Tarjeta Digital - ImperioDev";
-  }, []);
+    document.title = language === "en" ? "Digital Card Demo - ImperioDev" : "Demo de Tarjeta Digital - ImperioDev";
+  }, [language]);
 
   // Time-update handler to fade out video 1.2s before loop end and fade in 1.2s after loop start
   // Modifies DOM properties directly to prevent React state re-renders (solving text size shifts and layout shifts)
@@ -299,9 +301,11 @@ END:VCARD`;
 
       {/* Floating Demo Control Bar */}
       <div className="demo-bar-light px-4 py-2 d-flex align-items-center gap-3">
-        <span className="text-black small fw-bold d-none d-sm-inline">Demo de Tarjeta Digital</span>
+        <span className="text-black small fw-bold d-none d-sm-inline">
+          {language === "en" ? "Digital Card Demo" : "Demo de Tarjeta Digital"}
+        </span>
         <Link href="/demos" className="btn btn-dark btn-sm fw-bold rounded-pill px-3 py-1.5 d-flex align-items-center gap-1">
-          <i className="bi bi-grid-fill"></i> Salir de la Demo
+          <i className="bi bi-grid-fill"></i> {language === "en" ? "Exit Demo" : "Salir de la Demo"}
         </Link>
       </div>
 
@@ -352,12 +356,16 @@ END:VCARD`;
         <nav className="w-100 d-flex flex-column gap-3">
           {/* Primary CTA: Book appointment */}
           <button 
-            onClick={() => setPopupText("Aquí iría tu enlace para agendar citas (por ejemplo, Calendly, un formulario interactivo o tu número de WhatsApp para reservas).")}
+            onClick={() => setPopupText(
+              language === "en"
+                ? "Here would be your link to schedule appointments (for example, Calendly, an interactive form, or your WhatsApp number for bookings)."
+                : "Aquí iría tu enlace para agendar citas (por ejemplo, Calendly, un formulario interactivo o tu número de WhatsApp para reservas)."
+            )}
             className="btn-legacy-primary w-100"
           >
             <span className="d-flex align-items-center gap-3">
               <i className="bi bi-calendar3 fs-5"></i>
-              <span>Agendar Cita</span>
+              <span>{language === "en" ? "Book Appointment" : "Agendar Cita"}</span>
             </span>
             <i className="bi bi-arrow-right fs-5"></i>
           </button>
@@ -369,26 +377,34 @@ END:VCARD`;
           >
             <span className="d-flex align-items-center gap-3">
               <i className="bi bi-person-plus fs-5"></i>
-              <span>Guardar Contacto</span>
+              <span>{language === "en" ? "Save Contact" : "Guardar Contacto"}</span>
             </span>
             <i className="bi bi-download fs-5"></i>
           </button>
 
           {/* Catálogo / Servicios */}
           <button 
-            onClick={() => setPopupText("Aquí iría el catálogo interactivo de tus servicios, cortes de cabello, arreglos de barba y tratamientos con sus respectivos precios.")}
+            onClick={() => setPopupText(
+              language === "en"
+                ? "Here would be the interactive catalog of your services, haircuts, beard trims, and treatments with their respective prices."
+                : "Aquí iría el catálogo interactivo de tus servicios, cortes de cabello, arreglos de barba y tratamientos con sus respectivos precios."
+            )}
             className="btn-legacy-secondary w-100"
           >
             <span className="d-flex align-items-center gap-3">
               <i className="bi bi-card-list fs-5"></i>
-              <span>Catálogo / Servicios</span>
+              <span>{language === "en" ? "Catalog / Services" : "Catálogo / Servicios"}</span>
             </span>
             <i className="bi bi-box-arrow-up-right fs-5"></i>
           </button>
 
           {/* Instagram */}
           <button 
-            onClick={() => setPopupText("Aquí iría tu perfil de Instagram para que tus clientes puedan ver tu feed y etiquetar tu cuenta.")}
+            onClick={() => setPopupText(
+              language === "en"
+                ? "Here would be your Instagram profile so your clients can view your feed and tag your account."
+                : "Aquí iría tu perfil de Instagram para que tus clientes puedan ver tu feed y etiquetar tu cuenta."
+            )}
             className="btn-legacy-secondary w-100"
           >
             <span className="d-flex align-items-center gap-3">
@@ -400,7 +416,11 @@ END:VCARD`;
 
           {/* Facebook */}
           <button 
-            onClick={() => setPopupText("Aquí iría tu página de Facebook para interactuar con tu comunidad y responder comentarios.")}
+            onClick={() => setPopupText(
+              language === "en"
+                ? "Here would be your Facebook page to interact with your community and answer comments."
+                : "Aquí iría tu página de Facebook para interactuar con tu comunidad y responder comentarios."
+            )}
             className="btn-legacy-secondary w-100"
           >
             <span className="d-flex align-items-center gap-3">
@@ -412,7 +432,11 @@ END:VCARD`;
 
           {/* WhatsApp */}
           <button 
-            onClick={() => setPopupText("Aquí iría tu chat de WhatsApp Business con un mensaje predeterminado para iniciar una conversación instantánea.")}
+            onClick={() => setPopupText(
+              language === "en"
+                ? "Here would be your WhatsApp Business chat with a predefined message to start an instant conversation."
+                : "Aquí iría tu chat de WhatsApp Business con un mensaje predeterminado para iniciar una conversación instantánea."
+            )}
             className="btn-legacy-secondary w-100"
           >
             <span className="d-flex align-items-center gap-3">
@@ -424,12 +448,16 @@ END:VCARD`;
 
           {/* Location */}
           <button 
-            onClick={() => setPopupText("Aquí iría tu ubicación en Google Maps o Waze para que tus clientes puedan trazar la ruta exacta hacia tu establecimiento.")}
+            onClick={() => setPopupText(
+              language === "en"
+                ? "Here would be your location on Google Maps or Waze so your clients can map the exact route to your shop."
+                : "Aquí iría tu ubicación en Google Maps o Waze para que tus clientes puedan trazar la ruta exacta hacia tu establecimiento."
+            )}
             className="btn-legacy-secondary w-100"
           >
             <span className="d-flex align-items-center gap-3">
               <i className="bi bi-geo-alt fs-5"></i>
-              <span>Nuestra Ubicación</span>
+              <span>{language === "en" ? "Our Location" : "Nuestra Ubicación"}</span>
             </span>
             <i className="bi bi-map fs-5"></i>
           </button>
@@ -461,7 +489,7 @@ END:VCARD`;
               <i className="bi bi-info-circle fs-1" style={{ color: "var(--legacy-gold)" }}></i>
             </div>
             <h3 className="font-headline h5 fw-bold mb-3" style={{ color: "var(--legacy-gold)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              Enlace de Demostración
+              {language === "en" ? "Demo Link" : "Enlace de Demostración"}
             </h3>
             <p className="mb-0 text-muted" style={{ fontSize: "0.95rem", lineHeight: "1.6" }}>
               {popupText}
@@ -470,7 +498,7 @@ END:VCARD`;
               className="btn-legacy-close w-100" 
               onClick={() => setPopupText(null)}
             >
-              Entendido
+              {language === "en" ? "Understood" : "Entendido"}
             </button>
           </div>
         </div>

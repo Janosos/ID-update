@@ -1,10 +1,7 @@
-import Link from "next/link";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Enlaces Oficiales",
-  description: "Conoce todos los canales de contacto de ImperioDev, explora nuestras demos interactivas en vivo y utiliza nuestra aplicación de cotizaciones.",
-};
+import Link from "next/link";
+import { useTranslation } from "@/context/LanguageContext";
 
 interface LinkItem {
   label: string;
@@ -17,12 +14,14 @@ interface LinkItem {
 }
 
 export default function EnlacesPage() {
+  const t = useTranslation();
+
   const links: LinkItem[] = [
-    { label: "Demos de Trabajo", href: "/demos", icon: "bi-window-stack", description: "Explora trabajos, integraciones y plantillas interactivas.", glow: true },
-    { label: "Notes Creator App", href: "/notes-app", icon: "bi-phone-fill", description: "Conoce nuestra aplicación inteligente de cotizaciones.", badge: "Popular" },
-    { label: "Contacto Directo", href: "https://wa.me/526623440716", icon: "bi-whatsapp", description: "Envíanos un mensaje y cotiza tu web gratis.", external: true },
-    { label: "Facebook Oficial", href: "https://www.facebook.com/ImperioDev", icon: "bi-facebook", description: "Síguenos en Facebook y entérate de nuestras novedades.", external: true },
-    { label: "Instagram Oficial", href: "https://www.instagram.com/imperiodev_", icon: "bi-instagram", description: "Mira nuestras últimas publicaciones y aprende algo nuevo", external: true },
+    { label: t.links.items[0].label, href: "/demos", icon: "bi-window-stack", description: t.links.items[0].description, glow: true },
+    { label: t.links.items[1].label, href: "/notes-app", icon: "bi-phone-fill", description: t.links.items[1].description, badge: t.links.items[1].badge },
+    { label: t.links.items[2].label, href: "https://wa.me/526623440716", icon: "bi-whatsapp", description: t.links.items[2].description, external: true },
+    { label: t.links.items[3].label, href: "https://www.facebook.com/ImperioDev", icon: "bi-facebook", description: t.links.items[3].description, external: true },
+    { label: t.links.items[4].label, href: "https://www.instagram.com/imperiodev_", icon: "bi-instagram", description: t.links.items[4].description, external: true },
   ];
 
   const getIconStyle = (icon: string) => {
@@ -94,8 +93,8 @@ export default function EnlacesPage() {
             className="mb-3 animate-float"
             style={{ height: "70px", width: "auto", objectFit: "contain" }}
           />
-          <h1 className="h2 fw-bold text-body font-display mb-1">IMPERIODEV</h1>
-          <p className="small text-secondary m-0">Enlaces y Accesos Oficiales</p>
+          <h1 className="h2 fw-bold text-body font-display mb-1">{t.links.title}</h1>
+          <p className="small text-secondary m-0">{t.links.subtitle}</p>
         </div>
 
         {/* Buttons List Container */}
@@ -148,7 +147,7 @@ export default function EnlacesPage() {
                   <h3 className="h6 fw-bold m-0 font-display d-flex align-items-center gap-2">
                     {link.label}
                     {link.badge && (
-                      <span className={`badge ${link.badge === 'Próximamente' ? 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25' : 'bg-info bg-opacity-10 text-info border border-info border-opacity-25'} px-2 py-0.5 rounded-pill`} style={{ fontSize: '0.65rem' }}>
+                      <span className={`badge ${link.badge === 'Próximamente' || link.badge === 'Coming Soon' || link.badge === 'Popular' ? 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25' : 'bg-info bg-opacity-10 text-info border border-info border-opacity-25'} px-2 py-0.5 rounded-pill`} style={{ fontSize: '0.65rem' }}>
                         {link.badge}
                       </span>
                     )}

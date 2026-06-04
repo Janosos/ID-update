@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/context/LanguageContext";
 
 interface Product {
   id: string;
@@ -14,116 +15,11 @@ interface Product {
 }
 
 export default function CatalogPage() {
+  const t = useTranslation();
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState<"all" | "web" | "mockups">("all");
 
-  const products: Product[] = [
-    {
-      id: "web-sencilla",
-      title: "Pagina Web Sencilla",
-      price: "$4,000 - $6,000 MXN",
-      category: "web",
-      description: "Ideal para comenzar tu presencia online de forma rápida.",
-      icon: "bi-feather",
-      features: [
-        "Página principal + Tienda",
-        "Conexión básica de paquetería",
-        "2 Subpáginas internas",
-        "Integración básica de WhatsApp"
-      ],
-      whatsappMessage: "Me interesa el servicio: Pagina Web Sencilla",
-    },
-    {
-      id: "web-estandar",
-      title: "Pagina Web Estándar",
-      price: "$6,000 - $8,000 MXN",
-      category: "web",
-      description: "La opción de diseño equilibrada para pequeñas empresas.",
-      icon: "bi-layers",
-      features: [
-        "Todo lo del plan Sencillo",
-        "Estructura web estándar completa",
-        "4 Subpáginas internas",
-        "Optimización de velocidad y SEO"
-      ],
-      whatsappMessage: "Me interesa el servicio: Pagina Web Estándar",
-    },
-    {
-      id: "web-pro",
-      title: "Pagina Web PRO",
-      price: "$10,000 - $12,000 MXN",
-      category: "web",
-      description: "Solución completa y robusta con integraciones avanzadas.",
-      icon: "bi-gem",
-      features: [
-        "Todo lo del plan Estándar",
-        "Más de 4 Subpáginas internas",
-        "Conexión a redes sociales (FB, IG, WA)",
-        "Mantenimiento técnico por 3 meses"
-      ],
-      whatsappMessage: "Me interesa el servicio: Pagina Web PRO",
-    },
-    {
-      id: "mockup-sencillo",
-      title: "Mockup Sencillo",
-      price: "$60 MXN",
-      category: "mockups",
-      description: "Recurso digital de mockup individual listo para editar.",
-      icon: "bi-file-earmark-image",
-      features: [
-        "Archivo PSD editable de alta calidad",
-        "Capas organizadas y objetos inteligentes",
-        "Resolución ultra-nítida",
-        "Descarga inmediata tras confirmación"
-      ],
-      whatsappMessage: "Me interesa comprar: Mockup Sencillo",
-    },
-    {
-      id: "mockup-10",
-      title: "Paquete 10 Mockups",
-      price: "$160 MXN",
-      category: "mockups",
-      description: "Colección básica de 10 mockups de alta calidad.",
-      icon: "bi-images",
-      features: [
-        "10 archivos PSD editables",
-        "Licencia de uso comercial",
-        "Variedad de formatos y ángulos",
-        "Soporte de descarga en línea"
-      ],
-      whatsappMessage: "Me interesa comprar: Paquete 10 Mockups",
-    },
-    {
-      id: "mockup-20",
-      title: "Paquete 20 Mockups",
-      price: "$320 MXN",
-      category: "mockups",
-      description: "Colección intermedia de 20 mockups profesionales.",
-      icon: "bi-collection-play-fill",
-      features: [
-        "20 archivos PSD editables premium",
-        "Licencia de uso comercial completa",
-        "Optimizado para redes y portafolio",
-        "Entrega por carpeta compartida"
-      ],
-      whatsappMessage: "Me interesa comprar: Paquete 20 Mockups",
-    },
-    {
-      id: "mockup-50",
-      title: "Paquete 50 Mockups",
-      price: "$1,000 MXN",
-      category: "mockups",
-      description: "Colección profesional completa de 50 mockups.",
-      icon: "bi-stars",
-      features: [
-        "50 archivos PSD editables de la más alta calidad",
-        "Acceso preferente y actualizaciones",
-        "Todos los formatos comerciales incluidos",
-        "Soporte directo ImperioDev"
-      ],
-      whatsappMessage: "Me interesa comprar: Paquete 50 Mockups",
-    },
-  ];
+  const products: Product[] = t.catalog.products as Product[];
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.title.toLowerCase().includes(search.toLowerCase()) || 
@@ -142,10 +38,10 @@ export default function CatalogPage() {
       <div className="container-xl px-4 py-5 z-1">
         {/* Header Section */}
         <header className="text-center mb-5 max-w-2xl mx-auto">
-          <span className="text-info fw-bold tracking-wider text-uppercase small">Tienda Oficial</span>
-          <h1 className="display-4 fw-bold text-body mt-2 mb-3">Catálogo de Productos</h1>
+          <span className="text-info fw-bold tracking-wider text-uppercase small">{t.catalog.tag}</span>
+          <h1 className="display-4 fw-bold text-body mt-2 mb-3">{t.catalog.title}</h1>
           <p className="lead text-secondary">
-            Adquiere nuestros paquetes web a medida o descarga recursos digitales de diseño optimizados para tus proyectos.
+            {t.catalog.subtitle}
           </p>
         </header>
 
@@ -158,7 +54,7 @@ export default function CatalogPage() {
               </span>
               <input
                 type="text"
-                placeholder="Buscar productos..."
+                placeholder={t.catalog.searchPlaceholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="form-control bg-body border-start-0 ps-0 shadow-none text-body"
@@ -174,7 +70,7 @@ export default function CatalogPage() {
               }`}
               style={filterCategory === "all" ? { background: "#14b8a6", borderColor: "#14b8a6" } : {}}
             >
-              Todos
+              {t.catalog.filterAll}
             </button>
             <button
               onClick={() => setFilterCategory("web")}
@@ -183,7 +79,7 @@ export default function CatalogPage() {
               }`}
               style={filterCategory === "web" ? { background: "#14b8a6", borderColor: "#14b8a6" } : {}}
             >
-              Sitios Web
+              {t.catalog.filterWeb}
             </button>
             <button
               onClick={() => setFilterCategory("mockups")}
@@ -192,7 +88,7 @@ export default function CatalogPage() {
               }`}
               style={filterCategory === "mockups" ? { background: "#14b8a6", borderColor: "#14b8a6" } : {}}
             >
-              Mockups
+              {t.catalog.filterMockups}
             </button>
           </div>
         </div>
@@ -240,7 +136,7 @@ export default function CatalogPage() {
                     className="btn btn-info text-white w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2 mt-auto"
                     style={{ background: "#14b8a6", borderColor: "#14b8a6" }}
                   >
-                    <i className="bi bi-whatsapp"></i> Adquirir Ahora
+                    <i className="bi bi-whatsapp"></i> {t.catalog.btnAcquire}
                   </a>
                 </div>
               </div>
@@ -248,8 +144,8 @@ export default function CatalogPage() {
           ) : (
             <div className="col-12 text-center py-5">
               <i className="bi bi-search display-1 text-muted d-block mb-3"></i>
-              <h3 className="fw-bold text-body">No se encontraron productos</h3>
-              <p className="text-secondary">Prueba con otra búsqueda o filtro de categoría.</p>
+              <h3 className="fw-bold text-body">{t.catalog.noProducts}</h3>
+              <p className="text-secondary">{t.catalog.noProductsDesc}</p>
             </div>
           )}
         </div>

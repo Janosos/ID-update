@@ -1,10 +1,7 @@
-import Link from "next/link";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Demos Interactivas - ImperioDev",
-  description: "Explora las demostraciones interactivas de nuestros trabajos de diseño y desarrollo web: Landing Pages, Tiendas Online y Tarjetas de Presentación Digitales.",
-};
+import Link from "next/link";
+import { useTranslation, useLanguage } from "@/context/LanguageContext";
 
 interface DemoItem {
   id: string;
@@ -19,70 +16,53 @@ interface DemoItem {
 }
 
 export default function DemosPage() {
+  const t = useTranslation();
+  const { language } = useLanguage();
+
   const demos: DemoItem[] = [
     {
       id: "landing",
-      title: "Demo de Landing Page",
-      tag: "Conversión Alta",
-      description: "Página de aterrizaje optimizada para capturar prospectos y maximizar las ventas de un producto o servicio específico.",
-      features: [
-        "Estructura orientada a conversión",
-        "Formulario interactivo integrado",
-        "Secciones autodesplazables",
-        "Optimización de velocidad móvil"
-      ],
+      title: t.demos.items[0].title,
+      tag: t.demos.items[0].tag,
+      description: t.demos.items[0].description,
+      features: t.demos.items[0].features,
       icon: "bi-layout-text-sidebar-reverse",
       href: "/demos/landing",
       glowColor: "rgba(249, 115, 22, 0.15)", // Orange glow
-      btnText: "Ver Demo de Landing Page"
+      btnText: t.demos.items[0].btnText
     },
     {
       id: "ecommerce",
-      title: "E-commerce",
-      tag: "Tienda Completa",
-      description: "Plataforma de comercio electrónico con catálogo interactivo, carrito de compras animado y simulación de checkout.",
-      features: [
-        "Carrito de compras interactivo",
-        "Buscador y filtros dinámicos",
-        "Detalle de producto interactivo",
-        "Flujo de compra automatizado"
-      ],
+      title: t.demos.items[1].title,
+      tag: t.demos.items[1].tag,
+      description: t.demos.items[1].description,
+      features: t.demos.items[1].features,
       icon: "bi-cart3",
       href: "/demos/ecommerce",
       glowColor: "rgba(139, 92, 246, 0.15)", // Violet glow
-      btnText: "Ver Demo de E-commerce"
+      btnText: t.demos.items[1].btnText
     },
     {
       id: "tarjeta",
-      title: "Tarjeta Digital",
-      tag: "Mobile First",
-      description: "Tarjeta de presentación interactiva diseñada especialmente para smartphones. Comparte tus datos de contacto al instante.",
-      features: [
-        "Guardado directo a contactos (.vcf)",
-        "Enlaces de contacto en un toque",
-        "Estructura compacta tipo Linktree",
-        "Optimizado para accesos vía código QR"
-      ],
+      title: t.demos.items[2].title,
+      tag: t.demos.items[2].tag,
+      description: t.demos.items[2].description,
+      features: t.demos.items[2].features,
       icon: "bi-person-badge",
       href: "/demos/tarjeta-digital",
       glowColor: "rgba(16, 185, 129, 0.15)", // Emerald glow
-      btnText: "Ver Tarjeta Digital"
+      btnText: t.demos.items[2].btnText
     },
     {
       id: "landing-jugos",
-      title: "Demo de Landing Page 2",
-      tag: "Interactiva 3D",
-      description: "Página de aterrizaje premium de marca de jugos con efectos visuales dinámicos de rotación y color al hacer scroll.",
-      features: [
-        "Efecto de scroll inmersivo",
-        "Banner hero interactivo gigante",
-        "Transición de color de fondo 3D",
-        "Presentación de 3 sabores únicos"
-      ],
+      title: t.demos.items[3].title,
+      tag: t.demos.items[3].tag,
+      description: t.demos.items[3].description,
+      features: t.demos.items[3].features,
       icon: "bi-cup-straw",
       href: "/demos/landing/jugos",
       glowColor: "rgba(34, 197, 94, 0.15)", // Green glow
-      btnText: "Ver Landing Page 2"
+      btnText: t.demos.items[3].btnText
     }
   ];
 
@@ -154,14 +134,18 @@ export default function DemosPage() {
             className="btn btn-premium-outline-theme fw-bold px-4 py-2.5 rounded d-inline-flex align-items-center gap-2 mb-4"
             id="back-to-links"
           >
-            <i className="bi bi-arrow-left"></i> Volver a Enlaces
+            <i className="bi bi-arrow-left"></i> {t.demos.backBtn}
           </Link>
           <div className="max-w-2xl">
             <h1 className="display-4 fw-bold text-body mb-3 font-display">
-              Demos <span className="text-gradient">Interactivas</span>
+              {language === "es" ? (
+                <>Demos <span className="text-gradient">Interactivas</span></>
+              ) : (
+                <>Interactive <span className="text-gradient">Demos</span></>
+              )}
             </h1>
             <p className="lead text-secondary m-0">
-              Explora ejemplos reales de los diferentes proyectos digitales que podemos diseñar y desarrollar para tu marca o negocio.
+              {t.demos.subtitle}
             </p>
           </div>
         </div>
@@ -226,7 +210,9 @@ export default function DemosPage() {
                     <hr className="opacity-10 my-4" />
 
                     {/* Features List */}
-                    <h3 className="h6 fw-bold text-body mb-3 uppercase tracking-wider small" style={{ fontSize: "0.7rem" }}>Características Clave</h3>
+                    <h3 className="h6 fw-bold text-body mb-3 uppercase tracking-wider small" style={{ fontSize: "0.7rem" }}>
+                      {language === "en" ? "Key Features" : "Características Clave"}
+                    </h3>
                     <ul className="list-unstyled d-flex flex-column gap-2 mb-4">
                       {demo.features.map((feature, i) => (
                         <li key={i} className="d-flex align-items-center gap-2 small text-secondary">

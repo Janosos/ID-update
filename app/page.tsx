@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import HeroMonitor from "@/components/HeroMonitor";
+import { useTranslation, useLanguage } from "@/context/LanguageContext";
 
 export default function Home() {
+  const t = useTranslation();
+  const { language } = useLanguage();
   const [visibleItems, setVisibleItems] = useState(3);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showPromo, setShowPromo] = useState(false);
@@ -41,7 +44,9 @@ export default function Home() {
     {
       title: "Tzaira Villegas Boutique",
       type: "E-commerce",
-      desc: "Tienda física y online de vestidos y moda femenina, con cobros integrados.",
+      desc: language === "en" 
+        ? "Physical and online dress and women's fashion store with integrated payments." 
+        : "Tienda física y online de vestidos y moda femenina, con cobros integrados.",
       img: "https://www.imperiodev.com/wp-content/uploads/2026/04/tzaira.avif",
       url: "https://www.tzairaboutique.com/",
       badgeBg: "bg-danger bg-opacity-10 text-danger",
@@ -50,7 +55,9 @@ export default function Home() {
     {
       title: "Nakama Bordados",
       type: "E-commerce",
-      desc: "Venta y envío de ropa bordada inspirada en anime con pasarela integrada.",
+      desc: language === "en"
+        ? "Sale and shipping of anime-inspired embroidered clothing with integrated gateway."
+        : "Venta y envío de ropa bordada inspirada en anime con pasarela integrada.",
       img: "https://www.imperiodev.com/wp-content/uploads/2026/02/nakama.webp",
       url: "https://nakamabordados.com/",
       badgeBg: "bg-info bg-opacity-10 text-info",
@@ -58,8 +65,10 @@ export default function Home() {
     },
     {
       title: "Nakama Embroidery",
-      type: "Productos Digitales",
-      desc: "Marketplace para compra, descarga y distribución de matrices y diseños bordados.",
+      type: language === "en" ? "Digital Products" : "Productos Digitales",
+      desc: language === "en"
+        ? "Marketplace for purchasing, downloading, and distributing embroidery designs and grids."
+        : "Marketplace para compra, descarga y distribución de matrices y diseños bordados.",
       img: "https://www.imperiodev.com/wp-content/uploads/2026/01/nakamaemb.png",
       url: "https://www.nakamaemb.com/",
       badgeBg: "bg-primary bg-opacity-10 text-primary",
@@ -67,8 +76,10 @@ export default function Home() {
     },
     {
       title: "SIRO",
-      type: "Estudio de Diseño",
-      desc: "Estudio de branding, imagen de marca y maquetación digital de alto nivel visual.",
+      type: language === "en" ? "Design Studio" : "Estudio de Diseño",
+      desc: language === "en"
+        ? "Branding, brand identity studio, and digital layout with high visual level."
+        : "Estudio de branding, imagen de marca y maquetación digital de alto nivel visual.",
       img: "https://www.imperiodev.com/wp-content/uploads/2026/02/siro1.avif",
       url: "https://www.siro.com.mx/",
       badgeBg: "bg-purple bg-opacity-10 text-purple-600 dark:text-purple-400",
@@ -268,15 +279,15 @@ export default function Home() {
                   style={{ background: "rgba(20, 184, 166, 0.08)" }}
                 >
                   <span className="d-inline-block rounded-circle bg-info animate-pulse" style={{ width: "8px", height: "8px" }}></span>
-                  Disponible para nuevos proyectos
+                  {t.home.available}
                 </span>
               </div>
               <h1 className="display-3 fw-bold tracking-tight text-body lh-sm">
-                Creamos Experiencias <br />
-                <span className="text-gradient">Digitales Que Venden</span>
+                {t.home.heroTitle1} <br />
+                <span className="text-gradient">{t.home.heroTitle2}</span>
               </h1>
               <p className="lead text-secondary max-w-xl mx-auto mx-lg-0">
-                No solo diseñamos webs bonitas. Construimos máquinas de venta automatizadas con WordPress y WooCommerce. Diseño estratégico para negocios modernos.
+                {t.home.heroSubtitle}
               </p>
               <div className="d-flex flex-column flex-sm-row gap-3 pt-2 justify-content-center justify-content-lg-start">
                 <Link 
@@ -284,21 +295,21 @@ export default function Home() {
                   className="btn btn-info text-white fw-bold px-4 py-3 rounded shadow-sm btn-premium-cta d-flex align-items-center justify-content-center gap-2"
                   style={{ background: "#14b8a6", borderColor: "#14b8a6" }}
                 >
-                  Ver Planes Web <i className="bi bi-arrow-right"></i>
+                  {t.home.btnPlans} <i className="bi bi-arrow-right"></i>
                 </Link>
                 <Link 
                   href="/enlaces" 
                   className="btn btn-premium-outline-theme btn-shimmer fw-bold px-4 py-3 rounded d-flex align-items-center justify-content-center gap-2"
                   style={{ "--shimmer-delay": "0s" } as React.CSSProperties}
                 >
-                  Enlaces <i className="bi bi-link-45deg fs-5"></i>
+                  {t.home.btnLinks} <i className="bi bi-link-45deg fs-5"></i>
                 </Link>
                 <Link 
                   href="#portfolio" 
                   className="btn btn-premium-outline-theme btn-shimmer fw-bold px-4 py-3 rounded d-flex align-items-center justify-content-center"
                   style={{ "--shimmer-delay": "0.6s" } as React.CSSProperties}
                 >
-                  Explorar Portafolio
+                  {t.home.btnPortfolio}
                 </Link>
               </div>
 
@@ -347,10 +358,10 @@ export default function Home() {
         <div className="container-xl px-4">
           <div className="text-center mb-5">
             <h2 className="display-5 fw-bold text-body mb-3">
-              Todo lo que necesitas <br /> en un solo lugar
+              {t.home.servicesTitle}
             </h2>
             <p className="text-secondary max-w-xl mx-auto">
-              Usamos el stack tecnológico más potente: WordPress para flexibilidad, Elementor para diseño y WooCommerce para ventas.
+              {t.home.servicesSubtitle}
             </p>
           </div>
 
@@ -369,24 +380,24 @@ export default function Home() {
                   >
                     <i className="bi bi-rocket-takeoff-fill fs-4"></i>
                   </div>
-                  <h3 className="h2 fw-bold text-body mb-3 font-display">Diseño Web de Alto Impacto</h3>
+                  <h3 className="h2 fw-bold text-body mb-3 font-display">{t.home.servicesWebTitle}</h3>
                   <p className="text-secondary mb-4">
-                    Sitios web que no solo se ven bien, sino que cargan rápido y convierten visitas en clientes. Optimizados para Google (SEO) desde el primer día.
+                    {t.home.servicesWebDesc}
                   </p>
                 </div>
                 <div className="mt-4">
                   <ul className="list-unstyled row g-3 text-secondary">
                     <li className="col-12 col-md-6 d-flex align-items-center gap-2">
-                      <i className="bi bi-check-circle-fill text-info"></i> Diseño Responsivo (Móvil/Tablet)
+                      <i className="bi bi-check-circle-fill text-info"></i> {t.home.servicesWebF1}
                     </li>
                     <li className="col-12 col-md-6 d-flex align-items-center gap-2">
-                      <i className="bi bi-check-circle-fill text-info"></i> Integración con WhatsApp
+                      <i className="bi bi-check-circle-fill text-info"></i> {t.home.servicesWebF2}
                     </li>
                     <li className="col-12 col-md-6 d-flex align-items-center gap-2">
-                      <i className="bi bi-check-circle-fill text-info"></i> Optimización de velocidad (Core Web Vitals)
+                      <i className="bi bi-check-circle-fill text-info"></i> {t.home.servicesWebF3}
                     </li>
                     <li className="col-12 col-md-6 d-flex align-items-center gap-2">
-                      <i className="bi bi-check-circle-fill text-info"></i> Estructura SEO amigable
+                      <i className="bi bi-check-circle-fill text-info"></i> {t.home.servicesWebF4}
                     </li>
                   </ul>
                 </div>
@@ -400,9 +411,9 @@ export default function Home() {
                 <div className="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center mb-3" style={{ width: "40px", height: "40px" }}>
                   <i className="bi bi-cart-fill fs-5"></i>
                 </div>
-                <h3 className="h4 fw-bold text-body mb-2 font-display">E-commerce</h3>
+                <h3 className="h4 fw-bold text-body mb-2 font-display">{t.home.servicesEcommerceTitle}</h3>
                 <p className="small text-secondary m-0">
-                  Tiendas WooCommerce automatizadas. Gestión de inventario, pasarelas de pago y logística de envíos.
+                  {t.home.servicesEcommerceDesc}
                 </p>
               </div>
 
@@ -411,9 +422,9 @@ export default function Home() {
                 <div className="rounded-3 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center mb-3" style={{ width: "40px", height: "40px" }}>
                   <i className="bi bi-shield-fill-check fs-5"></i>
                 </div>
-                <h3 className="h4 fw-bold text-body mb-2 font-display">Mantenimiento</h3>
+                <h3 className="h4 fw-bold text-body mb-2 font-display">{t.home.servicesMaintTitle}</h3>
                 <p className="small text-secondary m-0">
-                  Olvídate de las actualizaciones del servidor y la seguridad. Nosotros cuidamos de tu web mes a mes.
+                  {t.home.servicesMaintDesc}
                 </p>
               </div>
             </div>
@@ -426,18 +437,18 @@ export default function Home() {
         <div className="container-xl px-4">
           <div className="row mb-5 align-items-end g-4">
             <div className="col-12 col-md-8">
-              <span className="text-info fw-bold tracking-wider text-uppercase small">Nuestros Paquetes</span>
-              <h2 className="display-5 fw-bold text-body mt-2">Invierte en tu Negocio</h2>
+              <span className="text-info fw-bold tracking-wider text-uppercase small">{t.home.pricingTag}</span>
+              <h2 className="display-5 fw-bold text-body mt-2">{t.home.pricingTitle}</h2>
               <div className="mt-4 p-4 rounded-3 border d-flex gap-3 bg-info bg-opacity-10 border-info border-opacity-25" style={{ maxWidth: "650px" }}>
                 <i className="bi bi-info-circle-fill text-info fs-5 mt-1"></i>
                 <p className="small text-secondary m-0 leading-relaxed">
-                  <strong>Nota:</strong> Los precios mostrados son referenciales. Para obtener un presupuesto exacto adaptado a tus necesidades específicas, te recomendamos solicitar una cotización personalizada.
+                  <strong>{language === "en" ? "Note:" : "Nota:"}</strong> {t.home.pricingNote}
                 </p>
               </div>
             </div>
             <div className="col-12 col-md-4 text-md-end">
               <Link href="/catalogo" className="text-secondary fw-bold text-decoration-none hover-text-teal">
-                Ver catálogo completo <i className="bi bi-arrow-right"></i>
+                {t.home.pricingLink} <i className="bi bi-arrow-right"></i>
               </Link>
             </div>
           </div>
@@ -453,27 +464,27 @@ export default function Home() {
                   >
                     <i className="bi bi-feather text-info fs-1"></i>
                   </div>
-                  <h3 className="h4 fw-bold text-body mb-1 font-display">Sencillo</h3>
+                  <h3 className="h4 fw-bold text-body mb-1 font-display">{t.home.planSimpleTitle}</h3>
                   <p className="text-muted small mb-4" style={{ minHeight: "40px" }}>
-                    Estructura intuitiva y profesional para empezar.
+                    {t.home.planSimpleDesc}
                   </p>
                   <div className="d-flex align-items-baseline gap-1 mb-4">
-                    <span className="fs-2 fw-bold text-body">$4,000 - $6,000</span>
+                    <span className="fs-2 fw-bold text-body">{t.home.planSimplePrice}</span>
                     <span className="small text-muted">MXN</span>
                   </div>
                   <hr className="my-4 opacity-10" />
                   <ul className="list-unstyled text-secondary small d-flex flex-column gap-3 mb-5">
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-check-circle text-info"></i> Creación de Página Web sencilla
+                      <i className="bi bi-check-circle text-info"></i> {t.home.planSimpleF1}
                     </li>
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-check-circle text-info"></i> Página Principal + Tienda
+                      <i className="bi bi-check-circle text-info"></i> {t.home.planSimpleF2}
                     </li>
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-check-circle text-info"></i> Conexión con paquetería
+                      <i className="bi bi-check-circle text-info"></i> {t.home.planSimpleF3}
                     </li>
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-check-circle text-info"></i> 2 Subpáginas adicionales
+                      <i className="bi bi-check-circle text-info"></i> {t.home.planSimpleF4}
                     </li>
                   </ul>
                 </div>
@@ -483,7 +494,7 @@ export default function Home() {
                   rel="noopener noreferrer" 
                   className="btn btn-premium-outline-info w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2"
                 >
-                  <i className="bi bi-chat-left-text-fill"></i> Contratar Ahora
+                  <i className="bi bi-chat-left-text-fill"></i> {t.home.btnHire}
                 </a>
               </div>
             </div>
@@ -498,7 +509,7 @@ export default function Home() {
                   className="position-absolute text-white text-center py-1 fw-bold uppercase tracking-wider small w-100 top-0 start-0"
                   style={{ background: "#14b8a6", borderRadius: "10px 10px 0 0", fontSize: "0.75rem" }}
                 >
-                  MÁS POPULAR
+                  {t.home.planEstandarPopular}
                 </div>
                 <div className="pt-3">
                   <div 
@@ -507,27 +518,27 @@ export default function Home() {
                   >
                     <i className="bi bi-stack text-info fs-1"></i>
                   </div>
-                  <h3 className="h4 fw-bold text-body mb-1 font-display">Estándar</h3>
+                  <h3 className="h4 fw-bold text-body mb-1 font-display">{t.home.planEstandarTitle}</h3>
                   <p className="text-muted small mb-4" style={{ minHeight: "40px" }}>
-                    Más contenido para mostrar tu negocio al completo.
+                    {t.home.planEstandarDesc}
                   </p>
                   <div className="d-flex align-items-baseline gap-1 mb-4">
-                    <span className="fs-2 fw-bold text-body">$6,000 - $8,000</span>
+                    <span className="fs-2 fw-bold text-body">{t.home.planEstandarPrice}</span>
                     <span className="small text-muted">MXN</span>
                   </div>
                   <hr className="my-4 opacity-10" />
                   <ul className="list-unstyled text-secondary small d-flex flex-column gap-3 mb-5">
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-check-circle-fill text-info"></i> <strong>Todo lo del plan Sencillo</strong>
+                      <i className="bi bi-check-circle-fill text-info"></i> <strong>{t.home.planEstandarF1}</strong>
                     </li>
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-check-circle-fill text-info"></i> Estructura web estándar
+                      <i className="bi bi-check-circle-fill text-info"></i> {t.home.planEstandarF2}
                     </li>
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-plus-circle text-info"></i> 4 Subpáginas adicionales
+                      <i className="bi bi-plus-circle text-info"></i> {t.home.planEstandarF3}
                     </li>
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-check-circle-fill text-info"></i> Ideal para PyMEs crecientes
+                      <i className="bi bi-check-circle-fill text-info"></i> {t.home.planEstandarF4}
                     </li>
                   </ul>
                 </div>
@@ -538,7 +549,7 @@ export default function Home() {
                   className="btn btn-info text-white w-100 py-3 fw-bold btn-premium-cta d-flex align-items-center justify-content-center gap-2 shadow-sm"
                   style={{ background: "#14b8a6", borderColor: "#14b8a6" }}
                 >
-                  <i className="bi bi-chat-left-text-fill"></i> Contratar Ahora
+                  <i className="bi bi-chat-left-text-fill"></i> {t.home.btnHire}
                 </a>
               </div>
             </div>
@@ -553,27 +564,27 @@ export default function Home() {
                   >
                     <i className="bi bi-gem text-info fs-1"></i>
                   </div>
-                  <h3 className="h4 fw-bold text-body mb-1 font-display">PRO</h3>
+                  <h3 className="h4 fw-bold text-body mb-1 font-display">{t.home.planProTitle}</h3>
                   <p className="text-muted small mb-4" style={{ minHeight: "40px" }}>
-                    Solución integral con redes y mantenimiento técnico.
+                    {t.home.planProDesc}
                   </p>
                   <div className="d-flex align-items-baseline gap-1 mb-4">
-                    <span className="fs-2 fw-bold text-body">$10,000 - $12,000</span>
+                    <span className="fs-2 fw-bold text-body">{t.home.planProPrice}</span>
                     <span className="small text-muted">MXN</span>
                   </div>
                   <hr className="my-4 opacity-10" />
                   <ul className="list-unstyled text-secondary small d-flex flex-column gap-3 mb-5">
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-check-circle text-info"></i> <strong>Todo lo del plan Estándar</strong>
+                      <i className="bi bi-check-circle text-info"></i> <strong>{t.home.planProF1}</strong>
                     </li>
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-plus-circle text-info"></i> Más de 4 Subpáginas
+                      <i className="bi bi-plus-circle text-info"></i> {t.home.planProF2}
                     </li>
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-share text-info"></i> Conexión Redes (FB, IG, WA)
+                      <i className="bi bi-share text-info"></i> {t.home.planProF3}
                     </li>
                     <li className="d-flex align-items-start gap-2">
-                      <i className="bi bi-shield text-info"></i> Mantenimiento por 3 meses
+                      <i className="bi bi-shield text-info"></i> {t.home.planProF4}
                     </li>
                   </ul>
                 </div>
@@ -583,7 +594,7 @@ export default function Home() {
                   rel="noopener noreferrer" 
                   className="btn btn-premium-outline-primary w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2"
                 >
-                  <i className="bi bi-chat-left-text-fill"></i> Contratar Ahora
+                  <i className="bi bi-chat-left-text-fill"></i> {t.home.btnHire}
                 </a>
               </div>
             </div>
@@ -593,7 +604,7 @@ export default function Home() {
           <div className="row g-5 mt-5 pt-3">
             <div className="col-12 col-lg-6">
               <h3 className="h4 fw-bold text-body mb-4 pb-2 border-bottom d-flex align-items-center gap-2">
-                <i className="bi bi-check-circle-fill text-info"></i> Todos nuestros servicios incluyen
+                <i className="bi bi-check-circle-fill text-info"></i> {t.home.includeTitle}
               </h3>
               <div className="d-flex flex-column gap-4">
                 <div className="d-flex gap-3 align-items-start">
@@ -601,9 +612,9 @@ export default function Home() {
                     <i className="bi bi-database-fill fs-5"></i>
                   </div>
                   <div>
-                    <h4 className="h6 fw-bold text-body mb-1">Base de Datos</h4>
+                    <h4 className="h6 fw-bold text-body mb-1">{t.home.includeDbTitle}</h4>
                     <p className="text-secondary small mb-0">
-                      Creación de base de datos dedicada y estructurada para almacenar y gestionar tu información empresarial de forma segura.
+                      {t.home.includeDbDesc}
                     </p>
                   </div>
                 </div>
@@ -612,9 +623,9 @@ export default function Home() {
                     <i className="bi bi-hdd-network-fill fs-5"></i>
                   </div>
                   <div>
-                    <h4 className="h6 fw-bold text-body mb-1">Hosting por un año</h4>
+                    <h4 className="h6 fw-bold text-body mb-1">{t.home.includeHostingTitle}</h4>
                     <p className="text-secondary small mb-0">
-                      Servicio de almacenamiento web y dominio integrados para el despliegue inicial gratuito durante los primeros 12 meses.
+                      {t.home.includeHostingDesc}
                     </p>
                   </div>
                 </div>
@@ -623,30 +634,28 @@ export default function Home() {
 
             <div className="col-12 col-lg-6">
               <h3 className="h4 fw-bold text-body mb-4 pb-2 border-bottom d-flex align-items-center gap-2">
-                <i className="bi bi-exclamation-triangle-fill text-danger"></i> Lo que no está incluido
+                <i className="bi bi-exclamation-triangle-fill text-danger"></i> {t.home.excludeTitle}
               </h3>
               <div className="d-flex flex-column gap-4">
                 <div className="d-flex gap-3 align-items-start">
-                  {/* Replaced secondary gray with soft warning red/coral */}
                   <div className="rounded-3 bg-danger bg-opacity-10 text-danger d-flex align-items-center justify-content-center p-3" style={{ width: "44px", height: "44px" }}>
                     <i className="bi bi-box-fill fs-5"></i>
                   </div>
                   <div>
-                    <h4 className="h6 fw-bold text-body mb-1">Carga masiva de catálogo</h4>
+                    <h4 className="h6 fw-bold text-body mb-1">{t.home.excludeCatTitle}</h4>
                     <p className="text-secondary small mb-0">
-                      La subida detallada de todos los artículos o catálogo comercial de tu tienda virtual corre a cargo del cliente (proveemos manuales).
+                      {t.home.excludeCatDesc}
                     </p>
                   </div>
                 </div>
                 <div className="d-flex gap-3 align-items-start">
-                  {/* Replaced secondary gray with soft warning red/coral */}
                   <div className="rounded-3 bg-danger bg-opacity-10 text-danger d-flex align-items-center justify-content-center p-3" style={{ width: "44px", height: "44px" }}>
                     <i className="bi bi-wrench-adjustable-circle-fill fs-5"></i>
                   </div>
                   <div>
-                    <h4 className="h6 fw-bold text-body mb-1">Soporte Técnico Post-Entrega</h4>
+                    <h4 className="h6 fw-bold text-body mb-1">{t.home.excludeSupportTitle}</h4>
                     <p className="text-secondary small mb-0">
-                      El mantenimiento web periódico no está incluido en los planes iniciales básicos, pero está disponible como servicio adicional recurrente.
+                      {t.home.excludeSupportDesc}
                     </p>
                   </div>
                 </div>
@@ -659,7 +668,7 @@ export default function Home() {
       {/* 4. Portfolio Section (Rebuilt as a fully responsive client-side slider) */}
       <section className="py-5 overflow-hidden" id="portfolio">
         <div className="container-xl px-4">
-          <h2 className="display-5 fw-bold text-center text-body mb-5">Últimas Creaciones</h2>
+          <h2 className="display-5 fw-bold text-center text-body mb-5">{t.home.portfolioTitle}</h2>
 
           <div className="position-relative px-md-5">
             {/* Slider Container */}
@@ -704,7 +713,7 @@ export default function Home() {
                               {project.desc}
                             </p>
                           </div>
-                          <span className={`${project.textClass} fw-bold small`}>Visitar Sitio <i className="bi bi-arrow-right ms-1"></i></span>
+                          <span className={`${project.textClass} fw-bold small`}>{t.home.portfolioVisit} <i className="bi bi-arrow-right ms-1"></i></span>
                         </div>
                       </div>
                     </a>
@@ -720,7 +729,7 @@ export default function Home() {
                   onClick={prevSlide}
                   className="btn btn-light rounded-circle shadow border position-absolute start-0 top-50 translate-middle-y z-3 d-flex align-items-center justify-content-center"
                   style={{ width: "44px", height: "44px", left: "-10px" }}
-                  title="Anterior"
+                  title={language === "en" ? "Previous" : "Anterior"}
                 >
                   <i className="bi bi-chevron-left fs-5"></i>
                 </button>
@@ -728,7 +737,7 @@ export default function Home() {
                   onClick={nextSlide}
                   className="btn btn-light rounded-circle shadow border position-absolute end-0 top-50 translate-middle-y z-3 d-flex align-items-center justify-content-center"
                   style={{ width: "44px", height: "44px", right: "-10px" }}
-                  title="Siguiente"
+                  title={language === "en" ? "Next" : "Siguiente"}
                 >
                   <i className="bi bi-chevron-right fs-5"></i>
                 </button>
@@ -748,7 +757,7 @@ export default function Home() {
                     background: currentIndex === idx ? "#14b8a6" : "rgba(0,0,0,0.2)",
                     transition: "background 0.3s ease"
                   }}
-                  title={`Ir al slide ${idx + 1}`}
+                  title={language === "en" ? `Go to slide ${idx + 1}` : `Ir al slide ${idx + 1}`}
                 />
               ))}
             </div>
@@ -759,13 +768,13 @@ export default function Home() {
       {/* 5. Contact Section */}
       <section className="py-5 my-5 position-relative overflow-hidden" id="contacto">
         <div className="container-xl px-4 py-5 z-1 text-center">
-          <h2 className="display-4 fw-bold mb-3 text-body">¿Listo para destacar?</h2>
+          <h2 className="display-4 fw-bold mb-3 text-body">{t.home.ctaTitle}</h2>
           <p className="lead text-secondary mb-5 max-w-xl mx-auto">
-            Tu competencia ya está en digital. No te quedes atrás. Creamos la web que tu negocio merece en menos de 15 días.
+            {t.home.ctaSubtitle}
           </p>
           <div className="max-w-md mx-auto p-5 rounded-4 shadow-lg border glass-panel">
             <p className="text-secondary mb-4 small fw-bold">
-              Contáctanos directamente por WhatsApp para una atención inmediata.
+              {t.home.ctaBoxTitle}
             </p>
             <a 
               href="https://wa.me/526623440716?text=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20una%20cotizaci%C3%B3n%20o%20informaci%C3%B3n" 
@@ -773,10 +782,10 @@ export default function Home() {
               rel="noopener noreferrer" 
               className="btn-whatsapp-cta"
             >
-              <i className="bi bi-whatsapp"></i> Solicitar Cotización Gratis
+              <i className="bi bi-whatsapp"></i> {t.home.ctaBtn}
             </a>
             <p className="text-muted small mt-3 mb-0">
-              Sin compromisos. Respondemos en menos de 2 horas.
+              {t.home.ctaBoxNote}
             </p>
           </div>
         </div>
@@ -790,7 +799,7 @@ export default function Home() {
               <button 
                 onClick={dismissPromo} 
                 className="btn-close-promo position-absolute top-0 end-0 m-2 border-0 bg-transparent"
-                aria-label="Cerrar anuncio"
+                aria-label={t.home.promoClose}
               >
                 <i className="bi bi-x fs-5"></i>
               </button>
@@ -800,12 +809,12 @@ export default function Home() {
               </div>
               
               <div className="pe-3">
-                <span className="text-info text-xs fw-bold uppercase tracking-wider d-block mb-1">✨ ¡Lanzamiento!</span>
-                <h4 className="h6 fw-bold text-body mb-1">Empieza a verte profesional</h4>
+                <span className="text-info text-xs fw-bold uppercase tracking-wider d-block mb-1">✨ {language === "en" ? "Launch!" : "¡Lanzamiento!"}</span>
+                <h4 className="h6 fw-bold text-body mb-1">{language === "en" ? "Start looking professional" : "Empieza a verte profesional"}</h4>
                 <p className="text-secondary small m-0 leading-sm">
-                  Gestiona tus notas de venta con nuestra nueva app.
+                  {t.home.promoDesc}
                 </p>
-                <span className="text-info small fw-bold mt-1 d-inline-block">Probar gratis ahora <i className="bi bi-arrow-right"></i></span>
+                <span className="text-info small fw-bold mt-1 d-inline-block">{t.home.promoBtn} <i className="bi bi-arrow-right"></i></span>
               </div>
             </div>
           </Link>

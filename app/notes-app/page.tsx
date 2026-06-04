@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function NotesAppPage() {
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const { language } = useLanguage();
+
   return (
     <div className="bg-grid py-5 min-vh-100 d-flex flex-column align-items-center justify-content-center position-relative overflow-hidden">
       <style dangerouslySetInnerHTML={{ __html: `
@@ -101,31 +104,38 @@ export default function NotesAppPage() {
                   style={{ background: "rgba(59, 130, 246, 0.08)" }}
                 >
                   <span className="d-inline-block rounded-circle bg-primary animate-pulse" style={{ width: "8px", height: "8px" }}></span>
-                  Nuevo Lanzamiento
+                  {language === "en" ? "New Release" : "Nuevo Lanzamiento"}
                 </span>
               </div>
               
               <h1 className="display-4 fw-bold text-body mt-3 lh-sm">
-                Gestión Inteligente: <br />
-                <span className="text-gradient">Notes Creator App</span>
+                {language === "en" ? (
+                  <>Smart Management: <br />
+                  <span className="text-gradient">Notes Creator App</span></>
+                ) : (
+                  <>Gestión Inteligente: <br />
+                  <span className="text-gradient">Notes Creator App</span></>
+                )}
               </h1>
               
               <p className="lead text-secondary max-w-2xl mx-auto">
-                Te presentamos la nueva joya de <strong>ImperioDev</strong>. 
-                Desarrollada con la potencia de <strong>Flutter</strong>, Notes Creator está diseñada para emprendedores que necesitan velocidad. 
-                Optimiza la creación de notas de venta y cotizaciones profesionales en segundos.
+                {language === "en" ? (
+                  <>We present the new jewel of <strong>ImperioDev</strong>. Developed with the power of <strong>Flutter</strong>, Notes Creator is designed for entrepreneurs who need speed. Optimize the creation of professional sales notes and quotes in seconds.</>
+                ) : (
+                  <>Te presentamos la nueva joya de <strong>ImperioDev</strong>. Desarrollada con la potencia de <strong>Flutter</strong>, Notes Creator está diseñada para emprendedores que necesitan velocidad. Optimiza la creación de notas de venta y cotizaciones profesionales en segundos.</>
+                )}
               </p>
               
               {/* Badges */}
               <div className="d-flex flex-wrap justify-content-center gap-3 pt-2">
                 <span className="d-flex align-items-center gap-2 text-sm fw-bold text-secondary inner-panel px-3 py-2">
-                  <i className="bi bi-lightning-charge-fill text-warning"></i> Ultra Rápida
+                  <i className="bi bi-lightning-charge-fill text-warning"></i> {language === "en" ? "Ultra Fast" : "Ultra Rápida"}
                 </span>
                 <span className="d-flex align-items-center gap-2 text-sm fw-bold text-secondary inner-panel px-3 py-2">
-                  <i className="bi bi-phone-fill text-primary"></i> Nativa
+                  <i className="bi bi-phone-fill text-primary"></i> {language === "en" ? "Native" : "Nativa"}
                 </span>
                 <span className="d-flex align-items-center gap-2 text-sm fw-bold text-secondary inner-panel px-3 py-2">
-                  <i className="bi bi-file-earmark-pdf-fill text-success"></i> PDF al instante
+                  <i className="bi bi-file-earmark-pdf-fill text-success"></i> {language === "en" ? "Instant PDF" : "PDF al instante"}
                 </span>
               </div>
 
@@ -137,9 +147,11 @@ export default function NotesAppPage() {
                   className="btn btn-primary btn-lg text-white fw-bold px-5 py-3 rounded shadow-sm d-inline-flex align-items-center gap-2"
                   style={{ background: "#3b82f6", borderColor: "#3b82f6" }}
                 >
-                  <i className="bi bi-phone-vibrate"></i> Prueba la aplicación
+                  <i className="bi bi-phone-vibrate"></i> {language === "en" ? "Test the Application" : "Prueba la aplicación"}
                 </a>
-                <p className="text-muted small italic m-0">*Espera unos segundos a que cargue la app</p>
+                <p className="text-muted small italic m-0">
+                  {language === "en" ? "*Wait a few seconds for the app to load" : "*Espera unos segundos a que cargue la app"}
+                </p>
               </div>
             </div>
 
@@ -168,10 +180,12 @@ export default function NotesAppPage() {
                     </div>
                   </div>
                   <div className="fs-5 fw-semibold text-body mb-2 text-glow-teal animate-pulse-slow">
-                    Preparando presentación...
+                    {language === "en" ? "Preparing presentation..." : "Preparando presentación..."}
                   </div>
                   <div className="text-secondary small max-w-xs mx-auto leading-relaxed">
-                    Alineando las diapositivas de Notes Creator. Espera un momento.
+                    {language === "en" 
+                      ? "Aligning Notes Creator slides. Please wait." 
+                      : "Alineando las diapositivas de Notes Creator. Espera un momento."}
                   </div>
                 </div>
 
@@ -195,17 +209,24 @@ export default function NotesAppPage() {
             {/* 3. Call to Action */}
             <div className="py-4 text-center mt-4">
               <div className="max-w-md mx-auto p-4 rounded-4 shadow border inner-panel">
-                <h3 className="h5 fw-bold text-body mb-2">¿Quieres una app como esta para tu negocio?</h3>
+                <h3 className="h5 fw-bold text-body mb-2">
+                  {language === "en" ? "Want an app like this for your business?" : "¿Quieres una app como esta para tu negocio?"}
+                </h3>
                 <p className="text-secondary small mb-4">
-                  Cotiza tu proyecto personalizado de aplicación móvil o web. Creamos soluciones eficientes a tu medida.
+                  {language === "en" 
+                    ? "Get a quote for your custom mobile or web application. We create efficient solutions tailored to your needs." 
+                    : "Cotiza tu proyecto personalizado de aplicación móvil o web. Creamos soluciones eficientes a tu medida."}
                 </p>
                 <a 
-                  href="https://wa.me/526623440716?text=Hola%2C%20me%20gustar%C3%ADa%20cotizar%20una%20aplicacion%20como%20Notes%20Creator" 
+                  href={language === "en" 
+                    ? "https://wa.me/526623440716?text=Hello%2C%20I%20would%20like%20to%20get%20a%20quote%20for%20an%20application%20like%20Notes%20Creator"
+                    : "https://wa.me/526623440716?text=Hola%2C%20me%20gustar%C3%ADa%20cotizar%20una%20aplicacion%20como%20Notes%20Creator"
+                  } 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="btn-whatsapp-cta"
                 >
-                  <i className="bi bi-whatsapp"></i> Consultar por WhatsApp
+                  <i className="bi bi-whatsapp"></i> {language === "en" ? "Inquire via WhatsApp" : "Consultar por WhatsApp"}
                 </a>
               </div>
             </div>

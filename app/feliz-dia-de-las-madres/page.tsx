@@ -1,6 +1,10 @@
 "use client";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 export default function MothersDayPage() {
+  const { language } = useLanguage();
+
   return (
     <div className="mothers-day-wrapper">
       {/* Hero Section */}
@@ -34,14 +38,25 @@ export default function MothersDayPage() {
             <i className="bi bi-heart-fill text-danger fs-2"></i>
           </div>
           
-          <p className="font-display fw-bold text-uppercase tracking-wider text-danger small mb-0">Celebramos tu vida</p>
+          <p className="font-display fw-bold text-uppercase tracking-wider text-danger small mb-0">
+            {language === "en" ? "We celebrate your life" : "Celebramos tu vida"}
+          </p>
           <h1 className="font-display display-3 fw-bold text-danger mb-2 lh-sm text-gradient-rose">
-            ¡Feliz 10 de Mayo,<br />
-            <span className="fst-italic opacity-75">Mamá!</span>
+            {language === "en" ? (
+              <>Happy Mother's<br />
+              <span className="fst-italic opacity-75">Day!</span></>
+            ) : (
+              <>¡Feliz 10 de Mayo,<br />
+              <span className="fst-italic opacity-75">Mamá!</span></>
+            )}
           </h1>
           
           <p className="lead text-secondary max-w-2xl px-2">
-            Hoy celebramos la magia de tu existencia, la calidez infinita de tus abrazos y la fuerza inquebrantable de tu amor. Gracias por ser el pilar de nuestra vida, nuestro refugio más seguro y nuestra luz más brillante.
+            {language === "en" ? (
+              "Today we celebrate the magic of your existence, the infinite warmth of your hugs, and the unwavering strength of your love. Thank you for being the pillar of our lives, our safest refuge, and our brightest light."
+            ) : (
+              "Hoy celebramos la magia de tu existencia, la calidez infinita de tus abrazos y la fuerza inquebrantable de tu amor. Gracias por ser el pilar de nuestra vida, nuestro refugio más seguro y nuestra luz más brillante."
+            )}
           </p>
           
           <div className="w-50 mx-auto border-bottom border-danger border-opacity-25 pt-3"></div>
@@ -52,10 +67,16 @@ export default function MothersDayPage() {
       <section className="py-5 my-5 px-4" style={{ backgroundColor: "#fff8f6" }}>
         <div className="container-xl max-w-6xl">
           <div className="text-center mb-5">
-            <h2 className="display-6 font-display text-danger fst-italic mb-2">Palabras del Corazón</h2>
+            <h2 className="display-6 font-display text-danger fst-italic mb-2">
+              {language === "en" ? "Words from the Heart" : "Palabras del Corazón"}
+            </h2>
             <div className="mx-auto bg-warning bg-opacity-50" style={{ width: "60px", height: "2px" }}></div>
             <p className="text-secondary small mt-3 max-w-md mx-auto">
-              Porque a veces las palabras no alcanzan para describir la inmensidad de lo que significas para nosotros.
+              {language === "en" ? (
+                "Because sometimes words are not enough to describe the immensity of what you mean to us."
+              ) : (
+                "Porque a veces las palabras no alcanzan para describir la inmensidad de lo que significas para nosotros."
+              )}
             </p>
           </div>
           
@@ -73,7 +94,11 @@ export default function MothersDayPage() {
                 <i className="bi bi-quote text-danger text-opacity-25 display-1 position-absolute top-0 start-0 m-3" style={{ pointerEvents: "none" }}></i>
                 
                 <p className="fs-5 text-body fst-italic position-relative z-1 mb-0 pt-4 leading-normal">
-                  "Tus brazos siempre se abrían cuando necesitaba un abrazo. Tu corazón comprendía cuando necesitaba una amiga."
+                  {language === "en" ? (
+                    `"Your arms were always open when I needed a hug. Your heart understood when I needed a friend."`
+                  ) : (
+                    `"Tus brazos siempre se abrían cuando necesitaba un abrazo. Tu corazón comprendía cuando necesitaba una amiga."`
+                  )}
                 </p>
               </div>
             </div>
@@ -86,7 +111,11 @@ export default function MothersDayPage() {
               >
                 <i className="bi bi-flower1 text-danger display-4 mb-3"></i>
                 <p className="fs-5 text-body fw-medium m-0 leading-relaxed">
-                  Para el mundo eres una madre, pero para tu familia, eres absolutamente todo nuestro mundo.
+                  {language === "en" ? (
+                    "To the world you are a mother, but to your family, you are absolutely our whole world."
+                  ) : (
+                    "Para el mundo eres una madre, pero para tu familia, eres absolutamente todo nuestro mundo."
+                  )}
                 </p>
               </div>
             </div>
@@ -104,7 +133,11 @@ export default function MothersDayPage() {
                 <i className="bi bi-quote text-danger text-opacity-25 display-1 position-absolute top-0 start-0 m-3" style={{ pointerEvents: "none" }}></i>
                 
                 <p className="fs-5 text-body fst-italic position-relative z-1 mb-0 pt-4 leading-normal">
-                  "Un millón de gracias no son suficientes para devolverte todo lo que has hecho por mí."
+                  {language === "en" ? (
+                    `"A million thanks are not enough to return everything you have done for me."`
+                  ) : (
+                    `"Un millón de gracias no son suficientes para devolverte todo lo que has hecho por mí."`
+                  )}
                 </p>
               </div>
             </div>
@@ -117,9 +150,15 @@ export default function MothersDayPage() {
         <div className="container-xl max-w-6xl">
           <div className="text-center mb-5 d-flex flex-column align-items-center">
             <i className="bi bi-magic text-warning display-6 mb-2"></i>
-            <h2 className="display-6 font-display text-danger mb-1">Instantes Invaluables</h2>
+            <h2 className="display-6 font-display text-danger mb-1">
+              {language === "en" ? "Priceless Moments" : "Instantes Invaluables"}
+            </h2>
             <p className="text-secondary max-w-md mx-auto">
-              Cada recuerdo a tu lado es un tesoro bordado con hilo de oro en la memoria de nuestro corazón.
+              {language === "en" ? (
+                "Every memory by your side is a treasure embroidered with gold thread in the memory of our hearts."
+              ) : (
+                "Cada recuerdo a tu lado es un tesoro bordado con hilo de oro en la memoria de nuestro corazón."
+              )}
             </p>
           </div>
           
@@ -134,7 +173,9 @@ export default function MothersDayPage() {
                     className="position-absolute w-100 h-100 object-fit-cover"
                   />
                   <div className="position-absolute bottom-0 w-100 bg-dark bg-opacity-25 text-white text-center py-2">
-                    <span className="small tracking-wider uppercase font-display fw-bold">Ternura</span>
+                    <span className="small tracking-wider uppercase font-display fw-bold">
+                      {language === "en" ? "Tenderness" : "Ternura"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -150,7 +191,9 @@ export default function MothersDayPage() {
                     className="position-absolute w-100 h-100 object-fit-cover"
                   />
                   <div className="position-absolute bottom-0 w-100 bg-dark bg-opacity-25 text-white text-center py-2">
-                    <span className="small tracking-wider uppercase font-display fw-bold">Amor Incondicional</span>
+                    <span className="small tracking-wider uppercase font-display fw-bold">
+                      {language === "en" ? "Unconditional Love" : "Amor Incondicional"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -166,7 +209,9 @@ export default function MothersDayPage() {
                     className="position-absolute w-100 h-100 object-fit-cover"
                   />
                   <div className="position-absolute bottom-0 w-100 bg-dark bg-opacity-25 text-white text-center py-2">
-                    <span className="small tracking-wider uppercase font-display fw-bold">Alegría</span>
+                    <span className="small tracking-wider uppercase font-display fw-bold">
+                      {language === "en" ? "Joy" : "Alegría"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -200,15 +245,21 @@ export default function MothersDayPage() {
             <div className="position-relative z-1">
               <i className="bi bi-suit-heart-fill text-danger display-4 mb-3 animate-pulse"></i>
               
-              <h2 className="font-display display-6 text-danger mb-4">Nuestra Mayor Bendición</h2>
+              <h2 className="font-display display-6 text-danger mb-4">
+                {language === "en" ? "Our Greatest Blessing" : "Nuestra Mayor Bendición"}
+              </h2>
               
               <p className="fs-5 text-secondary fst-italic mb-4 px-2 max-w-2xl mx-auto">
-                "No hay regalo en el mundo que pueda igualar el milagro de tenerte como madre. Que hoy y siempre la vida te devuelva toda la paz, la alegría y el amor infinito que tú nos entregas todos los días."
+                {language === "en" ? (
+                  `"There is no gift in the world that can equal the miracle of having you as a mother. May life return to you today and always all the peace, joy, and infinite love that you give us every day."`
+                ) : (
+                  `"No hay regalo en el mundo que pueda igualar el milagro de tenerte como madre. Que hoy y siempre la vida te devuelva toda la paz, la alegría y el amor infinito que tú nos entregas todos los días."`
+                )}
               </p>
               
               <div className="d-inline-flex align-items-center gap-2 text-danger fw-bold uppercase border-bottom border-danger pb-1 tracking-wider small mt-3">
                 <i className="bi bi-sparkles"></i>
-                Te Amamos
+                {language === "en" ? "We Love You" : "Te Amamos"}
                 <i className="bi bi-sparkles"></i>
               </div>
             </div>

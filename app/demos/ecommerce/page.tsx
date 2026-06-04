@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Product {
   id: number;
@@ -19,16 +20,22 @@ interface CartItem extends Product {
 
 export default function EcommerceDemo() {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>(" ");
   const [selectedCategory, setSelectedCategory] = useState<string>("todos");
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState<boolean>(false);
   const [videoEnded, setVideoEnded] = useState<boolean>(false);
+  const { language } = useLanguage();
+
+  // Reset search term on mount to avoid placeholder issues
+  useEffect(() => {
+    setSearchTerm("");
+  }, []);
 
   // Set page document title dynamically on client
   useEffect(() => {
-    document.title = "Demo de E-commerce - ImperioDev";
-  }, []);
+    document.title = language === "en" ? "E-commerce Demo - ImperioDev" : "Demo de E-commerce - ImperioDev";
+  }, [language]);
 
   // Time update handler to freeze video 1.0s before actual end to bypass unwanted trailing transition
   const handleVideoTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -173,6 +180,30 @@ export default function EcommerceDemo() {
   const handleCheckout = () => {
     setCheckoutSuccess(true);
     setCart([]);
+  };
+
+  const getCategoryName = (category: string) => {
+    if (language === "en") {
+      switch (category) {
+        case "sudaderas": return "hoodies";
+        case "pantalones": return "pants";
+        case "camisetas": return "t-shirts";
+        case "chaquetas": return "jackets";
+        case "calzado": return "footwear";
+        case "accesorios": return "accessories";
+        default: return category;
+      }
+    }
+    return category;
+  };
+
+  const categoryLabels: Record<string, { es: string; en: string }> = {
+    todos: { es: "todos", en: "all" },
+    sudaderas: { es: "sudaderas", en: "hoodies" },
+    camisetas: { es: "camisetas", en: "t-shirts" },
+    chaquetas: { es: "chaquetas", en: "jackets" },
+    calzado: { es: "calzado", en: "footwear" },
+    accesorios: { es: "accesorios", en: "accessories" },
   };
 
   return (
@@ -343,9 +374,11 @@ export default function EcommerceDemo() {
 
       {/* Floating Demo Control Bar */}
       <div className="demo-bar-light px-4 py-2 d-flex align-items-center gap-3">
-        <span className="text-black small fw-bold d-none d-sm-inline">Demo de E-commerce</span>
+        <span className="text-black small fw-bold d-none d-sm-inline">
+          {language === "en" ? "E-commerce Demo" : "Demo de E-commerce"}
+        </span>
         <Link href="/demos" className="btn btn-dark btn-sm fw-bold rounded-pill px-3 py-1.5 d-flex align-items-center gap-1">
-          <i className="bi bi-grid-fill"></i> Salir de la Demo
+          <i className="bi bi-grid-fill"></i> {language === "en" ? "Exit Demo" : "Salir de la Demo"}
         </Link>
       </div>
 
@@ -415,13 +448,17 @@ export default function EcommerceDemo() {
             transition: "opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)"
           }}
         >
-          <span className="text-white text-uppercase tracking-widest small mb-2 fw-semibold hero-text-shadow" style={{ letterSpacing: "0.2em", fontSize: "0.75rem" }}>CÁPSULA 01 / STREETWEAR</span>
+          <span className="text-white text-uppercase tracking-widest small mb-2 fw-semibold hero-text-shadow" style={{ letterSpacing: "0.2em", fontSize: "0.75rem" }}>
+            {language === "en" ? "CAPSULE 01 / STREETWEAR" : "CÁPSULA 01 / STREETWEAR"}
+          </span>
           <h1 className="display-4 fw-bold text-white mb-3 tracking-widest font-display hero-text-shadow" style={{ letterSpacing: "0.15em" }}>RAW SILHOUETTES</h1>
           <p className="text-white-50 mx-auto mb-4 hero-text-shadow" style={{ fontSize: "0.95rem", maxWidth: "450px", lineHeight: "1.6", fontWeight: 500 }}>
-            Piezas oversized concebidas con tejidos de alto gramaje y costuras caídas. Estética minimalista monocromática.
+            {language === "en" 
+              ? "Oversized garments crafted from heavy knit fabrics and dropped shoulders. Minimalist monochromatic aesthetic."
+              : "Piezas oversized concebidas con tejidos de alto gramaje y costuras caídas. Estética minimalista monocromática."}
           </p>
           <a href="#novedades" className="btn btn-light rounded-0 px-4 py-2.5 fw-bold text-uppercase tracking-widest" style={{ fontSize: "0.7rem", letterSpacing: "0.1em" }}>
-            Explorar Colección
+            {language === "en" ? "Explore Collection" : "Explorar Colección"}
           </a>
         </div>
       </div>
@@ -433,15 +470,19 @@ export default function EcommerceDemo() {
         <section className="container-xl px-4 py-4" id="novedades">
           <div className="d-flex justify-content-between align-items-end mb-4 border-bottom pb-2">
             <div>
-              <span className="text-muted text-uppercase tracking-widest font-monospace" style={{ fontSize: "0.65rem" }}>Colección Invierno</span>
-              <h2 className="h4 fw-bold text-dark m-0 text-uppercase tracking-wider font-display">Novedades</h2>
+              <span className="text-muted text-uppercase tracking-widest font-monospace" style={{ fontSize: "0.65rem" }}>
+                {language === "en" ? "Winter Collection" : "Colección Invierno"}
+              </span>
+              <h2 className="h4 fw-bold text-dark m-0 text-uppercase tracking-wider font-display">
+                {language === "en" ? "New Arrivals" : "Novedades"}
+              </h2>
             </div>
             <div className="d-flex gap-2">
               <button 
                 onClick={() => scrollSlider(newsSliderRef, "left")} 
                 className="btn btn-outline-dark rounded-circle p-0 d-flex align-items-center justify-content-center" 
                 style={{ width: "36px", height: "36px" }}
-                aria-label="Anterior"
+                aria-label={language === "en" ? "Previous" : "Anterior"}
               >
                 <i className="bi bi-chevron-left"></i>
               </button>
@@ -449,7 +490,7 @@ export default function EcommerceDemo() {
                 onClick={() => scrollSlider(newsSliderRef, "right")} 
                 className="btn btn-outline-dark rounded-circle p-0 d-flex align-items-center justify-content-center" 
                 style={{ width: "36px", height: "36px" }}
-                aria-label="Siguiente"
+                aria-label={language === "en" ? "Next" : "Siguiente"}
               >
                 <i className="bi bi-chevron-right"></i>
               </button>
@@ -467,13 +508,15 @@ export default function EcommerceDemo() {
                         ⭐ {product.rating}
                       </span>
                     </div>
-                    <span className="text-muted text-uppercase font-monospace" style={{ fontSize: "0.65rem" }}>{product.category}</span>
+                    <span className="text-muted text-uppercase font-monospace" style={{ fontSize: "0.65rem" }}>
+                      {getCategoryName(product.category)}
+                    </span>
                     <h3 className="h6 fw-bold text-dark mt-1 mb-2">{product.name}</h3>
                   </div>
                   <div className="mt-3">
                     <span className="d-block fw-bold mb-3">${product.price.toLocaleString("es-MX")} MXN</span>
                     <button onClick={() => addToCart(product)} className="btn btn-black-streetwear w-100 py-2">
-                      Añadir
+                      {language === "en" ? "Add" : "Añadir"}
                     </button>
                   </div>
                 </div>
@@ -486,7 +529,9 @@ export default function EcommerceDemo() {
         <section className="container-xl px-4 py-5" id="essentials">
           <div className="d-flex justify-content-between align-items-end mb-4 border-bottom pb-2">
             <div>
-              <span className="text-muted text-uppercase tracking-widest font-monospace" style={{ fontSize: "0.65rem" }}>Estética Atemporal</span>
+              <span className="text-muted text-uppercase tracking-widest font-monospace" style={{ fontSize: "0.65rem" }}>
+                {language === "en" ? "Timeless Aesthetic" : "Estética Atemporal"}
+              </span>
               <h2 className="h4 fw-bold text-dark m-0 text-uppercase tracking-wider font-display">Essentials</h2>
             </div>
             <div className="d-flex gap-2">
@@ -494,7 +539,7 @@ export default function EcommerceDemo() {
                 onClick={() => scrollSlider(essentialsSliderRef, "left")} 
                 className="btn btn-outline-dark rounded-circle p-0 d-flex align-items-center justify-content-center" 
                 style={{ width: "36px", height: "36px" }}
-                aria-label="Anterior"
+                aria-label={language === "en" ? "Previous" : "Anterior"}
               >
                 <i className="bi bi-chevron-left"></i>
               </button>
@@ -502,7 +547,7 @@ export default function EcommerceDemo() {
                 onClick={() => scrollSlider(essentialsSliderRef, "right")} 
                 className="btn btn-outline-dark rounded-circle p-0 d-flex align-items-center justify-content-center" 
                 style={{ width: "36px", height: "36px" }}
-                aria-label="Siguiente"
+                aria-label={language === "en" ? "Next" : "Siguiente"}
               >
                 <i className="bi bi-chevron-right"></i>
               </button>
@@ -520,13 +565,15 @@ export default function EcommerceDemo() {
                         ⭐ {product.rating}
                       </span>
                     </div>
-                    <span className="text-muted text-uppercase font-monospace" style={{ fontSize: "0.65rem" }}>{product.category}</span>
+                    <span className="text-muted text-uppercase font-monospace" style={{ fontSize: "0.65rem" }}>
+                      {getCategoryName(product.category)}
+                    </span>
                     <h3 className="h6 fw-bold text-dark mt-1 mb-2">{product.name}</h3>
                   </div>
                   <div className="mt-3">
                     <span className="d-block fw-bold mb-3">${product.price.toLocaleString("es-MX")} MXN</span>
                     <button onClick={() => addToCart(product)} className="btn btn-black-streetwear w-100 py-2">
-                      Añadir
+                      {language === "en" ? "Add" : "Añadir"}
                     </button>
                   </div>
                 </div>
@@ -539,15 +586,19 @@ export default function EcommerceDemo() {
         <section className="container-xl px-4 py-4" id="accesorios">
           <div className="d-flex justify-content-between align-items-end mb-4 border-bottom pb-2">
             <div>
-              <span className="text-muted text-uppercase tracking-widest font-monospace" style={{ fontSize: "0.65rem" }}>Detalles Clave</span>
-              <h2 className="h4 fw-bold text-dark m-0 text-uppercase tracking-wider font-display">Accesorios</h2>
+              <span className="text-muted text-uppercase tracking-widest font-monospace" style={{ fontSize: "0.65rem" }}>
+                {language === "en" ? "Key Details" : "Detalles Clave"}
+              </span>
+              <h2 className="h4 fw-bold text-dark m-0 text-uppercase tracking-wider font-display">
+                {language === "en" ? "Accessories" : "Accesorios"}
+              </h2>
             </div>
             <div className="d-flex gap-2">
               <button 
                 onClick={() => scrollSlider(accessoriesSliderRef, "left")} 
                 className="btn btn-outline-dark rounded-circle p-0 d-flex align-items-center justify-content-center" 
                 style={{ width: "36px", height: "36px" }}
-                aria-label="Anterior"
+                aria-label={language === "en" ? "Previous" : "Anterior"}
               >
                 <i className="bi bi-chevron-left"></i>
               </button>
@@ -555,7 +606,7 @@ export default function EcommerceDemo() {
                 onClick={() => scrollSlider(accessoriesSliderRef, "right")} 
                 className="btn btn-outline-dark rounded-circle p-0 d-flex align-items-center justify-content-center" 
                 style={{ width: "36px", height: "36px" }}
-                aria-label="Siguiente"
+                aria-label={language === "en" ? "Next" : "Siguiente"}
               >
                 <i className="bi bi-chevron-right"></i>
               </button>
@@ -573,13 +624,15 @@ export default function EcommerceDemo() {
                         ⭐ {product.rating}
                       </span>
                     </div>
-                    <span className="text-muted text-uppercase font-monospace" style={{ fontSize: "0.65rem" }}>{product.category}</span>
+                    <span className="text-muted text-uppercase font-monospace" style={{ fontSize: "0.65rem" }}>
+                      {getCategoryName(product.category)}
+                    </span>
                     <h3 className="h6 fw-bold text-dark mt-1 mb-2">{product.name}</h3>
                   </div>
                   <div className="mt-3">
                     <span className="d-block fw-bold mb-3">${product.price.toLocaleString("es-MX")} MXN</span>
                     <button onClick={() => addToCart(product)} className="btn btn-black-streetwear w-100 py-2">
-                      Añadir
+                      {language === "en" ? "Add" : "Añadir"}
                     </button>
                   </div>
                 </div>
@@ -592,13 +645,15 @@ export default function EcommerceDemo() {
         <section className="container-xl px-4 py-5 border-top mt-5" id="buscador">
           <div className="row g-3 mb-5 align-items-center justify-content-between">
             <div className="col-12 col-md-5">
-              <h2 className="h4 fw-bold text-dark text-uppercase tracking-wider font-display mb-3">Catálogo Completo</h2>
+              <h2 className="h4 fw-bold text-dark text-uppercase tracking-wider font-display mb-3">
+                {language === "en" ? "Full Catalog" : "Catálogo Completo"}
+              </h2>
               <div className="input-group" style={{ borderRadius: "0px" }}>
                 <span className="input-group-text bg-transparent border-end-0 border-dark rounded-0"><i className="bi bi-search"></i></span>
                 <input 
                   type="text" 
                   className="form-control border-start-0 border-dark rounded-0 py-2.5" 
-                  placeholder="Buscar sudaderas, camisetas..." 
+                  placeholder={language === "en" ? "Search hoodies, t-shirts..." : "Buscar sudaderas, camisetas..."} 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{ fontSize: "0.9rem" }}
@@ -614,7 +669,7 @@ export default function EcommerceDemo() {
                   className={`btn btn-sm text-capitalize px-3 py-2 rounded-0 fw-semibold tracking-wide ${selectedCategory === cat ? "btn-dark" : "btn-outline-dark"}`}
                   style={{ fontSize: "0.75rem" }}
                 >
-                  {cat}
+                  {categoryLabels[cat]?.[language] || cat}
                 </button>
               ))}
             </div>
@@ -633,14 +688,16 @@ export default function EcommerceDemo() {
                           ⭐ {product.rating}
                         </span>
                       </div>
-                      <span className="text-muted text-uppercase font-monospace" style={{ fontSize: "0.65rem" }}>{product.category}</span>
+                      <span className="text-muted text-uppercase font-monospace" style={{ fontSize: "0.65rem" }}>
+                        {getCategoryName(product.category)}
+                      </span>
                       <h3 className="h6 fw-bold text-dark mt-1 mb-2" style={{ minHeight: "38px" }}>{product.name}</h3>
                     </div>
 
                     <div className="mt-3">
                       <span className="d-block fw-bold mb-3">${product.price.toLocaleString("es-MX")} MXN</span>
                       <button onClick={() => addToCart(product)} className="btn btn-black-streetwear w-100 py-2">
-                        Añadir al Carrito
+                        {language === "en" ? "Add to Cart" : "Añadir al Carrito"}
                       </button>
                     </div>
                   </div>
@@ -649,7 +706,9 @@ export default function EcommerceDemo() {
             ) : (
               <div className="col-12 text-center py-5">
                 <i className="bi bi-search-heart text-secondary fs-1 mb-3"></i>
-                <p className="lead text-secondary">No encontramos prendas en esa búsqueda.</p>
+                <p className="lead text-secondary">
+                  {language === "en" ? "No items found in this search." : "No encontramos prendas en esa búsqueda."}
+                </p>
               </div>
             )}
           </div>
@@ -665,12 +724,12 @@ export default function EcommerceDemo() {
           {/* Header */}
           <div className="d-flex align-items-center justify-content-between pb-3 border-bottom mb-4">
             <h4 className="fw-bold text-dark m-0 d-flex align-items-center gap-2 text-uppercase tracking-wider font-display" style={{ fontSize: "1.1rem" }}>
-              <i className="bi bi-bag"></i> Bolsa de Compra
+              <i className="bi bi-bag"></i> {language === "en" ? "Shopping Bag" : "Bolsa de Compra"}
             </h4>
             <button 
               onClick={() => setIsCartOpen(false)}
               className="btn btn-close shadow-none border-0"
-              aria-label="Cerrar bolsa"
+              aria-label={language === "en" ? "Close bag" : "Cerrar bolsa"}
             />
           </div>
 
@@ -692,7 +751,7 @@ export default function EcommerceDemo() {
                   <button 
                     onClick={() => removeFromCart(item.id)}
                     className="btn btn-sm text-danger border-0 bg-transparent p-1"
-                    title="Eliminar prenda"
+                    title={language === "en" ? "Remove item" : "Eliminar prenda"}
                   >
                     <i className="bi bi-trash"></i>
                   </button>
@@ -701,7 +760,9 @@ export default function EcommerceDemo() {
             ) : (
               <div className="text-center py-5">
                 <i className="bi bi-bag-x text-muted fs-1 mb-2"></i>
-                <p className="small text-muted">Tu bolsa de compra está vacía.</p>
+                <p className="small text-muted">
+                  {language === "en" ? "Your shopping bag is empty." : "Tu bolsa de compra está vacía."}
+                </p>
               </div>
             )}
           </div>
@@ -719,7 +780,7 @@ export default function EcommerceDemo() {
                 onClick={handleCheckout}
                 className="btn btn-black-streetwear w-100 py-3 text-uppercase"
               >
-                Proceder a Checkout
+                {language === "en" ? "Proceed to Checkout" : "Proceder a Checkout"}
               </button>
             </div>
           )}
@@ -732,15 +793,19 @@ export default function EcommerceDemo() {
           <div className="text-dark fs-1 mb-2">
             <i className="bi bi-check2-square"></i>
           </div>
-          <h4 className="fw-bold text-dark text-uppercase tracking-wider font-display">Pedido Ficticio</h4>
+          <h4 className="fw-bold text-dark text-uppercase tracking-wider font-display">
+            {language === "en" ? "Fictional Order" : "Pedido Ficticio"}
+          </h4>
           <p className="text-muted small mt-2 mb-4">
-            Tu compra ha sido procesada como simulación. Esto valida los flujos de interacción e integración que realizamos en ImperioDev.
+            {language === "en" 
+              ? "Your purchase has been processed as a simulation. This validates the interaction and integration flows we build at ImperioDev."
+              : "Tu compra ha sido procesada como simulación. Esto valida los flujos de interacción e integración que realizamos en ImperioDev."}
           </p>
           <button 
             onClick={() => setCheckoutSuccess(false)}
             className="btn btn-black-streetwear w-100 py-2.5"
           >
-            Entendido
+            {language === "en" ? "Understood" : "Entendido"}
           </button>
         </div>
       )}

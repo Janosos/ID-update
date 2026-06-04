@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface TextSection {
   title: string;
@@ -15,6 +16,7 @@ interface TextSection {
 export default function ScrollLandingDemo() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isPreloaded, setIsPreloaded] = useState(false);
+  const { language } = useLanguage();
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
@@ -33,12 +35,12 @@ export default function ScrollLandingDemo() {
 
   // Set document title dynamically on client and reset scroll to top on mount
   useEffect(() => {
-    document.title = "Demo de Landing Page - ImperioDev";
+    document.title = language === "en" ? "Landing Page Demo - ImperioDev" : "Demo de Landing Page - ImperioDev";
     window.scrollTo(0, 0);
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
-  }, []);
+  }, [language]);
 
   // Preload scroll animation frames
   useEffect(() => {
@@ -149,56 +151,70 @@ export default function ScrollLandingDemo() {
   const textSections: TextSection[] = [
     {
       title: "AeroPods Pro",
-      subtitle: "Sonido en su estado más puro.",
-      description: "Una experiencia de audio completamente rediseñada para envolverte en cada nota. Ingeniería de precisión acústica y diseño ergonómico de vanguardia.",
+      subtitle: language === "en" ? "Sound in its purest form." : "Sonido en su estado más puro.",
+      description: language === "en" 
+        ? "A completely redesigned audio experience to envelop you in every note. Precision acoustic engineering and cutting-edge ergonomic design."
+        : "Una experiencia de audio completamente rediseñada para envolverte en cada nota. Ingeniería de precisión acústica y diseño ergonómico de vanguardia.",
       start: 0.0,
       end: 0.14,
       align: "center"
     },
     {
-      title: "Transductor de Alta Excursión",
-      subtitle: "Componentes de precisión absoluta.",
-      description: "Un motor de bobina móvil de diseño exclusivo y un amplificador de rango dinámico ultra amplio minimizan la distorsión, entregando graves profundos de hasta 15 Hz.",
+      title: language === "en" ? "High-Excursion Transducer" : "Transductor de Alta Excursión",
+      subtitle: language === "en" ? "Absolute precision components." : "Componentes de precisión absoluta.",
+      description: language === "en"
+        ? "A custom-designed high-excursion driver and ultra-wide dynamic range amplifier minimize distortion, delivering deep bass down to 15 Hz."
+        : "Un motor de bobina móvil de diseño exclusivo y un amplificador de rango dinámico ultra amplio minimizan la distorsión, entregando graves profundos de hasta 15 Hz.",
       start: 0.17,
       end: 0.28,
       align: "left"
     },
     {
-      title: "Diafragma de Berilio",
-      subtitle: "Materiales de grado aeroespacial.",
-      description: "El diafragma ultraligero recubierto de berilio de 11 mm responde con una velocidad extrema a las altas frecuencias, eliminando resonancias y entregando agudos cristalinos y detallados.",
+      title: language === "en" ? "Beryllium Diaphragm" : "Diafragma de Berilio",
+      subtitle: language === "en" ? "Aerospace-grade materials." : "Materiales de grado aeroespacial.",
+      description: language === "en"
+        ? "The ultra-lightweight 11mm beryllium-coated diaphragm responds with extreme speed to high frequencies, eliminating resonance and delivering crystal-clear, detailed treble."
+        : "El diafragma ultraligero recubierto de berilio de 11 mm responde con una velocidad extrema a las altas frecuencias, eliminando resonancias y entregando agudos cristalinos y detallados.",
       start: 0.31,
       end: 0.41,
       align: "right"
     },
     {
-      title: "Cancelación Activa de Ruido",
-      subtitle: "Silencio absoluto, música pura.",
-      description: "Dos micrófonos dedicados analizan el ruido ambiental 48,000 veces por segundo, generando una onda de fase inversa que neutraliza el sonido exterior antes de que llegue a tus oídos.",
+      title: language === "en" ? "Active Noise Cancellation" : "Cancelación Activa de Ruido",
+      subtitle: language === "en" ? "Absolute silence, pure music." : "Silencio absoluto, música pura.",
+      description: language === "en"
+        ? "Two dedicated microphones analyze ambient noise 48,000 times per second, generating an inverse-phase wave that neutralizes external sound before it reaches your ears."
+        : "Dos micrófonos dedicados analizan el ruido ambiental 48,000 veces por segundo, generando una onda de fase inversa que neutraliza el sonido exterior antes de que llegue a tus oídos.",
       start: 0.44,
       end: 0.54,
       align: "left"
     },
     {
-      title: "Micrófonos de Formación de Haces",
-      subtitle: "Focalización de voz y nitidez extrema.",
-      description: "Los micrófonos dual-beamforming y una malla acústica de acero inoxidable reducen el ruido del viento y aíslan tu voz para llamadas cristalinas en cualquier entorno.",
+      title: language === "en" ? "Beamforming Microphones" : "Micrófonos de Formación de Haces",
+      subtitle: language === "en" ? "Voice targeting and extreme clarity." : "Focalización de voz y nitidez extrema.",
+      description: language === "en"
+        ? "Dual beamforming microphones and a stainless steel acoustic mesh reduce wind noise and isolate your voice for crystal-clear calls in any environment."
+        : "Los micrófonos dual-beamforming y una malla acústica de acero inoxidable reducen el ruido del viento y aíslan tu voz para llamadas cristalinas en cualquier entorno.",
       start: 0.57,
       end: 0.67,
       align: "right"
     },
     {
-      title: "Procesador Imperio H3 Pro",
-      subtitle: "Computación de audio en tiempo real.",
-      description: "El chip H3 utiliza 10 núcleos de procesamiento de audio para ecualizar dinámicamente el sonido según la fisonomía de tu oído y optimizar el consumo de batería en un espacio ultra compacto.",
+      title: language === "en" ? "Imperio H3 Pro Processor" : "Procesador Imperio H3 Pro",
+      subtitle: language === "en" ? "Real-time computational audio." : "Computación de audio en tiempo real.",
+      description: language === "en"
+        ? "The H3 chip utilizes 10 audio processing cores to dynamically equalize sound to your ear's unique anatomy and optimize battery life in an ultra-compact space."
+        : "El chip H3 utiliza 10 núcleos de procesamiento de audio para ecualizar dinámicamente el sonido según la fisonomía de tu oído y optimizar el consumo de batería en un espacio ultra compacto.",
       start: 0.70,
       end: 0.80,
       align: "left"
     },
     {
-      title: "Energía Ininterrumpida",
-      subtitle: "Hasta 45 horas de autonomía total.",
-      description: "Los audífonos ofrecen hasta 9 horas de reproducción por carga. El estuche de carga inteligente MagSafe proporciona hasta 36 horas adicionales con carga rápida mediante USB-C.",
+      title: language === "en" ? "Uninterrupted Power" : "Energía Ininterrumpida",
+      subtitle: language === "en" ? "Up to 45 hours of total runtime." : "Hasta 45 horas de autonomía total.",
+      description: language === "en"
+        ? "The earbuds offer up to 9 hours of playback per charge. The smart MagSafe charging case provides up to 36 additional hours with USB-C fast charging."
+        : "Los audífonos ofrecen hasta 9 horas de reproducción por carga. El estuche de carga inteligente MagSafe proporciona hasta 36 horas adicionales con carga rápida mediante USB-C.",
       start: 0.83,
       end: 0.93,
       align: "center"
@@ -284,43 +300,44 @@ export default function ScrollLandingDemo() {
             }
           }
         }
+      }
 
-        // Apply scale transform to canvas using GPU layers
+      const isMobileScreen = window.innerWidth < 992;
+      if (canvas) {
         const firstSectionOpacity = getSectionOpacity(progress, 0, 0.14);
         const canvasScale = 1 + (1 - firstSectionOpacity) * 0.05;
-        const isMobileScreen = window.innerWidth < 992;
         canvas.style.transform = isMobileScreen
           ? `scale3d(${canvasScale}, ${canvasScale}, 1) translate3d(0, 12vh, 0)`
           : `scale3d(${canvasScale}, ${canvasScale}, 1) translate3d(0, 0, 0)`;
-
-        // Update Text Card opacities and translations directly in the DOM
-        textSections.forEach((section, idx) => {
-          const cardEl = cardRefs.current[idx];
-          if (!cardEl) return;
-
-          const opacity = getSectionOpacity(progress, section.start, section.end);
-          const translateY = getSectionTranslateY(progress, section.start, section.end);
-
-          // Optimize style writes: only update DOM if values have changed
-          const cache = lastCardStates.current[idx] || { opacity: -1, translateY: -1 };
-          if (Math.abs(cache.opacity - opacity) > 0.001 || Math.abs(cache.translateY - translateY) > 0.1) {
-            lastCardStates.current[idx] = { opacity, translateY };
-            if (opacity <= 0.01) {
-              cardEl.style.opacity = "0";
-              cardEl.style.transform = isMobileScreen
-                ? `translate3d(0, 40px, 0)`
-                : (section.align === "center" ? `translate3d(-50%, 40px, 0)` : `translate3d(0, 40px, 0)`);
-              cardEl.style.pointerEvents = "none";
-            } else {
-              cardEl.style.opacity = opacity.toString();
-              cardEl.style.transform = isMobileScreen
-                ? `translate3d(0, ${translateY}px, 0)`
-                : (section.align === "center" ? `translate3d(-50%, ${translateY}px, 0)` : `translate3d(0, ${translateY}px, 0)`);
-              cardEl.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
-            }
-          }
-        });
       }
+
+      // Update Text Card opacities and translations directly in the DOM
+      textSections.forEach((section, idx) => {
+        const cardEl = cardRefs.current[idx];
+        if (!cardEl) return;
+
+        const opacity = getSectionOpacity(progress, section.start, section.end);
+        const translateY = getSectionTranslateY(progress, section.start, section.end);
+
+        // Optimize style writes: only update DOM if values have changed
+        const cache = lastCardStates.current[idx] || { opacity: -1, translateY: -1 };
+        if (Math.abs(cache.opacity - opacity) > 0.001 || Math.abs(cache.translateY - translateY) > 0.1) {
+          lastCardStates.current[idx] = { opacity, translateY };
+          if (opacity <= 0.01) {
+            cardEl.style.opacity = "0";
+            cardEl.style.transform = isMobileScreen
+              ? `translate3d(0, 40px, 0)`
+              : (section.align === "center" ? `translate3d(-50%, 40px, 0)` : `translate3d(0, 40px, 0)`);
+            cardEl.style.pointerEvents = "none";
+          } else {
+            cardEl.style.opacity = opacity.toString();
+            cardEl.style.transform = isMobileScreen
+              ? `translate3d(0, ${translateY}px, 0)`
+              : (section.align === "center" ? `translate3d(-50%, ${translateY}px, 0)` : `translate3d(0, ${translateY}px, 0)`);
+            cardEl.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
+          }
+        }
+      });
 
       info.animationFrameId = requestAnimationFrame(renderLoop);
     };
@@ -343,6 +360,15 @@ export default function ScrollLandingDemo() {
       window.removeEventListener("resize", handleScroll);
     };
   }, [isPreloaded]);
+
+  const handleBookingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert(
+      language === "en"
+        ? "Reservation completed successfully (Landing Page Simulation)."
+        : "Reserva realizada con éxito (Simulación de landing)."
+    );
+  };
 
   return (
     <div data-bs-theme="light" className="bg-white text-black min-vh-100 position-relative" style={{ fontFamily: "var(--font-sans)", overflow: "visible" }}>
@@ -662,8 +688,10 @@ export default function ScrollLandingDemo() {
               className="mb-3 animate-float"
               style={{ height: "50px", width: "auto" }}
             />
-            <h2 className="h5 fw-bold text-black font-display mb-1">Cargando Experiencia 3D</h2>
-            <p className="small text-muted">{loadingProgress}% completado</p>
+            <h2 className="h5 fw-bold text-black font-display mb-1">
+              {language === "en" ? "Loading 3D Experience" : "Cargando Experiencia 3D"}
+            </h2>
+            <p className="small text-muted">{loadingProgress}% {language === "en" ? "completed" : "completado"}</p>
             <div className="progress-bar-demos mx-auto">
               <div className="progress-fill-demos" style={{ width: `${loadingProgress}%` }}></div>
             </div>
@@ -673,9 +701,11 @@ export default function ScrollLandingDemo() {
 
       {/* Floating Demo Control Bar */}
       <div className="demo-bar-light px-4 py-2 d-flex align-items-center gap-3">
-        <span className="text-black small fw-bold d-none d-sm-inline">Demo de Landing Page</span>
+        <span className="text-black small fw-bold d-none d-sm-inline">
+          {language === "en" ? "Landing Page Demo" : "Demo de Landing Page"}
+        </span>
         <Link href="/demos" className="btn btn-dark btn-sm fw-bold rounded-pill px-3 py-1.5 d-flex align-items-center gap-1">
-          <i className="bi bi-grid-fill"></i> Salir de la Demo
+          <i className="bi bi-grid-fill"></i> {language === "en" ? "Exit Demo" : "Salir de la Demo"}
         </Link>
       </div>
 
@@ -687,11 +717,20 @@ export default function ScrollLandingDemo() {
           </span>
           <div className="d-flex align-items-center gap-3">
             <span className="small" style={{ color: "#1d1d1f", fontWeight: 600, fontSize: "clamp(0.75rem, 2.2vw, 0.85rem)" }}>
-              <span className="d-none d-sm-inline">Cancelación de Ruido Inteligente</span>
-              <span className="d-inline d-sm-none">Cancelación de Ruido</span>
+              {language === "en" ? (
+                <>
+                  <span className="d-none d-sm-inline">Smart Noise Cancellation</span>
+                  <span className="d-inline d-sm-none">Noise Cancellation</span>
+                </>
+              ) : (
+                <>
+                  <span className="d-none d-sm-inline">Cancelación de Ruido Inteligente</span>
+                  <span className="d-inline d-sm-none">Cancelación de Ruido</span>
+                </>
+              )}
             </span>
             <a href="#comprar" className="btn btn-dark btn-sm rounded-pill px-3 fw-bold">
-              Reservar
+              {language === "en" ? "Reserve" : "Reservar"}
             </a>
           </div>
         </div>
@@ -729,7 +768,11 @@ export default function ScrollLandingDemo() {
                 }}
               >
                 <span className="apple-label font-monospace">
-                  {section.align === "center" ? "Lanzamiento" : section.align === "left" ? "Especificaciones" : "Componentes"}
+                  {language === "en" ? (
+                    section.align === "center" ? "Release" : section.align === "left" ? "Specifications" : "Components"
+                  ) : (
+                    section.align === "center" ? "Lanzamiento" : section.align === "left" ? "Especificaciones" : "Componentes"
+                  )}
                 </span>
                 <h2 className={`apple-title mb-2 ${section.align === 'center' ? 'display-5' : 'h4'}`}>{section.title}</h2>
                 <h3 className={`apple-subtitle mb-2 ${section.align === 'center' ? 'h5' : 'h6'}`} style={{ fontSize: section.align === 'center' ? undefined : "0.85rem" }}>{section.subtitle}</h3>
@@ -746,45 +789,75 @@ export default function ScrollLandingDemo() {
         <div className="container-xl px-4 py-5">
           <div className="row g-5 align-items-center">
             <div className="col-12 col-lg-6">
-              <span className="text-danger fw-bold uppercase tracking-wider small d-block mb-2">Ingeniería Acústica</span>
-              <h2 className="display-5 fw-bold text-black mb-4 font-display">Tecnología de otro nivel.</h2>
+              <span className="text-danger fw-bold uppercase tracking-wider small d-block mb-2">
+                {language === "en" ? "Acoustic Engineering" : "Ingeniería Acústica"}
+              </span>
+              <h2 className="display-5 fw-bold text-black mb-4 font-display">
+                {language === "en" ? "Next-level technology." : "Tecnología de otro nivel."}
+              </h2>
               
               <div className="row g-4 mt-2">
                 <div className="col-12 col-sm-6">
-                  <h4 className="h6 spec-title">Cancelación de Ruido</h4>
-                  <p className="spec-desc">Elimina el doble de ruido exterior adaptándose al canal de tu oído.</p>
+                  <h4 className="h6 spec-title">{language === "en" ? "Noise Cancellation" : "Cancelación de Ruido"}</h4>
+                  <p className="spec-desc">
+                    {language === "en" 
+                      ? "Eliminates twice as much background noise by adapting to the shape of your ear canal."
+                      : "Elimina el doble de ruido exterior adaptándose al canal de tu oído."}
+                  </p>
                 </div>
                 <div className="col-12 col-sm-6">
-                  <h4 className="h6 spec-title">Audio Espacial Personalizado</h4>
-                  <p className="spec-desc">Sonido de 360 grados calibrado según la fisonomía de tus oídos.</p>
+                  <h4 className="h6 spec-title">{language === "en" ? "Personalized Spatial Audio" : "Audio Espacial Personalizado"}</h4>
+                  <p className="spec-desc">
+                    {language === "en"
+                      ? "360-degree sound calibrated to the unique shape of your ears."
+                      : "Sonido de 360 grados calibrado según la fisonomía de tus oídos."}
+                  </p>
                 </div>
                 <div className="col-12 col-sm-6">
-                  <h4 className="h6 spec-title">Control Táctil Inteligente</h4>
-                  <p className="spec-desc">Desliza el dedo por el auricular para subir o bajar el volumen al instante.</p>
+                  <h4 className="h6 spec-title">{language === "en" ? "Smart Touch Control" : "Control Táctil Inteligente"}</h4>
+                  <p className="spec-desc">
+                    {language === "en"
+                      ? "Swipe the earbud stem to instantly adjust the volume."
+                      : "Desliza el dedo por el auricular para subir o bajar el volumen al instante."}
+                  </p>
                 </div>
                 <div className="col-12 col-sm-6">
-                  <h4 className="h6 spec-title">Resistencia IPX4</h4>
-                  <p className="spec-desc">Los audífonos y el estuche están preparados para soportar sudor y agua de forma segura.</p>
+                  <h4 className="h6 spec-title">{language === "en" ? "IPX4 Water Resistance" : "Resistencia IPX4"}</h4>
+                  <p className="spec-desc">
+                    {language === "en"
+                      ? "Both earbuds and charging case are built to withstand sweat and water safely."
+                      : "Los audífonos y el estuche están preparados para soportar sudor y agua de forma segura."}
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="col-12 col-lg-5 offset-lg-1">
               <div className="p-4 p-md-5 buy-card">
-                <h3 className="h4 fw-bold text-black mb-2 font-display">Reserva tus AeroPods</h3>
-                <p className="small buy-card-subtitle mb-4">Garantiza el precio exclusivo de preventa. Unidades limitadas.</p>
+                <h3 className="h4 fw-bold text-black mb-2 font-display">
+                  {language === "en" ? "Reserve your AeroPods" : "Reserva tus AeroPods"}
+                </h3>
+                <p className="small buy-card-subtitle mb-4">
+                  {language === "en" 
+                    ? "Secure the exclusive pre-order price. Limited quantities." 
+                    : "Garantiza el precio exclusivo de preventa. Unidades limitadas."}
+                </p>
                 
-                <form onSubmit={(e) => { e.preventDefault(); alert("Reserva realizada con éxito (Simulación de landing)."); }} className="d-flex flex-column gap-3">
+                <form onSubmit={handleBookingSubmit} className="d-flex flex-column gap-3">
                   <div>
-                    <label className="form-label small fw-bold text-black" htmlFor="name-input-end">Tu Nombre</label>
-                    <input type="text" id="name-input-end" className="form-control buy-input" placeholder="Ej. Carlos Martínez" required />
+                    <label className="form-label small fw-bold text-black" htmlFor="name-input-end">
+                      {language === "en" ? "Your Name" : "Tu Nombre"}
+                    </label>
+                    <input type="text" id="name-input-end" className="form-control buy-input" placeholder={language === "en" ? "e.g. John Doe" : "Ej. Carlos Martínez"} required />
                   </div>
                   <div>
-                    <label className="form-label small fw-bold text-black" htmlFor="email-input-end">Tu Correo</label>
+                    <label className="form-label small fw-bold text-black" htmlFor="email-input-end">
+                      {language === "en" ? "Your Email" : "Tu Correo"}
+                    </label>
                     <input type="email" id="email-input-end" className="form-control buy-input" placeholder="ejemplo@correo.com" required />
                   </div>
                   <button type="submit" className="btn btn-dark w-100 py-3 mt-2 fw-bold rounded-pill">
-                    Reservar Preventa Especial
+                    {language === "en" ? "Reserve Special Pre-sale" : "Reservar Preventa Especial"}
                   </button>
                 </form>
               </div>

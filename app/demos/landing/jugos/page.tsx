@@ -11,6 +11,7 @@ import uvaBgImg from "../bebidas/uvasbg.avif";
 import limonBgImgMobile from "../bebidas/limonbg_mobile.avif";
 import naranjaBgImgMobile from "../bebidas/naranjasbg_mobile.avif";
 import uvaBgImgMobile from "../bebidas/uvasbg_mobile.avif";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface LiquidBackgroundProps {
   imageUrl: string;
@@ -539,6 +540,7 @@ export default function JuiceScrollDemo() {
   const [nameFocused, setNameFocused] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { language } = useLanguage();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -634,7 +636,7 @@ export default function JuiceScrollDemo() {
 
   // Set document title and check mobile status
   useEffect(() => {
-    document.title = "Oasis Natura - Demos ImperioDev";
+    document.title = language === "en" ? "Oasis Natura - ImperioDev Demos" : "Oasis Natura - Demos ImperioDev";
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 992);
     };
@@ -1156,16 +1158,44 @@ export default function JuiceScrollDemo() {
   };
 
   const planPrices = {
-    semanal: { price: "$39.99", desc: "4 botellas por semana (Envío cada Lunes)" },
-    quincenal: { price: "$29.99", desc: "8 botellas quincenales (Envío Lunes por medio)" },
-    mensual: { price: "$19.99", desc: "12 botellas mensuales (Envío primer Lunes)" }
-  }[subscriptionPlan as "semanal" | "quincenal" | "mensual"] || { price: "$29.99", desc: "8 botellas quincenales" };
+    semanal: { 
+      price: "$39.99", 
+      desc: language === "en" ? "4 bottles per week (Shipped every Monday)" : "4 botellas por semana (Envío cada Lunes)" 
+    },
+    quincenal: { 
+      price: "$29.99", 
+      desc: language === "en" ? "8 biweekly bottles (Shipped every other Monday)" : "8 botellas quincenales (Envío Lunes por medio)" 
+    },
+    mensual: { 
+      price: "$19.99", 
+      desc: language === "en" ? "12 monthly bottles (Shipped the first Monday)" : "12 botellas mensuales (Envío primer Lunes)" 
+    }
+  }[subscriptionPlan as "semanal" | "quincenal" | "mensual"] || { 
+    price: "$29.99", 
+    desc: language === "en" ? "8 biweekly bottles" : "8 botellas quincenales" 
+  };
 
   const flavorDetails = {
-    limon: { name: "Oasis Limón", blend: "Limón Eureka + Menta Silvestre", desc: "Prensado en frío con menta fresca orgánica." },
-    naranja: { name: "Oasis Naranja", blend: "Naranja Valencia + Mandarina", desc: "Vitamina C e hidratación cítrica natural." },
-    uva: { name: "Oasis Uva", blend: "Uva Isabela + Arándanos", desc: "Súper antioxidantes para tu salud cardiovascular." }
-  }[selectedFlavor as "limon" | "naranja" | "uva"] || { name: "Oasis Limón", blend: "Limón Eureka + Menta Silvestre", desc: "Prensado en frío con menta fresca orgánica." };
+    limon: { 
+      name: language === "en" ? "Oasis Lemon" : "Oasis Limón", 
+      blend: language === "en" ? "Eureka Lemon + Wild Mint" : "Limón Eureka + Menta Silvestre", 
+      desc: language === "en" ? "Cold-pressed with organic fresh mint." : "Prensado en frío con menta fresca orgánica." 
+    },
+    naranja: { 
+      name: language === "en" ? "Oasis Orange" : "Oasis Naranja", 
+      blend: language === "en" ? "Valencia Orange + Mandarin" : "Naranja Valencia + Mandarina", 
+      desc: language === "en" ? "Vitamin C and natural citrus hydration." : "Vitamina C e hidratación cítrica natural." 
+    },
+    uva: { 
+      name: language === "en" ? "Oasis Grape" : "Oasis Uva", 
+      blend: language === "en" ? "Isabela Grape + Blueberries" : "Uva Isabela + Arándanos", 
+      desc: language === "en" ? "Super antioxidants for your cardiovascular health." : "Súper antioxidantes para tu salud cardiovascular." 
+    }
+  }[selectedFlavor as "limon" | "naranja" | "uva"] || { 
+    name: language === "en" ? "Oasis Lemon" : "Oasis Limón", 
+    blend: language === "en" ? "Eureka Lemon + Wild Mint" : "Limón Eureka + Menta Silvestre", 
+    desc: language === "en" ? "Cold-pressed with organic fresh mint." : "Prensado en frío con menta fresca orgánica." 
+  };
 
   return (
     <div data-bs-theme="light" className="bg-white text-black min-vh-100 position-relative" style={{ fontFamily: "'Outfit', var(--font-sans)", overflow: "visible" }}>
@@ -1715,10 +1745,14 @@ export default function JuiceScrollDemo() {
             <div className="logo-juice mb-3">
               <span className="fs-1">🍹</span>
             </div>
-            <h3 className="h6 fw-bold text-black font-display mb-1">Preparando Sabores Orgánicos</h3>
-            <p className="small text-muted mb-3">Cargando experiencia sensorial 3D...</p>
+            <h3 className="h6 fw-bold text-black font-display mb-1">
+              {language === "en" ? "Preparing Organic Flavors" : "Preparando Sabores Orgánicos"}
+            </h3>
+            <p className="small text-muted mb-3">
+              {language === "en" ? "Loading 3D sensory experience..." : "Cargando experiencia sensorial 3D..."}
+            </p>
             <div className="spinner-border text-success spinner-border-sm" role="status">
-              <span className="visually-hidden">Cargando...</span>
+              <span className="visually-hidden">{language === "en" ? "Loading..." : "Cargando..."}</span>
             </div>
           </div>
         </div>
@@ -1726,9 +1760,11 @@ export default function JuiceScrollDemo() {
 
       {/* Floating Demo Control Bar */}
       <div className="juice-demo-bar px-4 py-2 d-flex align-items-center gap-3">
-        <span className="text-black small fw-bold d-none d-sm-inline">Demo Oasis Natura</span>
+        <span className="text-black small fw-bold d-none d-sm-inline">
+          {language === "en" ? "Oasis Natura Demo" : "Demo Oasis Natura"}
+        </span>
         <Link href="/demos" className="btn btn-dark btn-sm fw-bold rounded-pill px-3 py-1.5 d-flex align-items-center gap-1">
-          <i className="bi bi-grid-fill"></i> Salir de la Demo
+          <i className="bi bi-grid-fill"></i> {language === "en" ? "Exit Demo" : "Salir de la Demo"}
         </Link>
       </div>
 
@@ -1852,11 +1888,15 @@ export default function JuiceScrollDemo() {
                     <div className="stacked-card-bg-1" style={{ backgroundColor: "#4c9c1b" }}></div>
                     <div className="stacked-card-bg-2" style={{ backgroundColor: "#8ade28" }}></div>
                     <div className="stacked-card-front">
-                      <span className="juice-label label-limon">Sabor 01</span>
+                      <span className="juice-label label-limon">
+                        {language === "en" ? "Flavor 01" : "Sabor 01"}
+                      </span>
                       <h2 className="juice-title mb-2 text-limon-accent font-display" style={{ fontSize: "2.8rem", fontWeight: 800, lineHeight: 1.05 }}>
-                        Oasis<br />Limón
+                        {language === "en" ? <>Oasis<br />Lemon</> : <>Oasis<br />Limón</>}
                       </h2>
-                      <p className="mb-0 text-slate-800 fw-bold" style={{ fontSize: "1.05rem", color: "#1e293b" }}>La frescura más ácida y natural.</p>
+                      <p className="mb-0 text-slate-800 fw-bold" style={{ fontSize: "1.05rem", color: "#1e293b" }}>
+                        {language === "en" ? "The most tart and natural freshness." : "La frescura más ácida y natural."}
+                      </p>
                     </div>
                   </div>
 
@@ -1865,11 +1905,15 @@ export default function JuiceScrollDemo() {
                     <div className="stacked-card-bg-1" style={{ backgroundColor: "#c24f0c" }}></div>
                     <div className="stacked-card-bg-2" style={{ backgroundColor: "#ffa366" }}></div>
                     <div className="stacked-card-front">
-                      <span className="juice-label label-naranja">Sabor 02</span>
+                      <span className="juice-label label-naranja">
+                        {language === "en" ? "Flavor 02" : "Sabor 02"}
+                      </span>
                       <h2 className="juice-title mb-2 text-naranja-accent font-display" style={{ fontSize: "2.8rem", fontWeight: 800, lineHeight: 1.05 }}>
-                        Oasis<br />Naranja
+                        {language === "en" ? <>Oasis<br />Orange</> : <>Oasis<br />Naranja</>}
                       </h2>
-                      <p className="mb-0 text-slate-800 fw-bold" style={{ fontSize: "1.05rem", color: "#1e293b" }}>Vibrante dulzura cítrica.</p>
+                      <p className="mb-0 text-slate-800 fw-bold" style={{ fontSize: "1.05rem", color: "#1e293b" }}>
+                        {language === "en" ? "Vibrant citrus sweetness." : "Vibrante dulzura cítrica."}
+                      </p>
                     </div>
                   </div>
 
@@ -1878,11 +1922,15 @@ export default function JuiceScrollDemo() {
                     <div className="stacked-card-bg-1" style={{ backgroundColor: "#5925a3" }}></div>
                     <div className="stacked-card-bg-2" style={{ backgroundColor: "#b996f5" }}></div>
                     <div className="stacked-card-front">
-                      <span className="juice-label label-uva">Sabor 03</span>
+                      <span className="juice-label label-uva">
+                        {language === "en" ? "Flavor 03" : "Sabor 03"}
+                      </span>
                       <h2 className="juice-title mb-2 text-uva-accent font-display" style={{ fontSize: "2.8rem", fontWeight: 800, lineHeight: 1.05 }}>
-                        Oasis<br />Uva
+                        {language === "en" ? <>Oasis<br />Grape</> : <>Oasis<br />Uva</>}
                       </h2>
-                      <p className="mb-0 text-slate-800 fw-bold" style={{ fontSize: "1.05rem", color: "#1e293b" }}>Dulzura exótica de la selva.</p>
+                      <p className="mb-0 text-slate-800 fw-bold" style={{ fontSize: "1.05rem", color: "#1e293b" }}>
+                        {language === "en" ? "Exotic sweetness from the jungle." : "Dulzura exótica de la selva."}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1895,39 +1943,51 @@ export default function JuiceScrollDemo() {
                   {/* Lemon Right Text */}
                   <div ref={textLimonRightRef} className="plain-juice-desc">
                     <h2 className="text-limon-accent mb-3 text-uppercase font-display" style={{ fontSize: "2.8rem", fontWeight: 900, lineHeight: 0.95, letterSpacing: "-0.02em" }}>
-                      EXTRACTO<br />FRESCO
+                      {language === "en" ? <>FRESH<br />EXTRACT</> : <>EXTRACTO<br />FRESCO</>}
                     </h2>
                     <p className="highlight mb-2 text-dark fw-bold" style={{ fontSize: "1.2rem", lineHeight: 1.35 }}>
-                      Prensado en frío con limones reales seleccionados a mano.
+                      {language === "en" 
+                        ? "Cold-pressed with hand-selected real lemons." 
+                        : "Prensado en frío con limones reales seleccionados a mano."}
                     </p>
                     <p className="desc m-0 text-secondary" style={{ fontSize: "1rem", lineHeight: 1.55 }}>
-                      Un estallido revitalizante que limpia tu organismo y despierta tu energía matutina con un toque sutil de menta silvestre.
+                      {language === "en" 
+                        ? "A revitalizing burst that cleanses your body and wakes up your morning energy with a subtle touch of wild mint." 
+                        : "Un estallido revitalizante que limpia tu organismo y despierta tu energía matutina con un toque sutil de menta silvestre."}
                     </p>
                   </div>
 
                   {/* Orange Right Text */}
                   <div ref={textNaranjaRightRef} className="plain-juice-desc">
                     <h2 className="text-naranja-accent mb-3 text-uppercase font-display" style={{ fontSize: "2.8rem", fontWeight: 900, lineHeight: 0.95, letterSpacing: "-0.02em" }}>
-                      ENERGÍA<br />PURA
+                      {language === "en" ? <>PURE<br />ENERGY</> : <>ENERGÍA<br />PURA</>}
                     </h2>
                     <p className="highlight mb-2 text-dark fw-bold" style={{ fontSize: "1.2rem", lineHeight: 1.35 }}>
-                      Elaborado con las naranjas más dulces y jugosas de la temporada.
+                      {language === "en" 
+                        ? "Made from the season's sweetest, juiciest oranges." 
+                        : "Elaborado con las naranjas más dulces y jugosas de la temporada."}
                     </p>
                     <p className="desc m-0 text-secondary" style={{ fontSize: "1rem", lineHeight: 1.55 }}>
-                      Maduradas bajo el sol y llenas de fibra soluble para nutrir tu cuerpo con hidratación natural y vitaminas al instante.
+                      {language === "en" 
+                        ? "Sun-ripened and packed with soluble fiber to nourish your body with instant natural hydration and vitamins." 
+                        : "Maduradas bajo el sol y llenas de fibra soluble para nutrir tu cuerpo con hidratación natural y vitaminas al instante."}
                     </p>
                   </div>
 
                   {/* Grape Right Text */}
                   <div ref={textUvaRightRef} className="plain-juice-desc grape-desc-theme">
                     <h2 className="text-uva-accent mb-3 text-uppercase font-display" style={{ fontSize: "2.8rem", fontWeight: 900, lineHeight: 0.95, letterSpacing: "-0.02em" }}>
-                      SÚPER<br />ANTIOXIDANTE
+                      {language === "en" ? <>SUPER<br />ANTIOXIDANT</> : <>SÚPER<br />ANTIOXIDANTE</>}
                     </h2>
                     <p className="highlight mb-2 text-dark fw-bold" style={{ fontSize: "1.2rem", lineHeight: 1.35 }}>
-                      Un néctar puro de uvas tintas silvestres seleccionadas.
+                      {language === "en" 
+                        ? "A pure nectar of selected wild red grapes." 
+                        : "Un néctar puro de uvas tintas silvestres seleccionadas."}
                     </p>
                     <p className="desc m-0 text-secondary" style={{ fontSize: "1rem", lineHeight: 1.55 }}>
-                      Rápida absorción de polifenoles activos que cuidan tu salud cardiovascular y deleitan tu paladar con notas silvestres profundas.
+                      {language === "en" 
+                        ? "Fast absorption of active polyphenols that support cardiovascular health and delight your palate with deep wild notes." 
+                        : "Rápida absorción de polifenoles activos que cuidan tu salud cardiovascular y deleitan tu paladar con notas silvestres profundas."}
                     </p>
                   </div>
                 </div>
@@ -1966,10 +2026,10 @@ export default function JuiceScrollDemo() {
             <div className="col-12 col-lg-7 d-flex flex-column justify-content-center">
               <header className="mb-5">
                 <p className="font-label-caps text-on-surface-variant text-uppercase mb-2" style={{ color: "#434843" }}>
-                  EL SECRETO DE NUESTRA CALIDAD
+                  {language === "en" ? "THE SECRET OF OUR QUALITY" : "EL SECRETO DE NUESTRA CALIDAD"}
                 </p>
                 <h2 className="fw-bold mb-0 text-black" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "2.5rem", color: "#1b1c19", fontWeight: 800 }}>
-                  Bebidas vivas y nutritivas.
+                  {language === "en" ? "Living and nutritious drinks." : "Bebidas vivas y nutritivas."}
                 </h2>
               </header>
 
@@ -1980,8 +2040,14 @@ export default function JuiceScrollDemo() {
                     <div className="rounded-circle flex items-center justify-center mb-4 text-on-primary-container d-flex align-items-center justify-content-center" style={{ width: "48px", height: "48px", backgroundColor: "#efeee9", border: "1px solid rgba(195, 200, 193, 0.3)" }}>
                       <span className="material-symbols-outlined fs-4" style={{ fontVariationSettings: "'wght' 300", color: "#1b3022" }}>ac_unit</span>
                     </div>
-                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>Cold Pressed (Prensado en frío)</h3>
-                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>Evitamos la fricción y el calor de las licuadoras tradicionales para preservar el 100% de las enzimas vivas, vitaminas y minerales de las frutas.</p>
+                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>
+                      {language === "en" ? "Cold Pressed" : "Cold Pressed (Prensado en frío)"}
+                    </h3>
+                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>
+                      {language === "en" 
+                        ? "We avoid the friction and heat of traditional blenders to preserve 100% of the live enzymes, vitamins, and minerals of the fruits." 
+                        : "Evitamos la fricción y el calor de las licuadoras tradicionales para preservar el 100% de las enzimas vivas, vitaminas y minerales de las frutas."}
+                    </p>
                   </div>
                 </div>
 
@@ -1991,8 +2057,14 @@ export default function JuiceScrollDemo() {
                     <div className="rounded-circle flex items-center justify-center mb-4 text-on-primary-container d-flex align-items-center justify-content-center" style={{ width: "48px", height: "48px", backgroundColor: "#efeee9", border: "1px solid rgba(195, 200, 193, 0.3)" }}>
                       <span className="material-symbols-outlined fs-4" style={{ fontVariationSettings: "'wght' 300", color: "#1b3022" }}>agriculture</span>
                     </div>
-                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>Agricultura Local</h3>
-                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>Apoyamos a agricultores locales que practican la agricultura regenerativa libre de pesticidas químicos. Directo del campo a tu botella.</p>
+                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>
+                      {language === "en" ? "Local Agriculture" : "Agricultura Local"}
+                    </h3>
+                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>
+                      {language === "en" 
+                        ? "We support local farmers practicing chemical pesticide-free regenerative agriculture. Straight from the field to your bottle." 
+                        : "Apoyamos a agricultores locales que practican la agricultura regenerativa libre de pesticidas químicos. Directo del campo a tu botella."}
+                    </p>
                   </div>
                 </div>
 
@@ -2002,8 +2074,14 @@ export default function JuiceScrollDemo() {
                     <div className="rounded-circle flex items-center justify-center mb-4 text-on-primary-container d-flex align-items-center justify-content-center" style={{ width: "48px", height: "48px", backgroundColor: "#efeee9", border: "1px solid rgba(195, 200, 193, 0.3)" }}>
                       <span className="material-symbols-outlined fs-4" style={{ fontVariationSettings: "'wght' 300", color: "#1b3022" }}>health_and_safety</span>
                     </div>
-                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>Sin Pasteurizar / HPP</h3>
-                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>Utilizamos procesamiento por alta presión (HPP) para garantizar la seguridad alimentaria sin someter el jugo a calor, manteniendo el sabor original fresco.</p>
+                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>
+                      {language === "en" ? "Unpasteurized / HPP" : "Sin Pasteurizar / HPP"}
+                    </h3>
+                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>
+                      {language === "en" 
+                        ? "We use High Pressure Processing (HPP) to guarantee food safety without exposing the juice to heat, maintaining the original fresh taste." 
+                        : "Utilizamos procesamiento por alta presión (HPP) para garantizar la seguridad alimentaria sin someter el jugo a calor, manteniendo el sabor original fresco."}
+                    </p>
                   </div>
                 </div>
 
@@ -2013,8 +2091,14 @@ export default function JuiceScrollDemo() {
                     <div className="rounded-circle flex items-center justify-center mb-4 text-on-primary-container d-flex align-items-center justify-content-center" style={{ width: "48px", height: "48px", backgroundColor: "#efeee9", border: "1px solid rgba(195, 200, 193, 0.3)" }}>
                       <span className="material-symbols-outlined fs-4" style={{ fontVariationSettings: "'wght' 300", color: "#1b3022" }}>recycling</span>
                     </div>
-                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>Empaques Biodegradables</h3>
-                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>Nuestras botellas están hechas de PET 100% reciclado y son completamente compostables. Cuidamos de tu salud y también de nuestro planeta.</p>
+                    <h3 className="font-body-lg fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "18px", color: "#1b1c19", fontWeight: 700 }}>
+                      {language === "en" ? "Biodegradable Packaging" : "Empaques Biodegradables"}
+                    </h3>
+                    <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "16px", color: "#434843" }}>
+                      {language === "en" 
+                        ? "Our bottles are made from 100% recycled PET and are fully compostable. We take care of your health and our planet." 
+                        : "Nuestras botellas están hechas de PET 100% reciclado y son completamente compostables. Cuidamos de tu salud y también de nuestro planeta."}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -2035,13 +2119,21 @@ export default function JuiceScrollDemo() {
                   fontWeight: 600,
                   zIndex: 15
                 }}>
-                  {planPrices.price} / {subscriptionPlan === 'semanal' ? 'semana' : subscriptionPlan === 'quincenal' ? 'quincena' : 'mes'}
+                  {planPrices.price} / {subscriptionPlan === 'semanal' ? (language === 'en' ? 'week' : 'semana') : subscriptionPlan === 'quincenal' ? (language === 'en' ? 'biweek' : 'quincena') : (language === 'en' ? 'month' : 'mes')}
                 </div>
 
                 <div className="mb-4">
-                  <p className="font-label-caps text-uppercase mb-2" style={{ color: "#819986" }}>DEGUSTACIÓN PREMIUM</p>
-                  <h3 className="fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "1.75rem", color: "#1b1c19", fontWeight: 700 }}>Reserva tu Experiencia</h3>
-                  <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "14px", color: "#434843" }}>Garantiza tu suscripción especial con entrega semanal refrigerada directamente desde nuestros huertos locales.</p>
+                  <p className="font-label-caps text-uppercase mb-2" style={{ color: "#819986" }}>
+                    {language === "en" ? "PREMIUM TASTING" : "DEGUSTACIÓN PREMIUM"}
+                  </p>
+                  <h3 className="fw-bold text-black mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", fontSize: "1.75rem", color: "#1b1c19", fontWeight: 700 }}>
+                    {language === "en" ? "Reserve Your Experience" : "Reserva tu Experiencia"}
+                  </h3>
+                  <p className="font-body-md text-on-surface-variant mb-0" style={{ fontSize: "14px", color: "#434843" }}>
+                    {language === "en" 
+                      ? "Guarantee your special subscription with weekly refrigerated delivery directly from our local orchards."
+                      : "Garantiza tu suscripción especial con entrega semanal refrigerada directamente desde nuestros huertos locales."}
+                  </p>
                 </div>
 
                 {formSubmitted ? (
@@ -2050,19 +2142,32 @@ export default function JuiceScrollDemo() {
                       ✓
                     </div>
                     <div>
-                      <h5 className="fw-bold text-success mb-1 font-headline-md" style={{ fontSize: "1.25rem" }}>¡Suscripción Reservada!</h5>
-                      <p className="small text-secondary mb-0">Hemos registrado tu solicitud de preventa especial con éxito.</p>
+                      <h5 className="fw-bold text-success mb-1 font-headline-md" style={{ fontSize: "1.25rem" }}>
+                        {language === "en" ? "Subscription Reserved!" : "¡Suscripción Reservada!"}
+                      </h5>
+                      <p className="small text-secondary mb-0">
+                        {language === "en" ? "We have successfully registered your special pre-sale request." : "Hemos registrado tu solicitud de preventa especial con éxito."}
+                      </p>
                     </div>
 
                     <div className="w-100 bg-white p-3 rounded-3 text-start border d-flex flex-column gap-2" style={{ fontSize: "0.82rem" }}>
-                      <div className="d-flex justify-content-between"><span className="text-muted">Pedido ID:</span><span className="fw-bold text-black font-monospace">#ON-2026-{Math.floor(1000 + Math.random() * 9000)}</span></div>
-                      <div className="d-flex justify-content-between"><span className="text-muted">Frecuencia:</span><span className="fw-bold text-black text-capitalize">{subscriptionPlan}</span></div>
-                      <div className="d-flex justify-content-between"><span className="text-muted">Sabor Inicial:</span><span className="fw-bold text-black">{flavorDetails.name}</span></div>
-                      <div className="d-flex justify-content-between"><span className="text-muted">Precio:</span><span className="fw-bold text-black">{planPrices.price} / mes</span></div>
+                      <div className="d-flex justify-content-between"><span className="text-muted">{language === "en" ? "Order ID:" : "Pedido ID:"}</span><span className="fw-bold text-black font-monospace">#ON-2026-{Math.floor(1000 + Math.random() * 9000)}</span></div>
+                      <div className="d-flex justify-content-between">
+                        <span className="text-muted">{language === "en" ? "Frequency:" : "Frecuencia:"}</span>
+                        <span className="fw-bold text-black text-capitalize">
+                          {subscriptionPlan === 'semanal' 
+                            ? (language === 'en' ? 'Weekly' : 'Semanal') 
+                            : subscriptionPlan === 'quincenal' 
+                              ? (language === 'en' ? 'Biweekly' : 'Quincenal') 
+                              : (language === 'en' ? 'Monthly' : 'Mensual')}
+                        </span>
+                      </div>
+                      <div className="d-flex justify-content-between"><span className="text-muted">{language === "en" ? "Initial Flavor:" : "Sabor Inicial:"}</span><span className="fw-bold text-black">{flavorDetails.name}</span></div>
+                      <div className="d-flex justify-content-between"><span className="text-muted">{language === "en" ? "Price:" : "Precio:"}</span><span className="fw-bold text-black">{planPrices.price} / {language === 'en' ? 'month' : 'mes'}</span></div>
                       <hr className="my-1" />
                       <div className="d-flex align-items-center gap-2 text-success font-semibold" style={{ fontSize: "0.78rem" }}>
-                        <span>🚚 Est. primer envío:</span>
-                        <span>Próximo Martes (Refrigerado)</span>
+                        <span>{language === "en" ? "🚚 Est. first shipment:" : "🚚 Est. primer envío:"}</span>
+                        <span>{language === "en" ? "Next Tuesday (Refrigerated)" : "Próximo Martes (Refrigerado)"}</span>
                       </div>
                     </div>
 
@@ -2072,7 +2177,7 @@ export default function JuiceScrollDemo() {
                       className="btn btn-sm btn-outline-secondary rounded-pill px-4 mt-1"
                       style={{ fontSize: "0.8rem" }}
                     >
-                      Modificar Reserva
+                      {language === "en" ? "Modify Reservation" : "Modificar Reserva"}
                     </button>
                   </div>
                 ) : (
@@ -2080,12 +2185,14 @@ export default function JuiceScrollDemo() {
 
                     {/* Flavour Selection */}
                     <fieldset className="border-0 p-0 m-0">
-                      <legend className="font-body-md text-black fw-semibold mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>1. Selecciona tu sabor inicial</legend>
+                      <legend className="font-body-md text-black fw-semibold mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>
+                        {language === "en" ? "1. Select your initial flavor" : "1. Selecciona tu sabor inicial"}
+                      </legend>
                       <div className="row g-2">
                         {[
-                          { id: "limon", emoji: "🍋", label: "Limón", desc: "Eureka+Menta" },
-                          { id: "naranja", emoji: "🍊", label: "Naranja", desc: "Valencia+Mand." },
-                          { id: "uva", emoji: "🍇", label: "Uva", desc: "Isabela+Aránd." }
+                          { id: "limon", emoji: "🍋", label: language === "en" ? "Lemon" : "Limón", desc: language === "en" ? "Eureka+Mint" : "Eureka+Menta" },
+                          { id: "naranja", emoji: "🍊", label: language === "en" ? "Orange" : "Naranja", desc: language === "en" ? "Valencia+Mand." : "Valencia+Mand." },
+                          { id: "uva", emoji: "🍇", label: language === "en" ? "Grape" : "Uva", desc: language === "en" ? "Isabela+Blueb." : "Isabela+Aránd." }
                         ].map((item) => {
                           const isChecked = selectedFlavor === item.id;
                           return (
@@ -2113,12 +2220,14 @@ export default function JuiceScrollDemo() {
 
                     {/* Frequency Selection */}
                     <fieldset className="border-0 p-0 m-0">
-                      <legend className="font-body-md text-black fw-semibold mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>2. Frecuencia de entrega</legend>
+                      <legend className="font-body-md text-black fw-semibold mb-3" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>
+                        {language === "en" ? "2. Delivery frequency" : "2. Frecuencia de entrega"}
+                      </legend>
                       <div className="row g-2">
                         {[
-                          { id: "semanal", label: "Semanal", price: "$39.99/mes" },
-                          { id: "quincenal", label: "Quincenal", price: "$29.99/mes" },
-                          { id: "mensual", label: "Mensual", price: "$19.99/mes" }
+                          { id: "semanal", label: language === "en" ? "Weekly" : "Semanal", price: language === "en" ? "$39.99/month" : "$39.99/mes" },
+                          { id: "quincenal", label: language === "en" ? "Biweekly" : "Quincenal", price: language === "en" ? "$29.99/month" : "$29.99/mes" },
+                          { id: "mensual", label: language === "en" ? "Monthly" : "Mensual", price: language === "en" ? "$19.99/month" : "$19.99/mes" }
                         ].map((item) => {
                           const isChecked = subscriptionPlan === item.id;
                           return (
@@ -2146,7 +2255,9 @@ export default function JuiceScrollDemo() {
                       <div className="mt-4 p-4 rounded-3 border" style={{ backgroundColor: "#f5f4ef", borderColor: "rgba(195, 200, 193, 0.2)" }}>
                         <div className="d-flex align-items-center gap-2 mb-2" style={{ color: "#819986" }}>
                           <span className="material-symbols-outlined text-[18px]">bolt</span>
-                          <span className="font-body-md fw-semibold" style={{ fontSize: "14px" }}>Incluido en tu Plan:</span>
+                          <span className="font-body-md fw-semibold" style={{ fontSize: "14px" }}>
+                            {language === "en" ? "Included in your Plan:" : "Incluido en tu Plan:"}
+                          </span>
                         </div>
                         <ul className="list-unstyled space-y-2 font-body-md m-0 d-flex flex-column gap-2 text-on-surface-variant" style={{ fontSize: "14px", color: "#434843" }}>
                           <li className="d-flex align-items-start gap-2">
@@ -2155,11 +2266,15 @@ export default function JuiceScrollDemo() {
                           </li>
                           <li className="d-flex align-items-start gap-2">
                             <span className="material-symbols-outlined fs-6 text-success" style={{ fontWeight: "bold" }}>check</span>
-                            <span>Envío express refrigerado sin costo adicional</span>
+                            <span>
+                              {language === "en" ? "Express refrigerated shipping at no extra cost" : "Envío express refrigerado sin costo adicional"}
+                            </span>
                           </li>
                           <li className="d-flex align-items-start gap-2">
                             <span className="material-symbols-outlined fs-6 text-success" style={{ fontWeight: "bold" }}>check</span>
-                            <span>Regalo: Botella térmica de acero inoxidable Oasis</span>
+                            <span>
+                              {language === "en" ? "Bonus: Oasis stainless steel thermal bottle" : "Regalo: Botella térmica de acero inoxidable Oasis"}
+                            </span>
                           </li>
                         </ul>
                       </div>
@@ -2168,7 +2283,9 @@ export default function JuiceScrollDemo() {
                     {/* User Info */}
                     <div className="d-flex flex-column gap-3">
                       <div>
-                        <label className="font-body-md fw-semibold text-black mb-2 d-block" htmlFor="fullName" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>3. Nombre Completo</label>
+                        <label className="font-body-md fw-semibold text-black mb-2 d-block" htmlFor="fullName" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>
+                          {language === "en" ? "3. Full Name" : "3. Nombre Completo"}
+                        </label>
                         <div className="position-relative">
                           <div className="position-absolute start-0 top-50 translate-middle-y ps-3 text-secondary pointer-events-none d-flex align-items-center" style={{ color: "#434843" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>person</span>
@@ -2176,7 +2293,7 @@ export default function JuiceScrollDemo() {
                           <input
                             type="text"
                             id="fullName"
-                            placeholder="Ej. Alejandra Gómez"
+                            placeholder={language === "en" ? "e.g., Alejandra Gomez" : "Ej. Alejandra Gómez"}
                             className="w-100 py-3 bg-white font-body-md text-black"
                             required
                             style={{
@@ -2203,7 +2320,9 @@ export default function JuiceScrollDemo() {
                       </div>
 
                       <div>
-                        <label className="font-body-md fw-semibold text-black mb-2 d-block" htmlFor="email" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>4. Correo Electrónico</label>
+                        <label className="font-body-md fw-semibold text-black mb-2 d-block" htmlFor="email" style={{ fontFamily: "'Outfit', var(--font-sans)", color: "#1b1c19", fontWeight: 600 }}>
+                          {language === "en" ? "4. Email Address" : "4. Correo Electrónico"}
+                        </label>
                         <div className="position-relative">
                           <div className="position-absolute start-0 top-50 translate-middle-y ps-3 text-secondary pointer-events-none d-flex align-items-center" style={{ color: "#434843" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>mail</span>
@@ -2259,7 +2378,7 @@ export default function JuiceScrollDemo() {
                         if (arrow) arrow.style.transform = "translateX(0px)";
                       }}
                     >
-                      Completar Pre-Reserva
+                      {language === "en" ? "Complete Pre-Reservation" : "Completar Pre-Reserva"}
                       <span className="material-symbols-outlined arrow-icon" style={{ fontSize: "20px", transition: "transform 0.3s ease" }}>arrow_forward</span>
                     </button>
 
