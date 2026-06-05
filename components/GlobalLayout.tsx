@@ -107,16 +107,15 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
       {/* Hide navbar on Mothers Day and Demo Pages */}
       {!isMothersDay && !isDemoPage && (
         <nav id="navbar-id" className="navbar navbar-expand-lg fixed-top py-3 glass-panel-nav">
-          <div className="container-xl px-4 d-flex justify-content-between align-items-center">
+          <div className="container-xl px-2 px-sm-4 d-flex justify-content-between align-items-center flex-nowrap">
             {/* Logo */}
-            <Link href="/" className="navbar-brand d-flex align-items-center gap-2 group text-decoration-none">
+            <Link href="/" className="navbar-brand d-flex align-items-center gap-1 gap-sm-2 group text-decoration-none flex-shrink-0">
               <img 
                 src="https://www.imperiodev.com/wp-content/uploads/2025/02/9c7d6fb0-1eab-481e-a6da-6b37688eacef-e1739234268387-46x63.png" 
                 alt="ImperioDev Logo" 
-                className="transition-transform group-hover:scale-110" 
-                style={{ height: "40px", width: "auto", objectFit: "contain" }}
+                className="brand-logo-img transition-transform group-hover:scale-110" 
               />
-              <span className="fs-3 fw-bold tracking-tighter text-uppercase m-0">
+              <span className="brand-text fw-bold tracking-tighter text-uppercase m-0 text-nowrap">
                 Imperio<span style={{ color: "#14b8a6" }}>Dev</span>
               </span>
             </Link>
@@ -150,7 +149,7 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
               <button 
                 onClick={() => setLanguage(language === "es" ? "en" : "es")} 
                 className="toggle-btn fw-bold text-uppercase small" 
-                style={{ fontSize: "0.8rem", width: "40px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                style={{ fontSize: "0.8rem" }}
                 title={language === "es" ? "Switch to English" : "Cambiar a Español"}
               >
                 {language === "es" ? "EN" : "ES"}
@@ -166,7 +165,7 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
             </div>
 
             {/* Mobile Actions */}
-            <div className="d-flex align-items-center gap-3 d-lg-none">
+            <div className="d-flex align-items-center gap-1 gap-sm-3 d-lg-none flex-shrink-0">
               <button 
                 onClick={toggleThemeGlobal} 
                 className="toggle-btn" 
@@ -183,7 +182,7 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
               <button 
                 onClick={() => setLanguage(language === "es" ? "en" : "es")} 
                 className="toggle-btn fw-bold text-uppercase small" 
-                style={{ fontSize: "0.8rem", width: "40px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                style={{ fontSize: "0.8rem" }}
                 title={language === "es" ? "Switch to English" : "Cambiar a Español"}
               >
                 {language === "es" ? "EN" : "ES"}
@@ -191,7 +190,7 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
 
               <button 
                 onClick={toggleMobileMenu} 
-                className="btn text-body border-0 p-1 fs-3"
+                className="btn text-body border-0 p-1 fs-4"
                 title={t.common.openMenu}
               >
                 <i className="bi bi-list"></i>
@@ -276,6 +275,47 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
         }
         .nav-link:hover {
           color: #14b8a6 !important;
+        }
+        .brand-logo-img {
+          height: 30px;
+          width: auto;
+          object-fit: contain;
+          transition: transform 0.2s ease-in-out;
+        }
+        @media (min-width: 576px) {
+          .brand-logo-img {
+            height: 35px;
+          }
+        }
+        @media (min-width: 768px) {
+          .brand-logo-img {
+            height: 40px;
+          }
+        }
+        .brand-text {
+          font-size: 1.15rem;
+        }
+        @media (min-width: 375px) {
+          .brand-text {
+            font-size: 1.25rem;
+          }
+        }
+        @media (min-width: 576px) {
+          .brand-text {
+            font-size: 1.5rem;
+          }
+        }
+        @media (min-width: 768px) {
+          .brand-text {
+            font-size: 1.75rem;
+          }
+        }
+        @media (max-width: 576px) {
+          .toggle-btn {
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 1rem !important;
+          }
         }
       `}</style>
     </div>
