@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -13,21 +13,41 @@ export default function TarjetaDigitalDemo() {
     document.title = language === "en" ? "Digital Card Demo - ImperioDev" : "Demo de Tarjeta Digital - ImperioDev";
   }, [language]);
 
-  // Time-update handler to fade out video 1.2s before loop end and fade in 1.2s after loop start
-  // Modifies DOM properties directly to prevent React state re-renders (solving text size shifts and layout shifts)
+  // Optimized high-performance loop fade. Only writes to the DOM on boundary transitions,
+  // letting the GPU handle the smooth animation via CSS transitions.
+  const lastStateRef = useRef<"in" | "stable" | "out">("stable");
   const handleVideoTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
     if (video.duration) {
       const timeLeft = video.duration - video.currentTime;
-      let opacity = 1;
+      let currentState: "in" | "stable" | "out" = "stable";
+      
       if (timeLeft < 1.2) {
-        // Fade out in the last 1.2s
-        opacity = Math.max(0, timeLeft / 1.2);
+        currentState = "out";
       } else if (video.currentTime < 1.2) {
-        // Fade in in the first 1.2s
-        opacity = Math.max(0, video.currentTime / 1.2);
+        currentState = "in";
       }
-      video.style.opacity = opacity.toString();
+
+      if (lastStateRef.current !== currentState) {
+        lastStateRef.current = currentState;
+        if (currentState === "out") {
+          video.style.transition = "opacity 1.2s ease-out";
+          video.style.opacity = "0";
+        } else if (currentState === "in") {
+          // Reset to 0 instantly if we just looped, to avoid a jump
+          if (video.currentTime < 0.3) {
+            video.style.transition = "none";
+            video.style.opacity = "0";
+            // Force layout reflow
+            video.offsetHeight;
+          }
+          video.style.transition = "opacity 1.2s ease-in";
+          video.style.opacity = "0.85";
+        } else {
+          video.style.transition = "opacity 1.2s ease-in-out";
+          video.style.opacity = "0.85";
+        }
+      }
     }
   };
 
@@ -320,9 +340,10 @@ END:VCARD`;
           playsInline
           onTimeUpdate={handleVideoTimeUpdate}
           style={{
-            filter: "blur(12px) brightness(0.24)",
-            opacity: 1,
-            transition: "opacity 0.1s linear"
+            filter: "blur(4px) brightness(0.45)",
+            opacity: 0.85,
+            transform: "scale(1.05) translate3d(0, 0, 0)",
+            willChange: "transform"
           }}
         />
       </div>
