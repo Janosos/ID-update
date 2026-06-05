@@ -1300,12 +1300,12 @@ export default function JuiceScrollDemo() {
           height: 100vh;
           width: 100%;
           overflow: hidden;
-          background-color: #ffffff;
+          background-color: transparent;
         }
 
         /* 3 Layered Background Images */
         .bg-layer-juice {
-          position: absolute;
+          position: fixed;
           width: 100%;
           height: 100%;
           top: 0;
@@ -2224,17 +2224,22 @@ export default function JuiceScrollDemo() {
 
         {/* Atmospheric Background */}
         <div className="position-absolute top-0 start-0 w-100 h-100 pointer-events-none" style={{ zIndex: 0 }}>
-          <img
-            alt="Atmospheric background image"
+          <div
             className="w-100 h-100"
-            style={{ objectFit: "cover", opacity: 0.7 }}
-            src="https://lh3.googleusercontent.com/aida/ADBb0ui-W34_45ae33Iz02Hw0agNvzx8-CtekX3bu_hDatPnMd8O5hmHIdgwYQZMI-I1Bz8E3jLAmtO6ziUgNQhz5OK00UFp9HG8bmh2bH9pfEqXnkTjWoGc4fX8_Xck4BcYpmTEVkXgt_CR9or7LRPONZXaaP1T6o5pgyBv1ptdj_lekMGA_dux4ligj5bNq5P18BLzMFj4rb4LHcd6mQ7OLOHKLWSpmK3MrsijlUH0QElD6woi-LkRVOMSpx7y"
+            style={{ 
+              backgroundImage: "url('/organic_juice_bg.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              opacity: 0.7,
+              WebkitMaskImage: "linear-gradient(to bottom, transparent 0px, black 200px)",
+              maskImage: "linear-gradient(to bottom, transparent 0px, black 200px)"
+            }}
           />
           <div
             className="position-absolute w-100 h-100"
             style={{
               top: 0, left: 0,
-              background: "linear-gradient(to bottom, rgba(250, 249, 244, 0.4) 0%, transparent 50%, rgba(250, 249, 244, 0.8) 100%)"
+              background: "linear-gradient(to bottom, transparent 0px, rgba(250, 249, 244, 0.4) 200px, transparent 50%, rgba(250, 249, 244, 0.8) 100%)"
             }}
           />
         </div>

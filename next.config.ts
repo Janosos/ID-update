@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,    // Evita que busque un servidor Node activo para procesar imágenes
   },
+  allowedDevOrigins: [
+    "localhost",
+    "*.trycloudflare.com",
+    "*.localtunnel.me"
+  ],
 };
 
 export default nextConfig;
