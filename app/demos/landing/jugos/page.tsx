@@ -345,6 +345,7 @@ const LiquidBackground = ({
     let animationFrameId = 0;
     let isDisposed = false;
     let time = 0.0;
+    let lastTickTime = typeof window !== 'undefined' ? performance.now() : 0;
 
     // Use reduced ratio on mobile for ultra performance
     const dpr = typeof window !== 'undefined' ? (window.innerWidth < 992 ? 1.0 : Math.min(window.devicePixelRatio, 2)) : 1;
@@ -367,14 +368,19 @@ const LiquidBackground = ({
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
 
+      // Compute time-delta (dt) normalized to 60fps baseline
+      const now = performance.now();
+      const dt = Math.min(50, now - lastTickTime) / 16.666;
+      lastTickTime = now;
+
       // Compute aspect ratio for coordinate adjustments
       const aspect = canvas.width / canvas.height;
 
-      // 1. Advance age of each ripple
+      // 1. Advance age of each ripple (time-delta independent)
       for (let i = 0; i < 24; i++) {
         const ripple = ripples[i];
         if (ripple.age < 1.0) {
-          ripple.age += 0.002; // slow age increment
+          ripple.age += 0.002 * dt; // slow age increment
           if (ripple.age >= 1.0) {
             ripple.age = 1.0;
           }
@@ -432,7 +438,7 @@ const LiquidBackground = ({
         ripplesData[i * 3 + 2] = ripples[i].age;
       }
 
-      time += 0.015;
+      time += 0.015 * dt;
 
       // Compute cover sizing uv scale
       const imgAspect = imageWidth / imageHeight;
@@ -567,6 +573,7 @@ export default function JuiceScrollDemo() {
 
   // Floating elements refs
   const floatsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
 
   const scrollInfoRef = useRef({
     targetProgress: 0,
@@ -819,6 +826,13 @@ export default function JuiceScrollDemo() {
 
       const p = info.currentProgress;
 
+      // Fade out scroll indicator as the user scrolls down
+      if (scrollIndicatorRef.current) {
+        const indOpacity = Math.max(0, 1 - p * 6); // Fade out completely in the first 16% scroll
+        scrollIndicatorRef.current.style.opacity = indOpacity.toFixed(3);
+        scrollIndicatorRef.current.style.display = indOpacity > 0.001 ? "flex" : "none";
+      }
+
       // 1. Backgrounds crossfade opacities
       const oLimonBg = getProgressOpacity(p, 0.0, 0.23, 0.12);
       const oNaranjaBg = getProgressOpacity(p, 0.35, 0.58, 0.12);
@@ -1056,7 +1070,7 @@ export default function JuiceScrollDemo() {
         else if (item.phase === "naranja") floatOpacity = oNaranjaBg;
         else if (item.phase === "uva") floatOpacity = oUvaBg;
 
-        const travel = p * item.speed * 180;
+        const travel = p * item.speed * 240;
         const rotate = p * item.rotateSpeed * 360;
 
         const finalOpacity = floatOpacity * 0.85;
@@ -1723,6 +1737,188 @@ export default function JuiceScrollDemo() {
           animation: float-subtle 4s ease-in-out infinite;
         }
 
+        @keyframes bounce-arrow {
+          0%, 100% { transform: translateY(0); opacity: 0.4; }
+          50% { transform: translateY(8px); opacity: 1; }
+        }
+        .arrow-down-animation-1 {
+          animation: bounce-arrow 1.6s infinite ease-in-out;
+        }
+        
+        .scroll-indicators-wrapper {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 10;
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+        }
+        
+        .scroll-indicator-pc {
+          position: absolute;
+          bottom: 10.5%; /* Shifted down to sit perfectly between bottle and bar */
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        
+        .scroll-indicator-mobile-left {
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.55);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          border-radius: 50%;
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(0, 0, 0, 0.05);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+        
+        .scroll-indicator-mobile-right {
+          position: absolute;
+          right: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.55);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          border-radius: 50%;
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(0, 0, 0, 0.05);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Flavor & Frequency responsive cards */
+        .flavor-card {
+          padding: 0.65rem 0.4rem !important;
+          transition: all 0.3s ease;
+          border-radius: 12px;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          background-color: #faf9f4;
+          border: 1px solid rgba(195, 200, 193, 0.4);
+        }
+        @media (min-width: 576px) {
+          .flavor-card {
+            padding: 1.25rem 1rem !important;
+          }
+        }
+        .flavor-card-emoji {
+          font-size: 1.35rem;
+          margin-bottom: 0.2rem;
+        }
+        @media (min-width: 576px) {
+          .flavor-card-emoji {
+            font-size: 1.85rem;
+            margin-bottom: 0.5rem;
+          }
+        }
+        .flavor-card-title {
+          font-size: 0.72rem !important;
+          font-weight: 700;
+          color: #1b1c19;
+          margin-bottom: 0.1rem;
+        }
+        @media (min-width: 576px) {
+          .flavor-card-title {
+            font-size: 0.88rem !important;
+            margin-bottom: 0.25rem;
+          }
+        }
+        .flavor-card-desc {
+          font-size: 0.58rem !important;
+          color: #434843;
+          line-height: 1.2;
+          text-align: center;
+          word-break: break-word;
+        }
+        @media (min-width: 576px) {
+          .flavor-card-desc {
+            font-size: 0.72rem !important;
+          }
+        }
+
+        .freq-card {
+          padding: 0.65rem 0.4rem !important;
+          transition: all 0.3s ease;
+          border-radius: 12px;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          background-color: #faf9f4;
+          border: 1px solid rgba(195, 200, 193, 0.4);
+        }
+        @media (min-width: 576px) {
+          .freq-card {
+            padding: 1.25rem 1rem !important;
+          }
+        }
+        .freq-card-title {
+          font-size: 0.72rem !important;
+          font-weight: 700;
+          color: #1b1c19;
+          margin-bottom: 0.1rem;
+        }
+        @media (min-width: 576px) {
+          .freq-card-title {
+            font-size: 0.82rem !important;
+            margin-bottom: 0.25rem;
+          }
+        }
+        .freq-card-price {
+          font-size: 0.58rem !important;
+          color: #434843;
+          line-height: 1.2;
+        }
+        @media (min-width: 576px) {
+          .freq-card-price {
+            font-size: 0.68rem !important;
+          }
+        }
+
+        .price-badge-juice {
+          position: absolute;
+          font-family: 'Inter', sans-serif;
+          font-size: 10px !important;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          padding: 6px 14px !important;
+          border-radius: 50px;
+          top: -14px;
+          right: 16px;
+          background-color: #d4e9c4;
+          color: #101f09;
+          border: 1px solid rgba(184, 205, 170, 0.5);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+          z-index: 15;
+        }
+        @media (min-width: 576px) {
+          .price-badge-juice {
+            font-size: 12px !important;
+            padding: 8px 20px !important;
+            top: -16px;
+            right: 32px;
+          }
+        }
+
         /* Preloader */
         .juice-preloader {
           position: fixed;
@@ -1781,6 +1977,30 @@ export default function JuiceScrollDemo() {
             <h1 className="text-black text-uppercase font-display text-center m-0" style={{ fontSize: "1.65rem", fontWeight: 900, letterSpacing: "0.25em", opacity: 0.95 }}>
               Oasis <span style={{ transition: "color 0.4s ease" }} className="brand-accent">Natura</span>
             </h1>
+          </div>
+
+          {/* Scroll Down Indicators (PC: Center high, Mobile: Sides at mid-height) */}
+          <div 
+            ref={scrollIndicatorRef}
+            className="scroll-indicators-wrapper"
+          >
+            {/* Center for PC */}
+            <div className="scroll-indicator-pc d-none d-lg-flex flex-column align-items-center">
+              <span className="text-black font-label-caps text-uppercase mb-1" style={{ fontSize: "10px", opacity: 0.6, letterSpacing: "0.15em", color: "#1b3022" }}>
+                {language === "en" ? "Scroll to discover" : "Desliza para descubrir"}
+              </span>
+              <div className="scroll-arrows">
+                <span className="material-symbols-outlined fs-4 d-block arrow-down-animation-1" style={{ color: "#1b3022" }}>keyboard_double_arrow_down</span>
+              </div>
+            </div>
+
+            {/* Side Circles for Mobile */}
+            <div className="scroll-indicator-mobile-left d-flex d-lg-none">
+              <span className="material-symbols-outlined fs-4 arrow-down-animation-1" style={{ color: "#1b3022" }}>keyboard_double_arrow_down</span>
+            </div>
+            <div className="scroll-indicator-mobile-right d-flex d-lg-none">
+              <span className="material-symbols-outlined fs-4 arrow-down-animation-1" style={{ color: "#1b3022" }}>keyboard_double_arrow_down</span>
+            </div>
           </div>
 
           {/* Background Layers */}
@@ -2109,16 +2329,7 @@ export default function JuiceScrollDemo() {
               <div className="glass-panel rounded-4 p-4 p-md-5 organic-shadow position-sticky" style={{ top: "120px", borderRadius: "24px" }}>
 
                 {/* Price Badge */}
-                <div className="position-absolute font-label-caps px-4 py-2 rounded-pill shadow-sm" style={{
-                  top: "-16px",
-                  right: "32px",
-                  backgroundColor: "#d4e9c4",
-                  color: "#101f09",
-                  border: "1px solid rgba(184, 205, 170, 0.5)",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  zIndex: 15
-                }}>
+                <div className="price-badge-juice">
                   {planPrices.price} / {subscriptionPlan === 'semanal' ? (language === 'en' ? 'week' : 'semana') : subscriptionPlan === 'quincenal' ? (language === 'en' ? 'biweek' : 'quincena') : (language === 'en' ? 'month' : 'mes')}
                 </div>
 
@@ -2190,27 +2401,25 @@ export default function JuiceScrollDemo() {
                       </legend>
                       <div className="row g-2">
                         {[
-                          { id: "limon", emoji: "🍋", label: language === "en" ? "Lemon" : "Limón", desc: language === "en" ? "Eureka+Mint" : "Eureka+Menta" },
-                          { id: "naranja", emoji: "🍊", label: language === "en" ? "Orange" : "Naranja", desc: language === "en" ? "Valencia+Mand." : "Valencia+Mand." },
-                          { id: "uva", emoji: "🍇", label: language === "en" ? "Grape" : "Uva", desc: language === "en" ? "Isabela+Blueb." : "Isabela+Aránd." }
+                          { id: "limon", emoji: "🍋", label: language === "en" ? "Lemon" : "Limón", desc: language === "en" ? "Eureka + Mint" : "Eureka + Menta" },
+                          { id: "naranja", emoji: "🍊", label: language === "en" ? "Orange" : "Naranja", desc: language === "en" ? "Valencia + Mand." : "Valencia + Mand." },
+                          { id: "uva", emoji: "🍇", label: language === "en" ? "Grape" : "Uva", desc: language === "en" ? "Isabela + Blueb." : "Isabela + Aránd." }
                         ].map((item) => {
                           const isChecked = selectedFlavor === item.id;
                           return (
                             <div key={item.id} className="col-4">
                               <div
                                 onClick={() => setSelectedFlavor(item.id)}
-                                className="p-3 text-center border rounded-3 cursor-pointer d-flex flex-column align-items-center justify-content-center h-100"
+                                className="flavor-card"
                                 style={{
                                   backgroundColor: isChecked ? "rgba(212, 233, 196, 0.3)" : "#faf9f4",
                                   borderColor: isChecked ? "#1b3022" : "rgba(195, 200, 193, 0.4)",
                                   borderWidth: isChecked ? "2px" : "1px",
-                                  transition: "all 0.3s ease",
-                                  borderRadius: "12px"
                                 }}
                               >
-                                <span className="fs-3 mb-2">{item.emoji}</span>
-                                <span className="font-body-md fw-bold d-block text-black" style={{ fontSize: "14px", color: "#1b1c19" }}>{item.label}</span>
-                                <span className="font-body-md text-on-surface-variant d-block leading-tight" style={{ fontSize: "11px", color: "#434843" }}>{item.desc}</span>
+                                <span className="flavor-card-emoji">{item.emoji}</span>
+                                <span className="flavor-card-title">{item.label}</span>
+                                <span className="flavor-card-desc">{item.desc}</span>
                               </div>
                             </div>
                           );
@@ -2234,17 +2443,15 @@ export default function JuiceScrollDemo() {
                             <div key={item.id} className="col-4">
                               <div
                                 onClick={() => setSubscriptionPlan(item.id)}
-                                className="p-3 text-center border rounded-3 cursor-pointer d-flex flex-column align-items-center justify-content-center h-100"
+                                className="freq-card"
                                 style={{
                                   backgroundColor: isChecked ? "rgba(212, 233, 196, 0.3)" : "#faf9f4",
                                   borderColor: isChecked ? "#1b3022" : "rgba(195, 200, 193, 0.4)",
                                   borderWidth: isChecked ? "2px" : "1px",
-                                  transition: "all 0.3s ease",
-                                  borderRadius: "12px"
                                 }}
                               >
-                                <span className="font-body-md fw-bold d-block text-black" style={{ fontSize: "13px", color: "#1b1c19" }}>{item.label}</span>
-                                <span className="font-body-md text-on-surface-variant d-block" style={{ fontSize: "11px", color: "#434843" }}>{item.price}</span>
+                                <span className="freq-card-title">{item.label}</span>
+                                <span className="freq-card-price">{item.price}</span>
                               </div>
                             </div>
                           );
