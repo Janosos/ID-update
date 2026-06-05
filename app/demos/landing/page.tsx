@@ -13,6 +13,66 @@ interface TextSection {
   align: "left" | "right" | "center";
 }
 
+interface MouseState {
+  x: number | null;
+  y: number | null;
+  radius: number;
+}
+
+class Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  density: number;
+
+  constructor(canvasWidth: number, canvasHeight: number, dpr: number) {
+    this.x = Math.random() * canvasWidth;
+    this.y = Math.random() * canvasHeight;
+    this.size = (Math.random() * 3 + 1) * dpr;
+    this.vx = (Math.random() - 0.5) * 1.5 * dpr;
+    this.vy = (Math.random() - 0.5) * 1.5 * dpr;
+    this.density = (Math.random() * 30) + 1;
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.fillStyle = '#000000';
+    ctx.fill();
+  }
+
+  update(canvasWidth: number, canvasHeight: number, mouse: MouseState) {
+    if (mouse.x !== null && mouse.y !== null) {
+      const dx = mouse.x - this.x;
+      const dy = mouse.y - this.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      const forceDirectionX = dx / distance;
+      const forceDirectionY = dy / distance;
+      
+      const maxDistance = mouse.radius;
+      const force = (maxDistance - distance) / maxDistance;
+      
+      const directionX = forceDirectionX * force * this.density;
+      const directionY = forceDirectionY * force * this.density;
+
+      if (distance < mouse.radius) {
+        this.x -= directionX;
+        this.y -= directionY;
+      }
+    }
+
+    this.x += this.vx;
+    this.y += this.vy;
+
+    if (this.x < 0 || this.x > canvasWidth) this.vx = -this.vx;
+    if (this.y < 0 || this.y > canvasHeight) this.vy = -this.vy;
+  }
+}
+
 export default function ScrollLandingDemo() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isPreloaded, setIsPreloaded] = useState(false);
@@ -22,6 +82,9 @@ export default function ScrollLandingDemo() {
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
+  const particlesArrayRef = useRef<Particle[]>([]);
+  const mouseRef = useRef<MouseState>({ x: null, y: null, radius: 150 });
   
   const lastCardStates = useRef<{ opacity: number; translateY: number }[]>([]);
   const scrollInfoRef = useRef({
@@ -65,86 +128,6 @@ export default function ScrollLandingDemo() {
       img.onerror = handleImageLoad; // Skip if failed to avoid blocking
       tempImages.push(img);
     }
-  }, []);
-
-  // Set initial canvas resolution when preloading is complete
-  useEffect(() => {
-    if (isPreloaded && canvasRef.current && imagesRef.current.length > 0) {
-      const firstImg = imagesRef.current[0];
-      if (firstImg) {
-        canvasRef.current.width = firstImg.naturalWidth;
-        canvasRef.current.height = firstImg.naturalHeight;
-      }
-    }
-  }, [isPreloaded]);
-
-  // Dynamically override parent layout overflow settings to fix position: sticky bugs
-  useEffect(() => {
-    const htmlEl = document.documentElement;
-    const bodyEl = document.body;
-    const wrapperEl = document.getElementById("id-global-wrapper");
-    const mainEl = document.querySelector("main");
-
-    // Save original styles to restore on unmount
-    const originalHtmlOverflow = htmlEl.style.overflow;
-    const originalHtmlOverflowX = htmlEl.style.overflowX;
-    const originalHtmlHeight = htmlEl.style.height;
-
-    const originalBodyOverflow = bodyEl.style.overflow;
-    const originalBodyOverflowX = bodyEl.style.overflowX;
-    const originalBodyHeight = bodyEl.style.height;
-
-    const originalWrapperOverflow = wrapperEl ? wrapperEl.style.overflow : "";
-    const originalWrapperOverflowX = wrapperEl ? wrapperEl.style.overflowX : "";
-    const originalWrapperHeight = wrapperEl ? wrapperEl.style.height : "";
-
-    const originalMainOverflow = mainEl ? mainEl.style.overflow : "";
-    const originalMainOverflowX = mainEl ? mainEl.style.overflowX : "";
-    const originalMainHeight = mainEl ? mainEl.style.height : "";
-
-    // Set overflow visible and height auto to allow sticky elements to stick on viewport scroll
-    htmlEl.style.setProperty("overflow", "visible", "important");
-    htmlEl.style.setProperty("overflow-x", "visible", "important");
-    htmlEl.style.setProperty("height", "auto", "important");
-
-    bodyEl.style.setProperty("overflow", "visible", "important");
-    bodyEl.style.setProperty("overflow-x", "visible", "important");
-    bodyEl.style.setProperty("height", "auto", "important");
-
-    if (wrapperEl) {
-      wrapperEl.style.setProperty("overflow", "visible", "important");
-      wrapperEl.style.setProperty("overflow-x", "visible", "important");
-      wrapperEl.style.setProperty("height", "auto", "important");
-    }
-
-    if (mainEl) {
-      mainEl.style.setProperty("overflow", "visible", "important");
-      mainEl.style.setProperty("overflow-x", "visible", "important");
-      mainEl.style.setProperty("height", "auto", "important");
-    }
-
-    return () => {
-      // Restore original styles on unmount
-      htmlEl.style.overflow = originalHtmlOverflow;
-      htmlEl.style.overflowX = originalHtmlOverflowX;
-      htmlEl.style.height = originalHtmlHeight;
-
-      bodyEl.style.overflow = originalBodyOverflow;
-      bodyEl.style.overflowX = originalBodyOverflowX;
-      bodyEl.style.height = originalBodyHeight;
-
-      if (wrapperEl) {
-        wrapperEl.style.overflow = originalWrapperOverflow;
-        wrapperEl.style.overflowX = originalWrapperOverflowX;
-        wrapperEl.style.height = originalWrapperHeight;
-      }
-
-      if (mainEl) {
-        mainEl.style.overflow = originalMainOverflow;
-        mainEl.style.overflowX = originalMainOverflowX;
-        mainEl.style.height = originalMainHeight;
-      }
-    };
   }, []);
 
   // Detailed product description walkthrough (7 sections)
@@ -265,6 +248,38 @@ export default function ScrollLandingDemo() {
       scrollInfoRef.current.targetProgress = progress;
     };
 
+    const handleResize = () => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        
+        // Adjust mouse interaction radius
+        mouseRef.current.radius = 150 * dpr;
+        
+        // Re-initialize particles
+        const particlesArray: Particle[] = [];
+        const numberOfParticles = (window.innerWidth * window.innerHeight) / 10000;
+        for (let i = 0; i < numberOfParticles; i++) {
+          particlesArray.push(new Particle(canvas.width, canvas.height, dpr));
+        }
+        particlesArrayRef.current = particlesArray;
+      }
+      handleScroll();
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const dpr = window.devicePixelRatio || 1;
+      mouseRef.current.x = event.clientX * dpr;
+      mouseRef.current.y = event.clientY * dpr;
+    };
+
+    const handleMouseLeave = () => {
+      mouseRef.current.x = null;
+      mouseRef.current.y = null;
+    };
+
     let active = true;
     const renderLoop = () => {
       if (!active) return;
@@ -282,34 +297,89 @@ export default function ScrollLandingDemo() {
       const progress = info.currentProgress;
       const canvas = canvasRef.current;
       if (canvas && imagesRef.current.length > 0) {
-        // Map animation progress to reach frame 240 at progress = 0.96 (creating a buffer zone)
-        const animProgress = Math.min(1, progress / 0.96);
-        const currentFrame = Math.min(
-          totalFrames,
-          Math.max(1, Math.floor(animProgress * (totalFrames - 1)) + 1)
-        );
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          // 1. Draw canvas background
+          ctx.fillStyle = '#f8f9fa';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        if (currentFrame !== info.lastFrameRendered) {
-          info.lastFrameRendered = currentFrame;
+          // 2. Update and draw particles
+          const particles = particlesArrayRef.current;
+          const mouse = mouseRef.current;
+          for (let i = 0; i < particles.length; i++) {
+            particles[i].update(canvas.width, canvas.height, mouse);
+            particles[i].draw(ctx);
+          }
+
+          // 3. Connect particles
+          const dpr = window.devicePixelRatio || 1;
+          const maxDistance = 150 * dpr;
+          const maxDistanceSq = maxDistance * maxDistance;
+          for (let a = 0; a < particles.length; a++) {
+            for (let b = a; b < particles.length; b++) {
+              const dx = particles[a].x - particles[b].x;
+              const dy = particles[a].y - particles[b].y;
+              const distance = dx * dx + dy * dy;
+
+              if (distance < maxDistanceSq) {
+                const opacityValue = 1 - (distance / maxDistanceSq);
+                ctx.strokeStyle = `rgba(0, 0, 0, ${opacityValue * 0.15})`;
+                ctx.lineWidth = 1 * dpr;
+                ctx.beginPath();
+                ctx.moveTo(particles[a].x, particles[a].y);
+                ctx.lineTo(particles[b].x, particles[b].y);
+                ctx.stroke();
+              }
+            }
+          }
+
+          // 4. Draw current frame image with Multiply blending
+          const animProgress = Math.min(1, progress / 0.96);
+          const currentFrame = Math.min(
+            totalFrames,
+            Math.max(1, Math.floor(animProgress * (totalFrames - 1)) + 1)
+          );
+          
           const img = imagesRef.current[currentFrame - 1];
           if (img) {
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              ctx.drawImage(img, 0, 0);
-            }
+            ctx.save();
+            ctx.globalCompositeOperation = 'multiply';
+            
+            // Calculate scale and position to center the image (object-fit: contain)
+            const isMobile = window.innerWidth < 992;
+            const firstSectionOpacity = getSectionOpacity(progress, 0, 0.14);
+            const zoomScale = 1 + (1 - firstSectionOpacity) * 0.05;
+            
+            // Limit image scale to prevent overflow
+            const fitScale = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight) * (isMobile ? 0.75 : 0.9);
+            const scale = fitScale * zoomScale;
+            
+            const w = img.naturalWidth * scale;
+            const h = img.naturalHeight * scale;
+            const x = (canvas.width - w) / 2;
+            const yOffset = isMobile ? canvas.height * 0.08 : 0; // match 12vh translation
+            const y = (canvas.height - h) / 2 + yOffset;
+            
+            ctx.drawImage(img, x, y, w, h);
+            ctx.restore();
           }
         }
       }
 
-      const isMobileScreen = window.innerWidth < 992;
-      if (canvas) {
-        const firstSectionOpacity = getSectionOpacity(progress, 0, 0.14);
-        const canvasScale = 1 + (1 - firstSectionOpacity) * 0.05;
-        canvas.style.transform = isMobileScreen
-          ? `scale3d(${canvasScale}, ${canvasScale}, 1) translate3d(0, 12vh, 0)`
-          : `scale3d(${canvasScale}, ${canvasScale}, 1) translate3d(0, 0, 0)`;
+      // Update scroll indicator opacity (smoothly fade out within first 3% of scrolling)
+      const indicatorEl = scrollIndicatorRef.current;
+      if (indicatorEl) {
+        const indicatorOpacity = Math.max(0, 1 - progress / 0.03);
+        if (indicatorOpacity <= 0.01) {
+          indicatorEl.style.opacity = "0";
+          indicatorEl.style.pointerEvents = "none";
+        } else {
+          indicatorEl.style.opacity = indicatorOpacity.toString();
+          indicatorEl.style.pointerEvents = "auto";
+        }
       }
+
+      const isMobileScreen = window.innerWidth < 992;
 
       // Update Text Card opacities and translations directly in the DOM
       textSections.forEach((section, idx) => {
@@ -344,10 +414,12 @@ export default function ScrollLandingDemo() {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     document.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("mouseleave", handleMouseLeave, { passive: true });
     
-    // Initial scroll position setup
-    handleScroll();
+    // Initial size setup
+    handleResize();
     
     // Start continuous animation loop
     renderLoop();
@@ -357,7 +429,9 @@ export default function ScrollLandingDemo() {
       cancelAnimationFrame(scrollInfoRef.current.animationFrameId);
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, [isPreloaded]);
 
@@ -371,7 +445,7 @@ export default function ScrollLandingDemo() {
   };
 
   return (
-    <div data-bs-theme="light" className="bg-white text-black min-vh-100 position-relative" style={{ fontFamily: "var(--font-sans)", overflow: "visible" }}>
+    <div data-bs-theme="light" className="bg-transparent text-black min-vh-100 position-relative" style={{ fontFamily: "var(--font-sans)", overflow: "visible" }}>
       <style dangerouslySetInnerHTML={{ __html: `
         /* Force overflow visible to fix CSS position: sticky bug on ancestor hierarchy */
         html, body, #id-global-wrapper, main {
@@ -416,25 +490,26 @@ export default function ScrollLandingDemo() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background-color: #ffffff;
+          background-color: transparent;
         }
 
         .scroll-canvas-container {
           position: absolute;
           width: 100%;
           height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          top: 0;
+          left: 0;
           z-index: 1;
+          pointer-events: none;
         }
 
         .scroll-canvas {
-          max-height: 72vh;
-          max-width: 90%;
-          object-fit: contain;
-          will-change: transform;
-          transform: scale3d(1, 1, 1) translate3d(0, 0, 0);
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100% !important;
+          height: 100% !important;
+          pointer-events: none;
         }
 
         .text-section-overlay {
@@ -603,10 +678,6 @@ export default function ScrollLandingDemo() {
 
         /* Mobile specific overrides */
         @media (max-width: 991.98px) {
-          .scroll-canvas {
-            max-height: 40vh !important;
-            transform: scale3d(1, 1, 1) translate3d(0, 12vh, 0) !important; /* Shifted down to lower half using GPU layers */
-          }
           section.py-5 {
             padding-top: 3rem !important;
             padding-bottom: 3rem !important;
@@ -615,19 +686,26 @@ export default function ScrollLandingDemo() {
 
         @media (max-width: 767.98px) {
           .text-card-overlay-item {
-            padding: 1.25rem !important;
+            padding: 1.5rem !important;
             border-radius: 1.25rem !important;
-            top: 11vh !important;
+            top: 16vh !important;
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(15px) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05) !important;
           }
           .apple-title {
-            font-size: 1.4rem !important;
+            font-size: 1.5rem !important;
+            letter-spacing: -0.02em !important;
           }
           .apple-subtitle {
-            font-size: 0.85rem !important;
+            font-size: 0.95rem !important;
+            color: #515154 !important;
           }
           .apple-desc {
-            font-size: 0.82rem !important;
-            line-height: 1.5 !important;
+            font-size: 0.85rem !important;
+            line-height: 1.6 !important;
+            color: #1c1c1e !important;
           }
           html body .display-5 {
             font-size: 2.2rem !important;
@@ -640,6 +718,45 @@ export default function ScrollLandingDemo() {
           }
           html body .spec-desc {
             font-size: 0.88rem !important;
+          }
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator-container {
+          position: absolute;
+          top: 75px;
+          left: 50%;
+          transform: translate3d(-50%, 0, 0);
+          z-index: 5;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.4rem;
+          color: #000000;
+          font-weight: 700;
+          font-size: 0.85rem;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          pointer-events: none;
+          transition: opacity 0.25s ease-out;
+          white-space: nowrap;
+        }
+
+        .scroll-indicator-arrow {
+          animation: bounce-scroll-indicator 2s infinite;
+          font-size: 1.1rem;
+          color: #000000;
+        }
+
+        @keyframes bounce-scroll-indicator {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translate3d(0, 0, 0);
+          }
+          40% {
+            transform: translate3d(0, -6px, 0);
+          }
+          60% {
+            transform: translate3d(0, -3px, 0);
           }
         }
 
@@ -716,18 +833,8 @@ export default function ScrollLandingDemo() {
             <span className="fw-semibold font-display">AeroPods Pro</span>
           </span>
           <div className="d-flex align-items-center gap-3">
-            <span className="small" style={{ color: "#1d1d1f", fontWeight: 600, fontSize: "clamp(0.75rem, 2.2vw, 0.85rem)" }}>
-              {language === "en" ? (
-                <>
-                  <span className="d-none d-sm-inline">Smart Noise Cancellation</span>
-                  <span className="d-inline d-sm-none">Noise Cancellation</span>
-                </>
-              ) : (
-                <>
-                  <span className="d-none d-sm-inline">Cancelación de Ruido Inteligente</span>
-                  <span className="d-inline d-sm-none">Cancelación de Ruido</span>
-                </>
-              )}
+            <span className="small d-none d-sm-inline" style={{ color: "#1d1d1f", fontWeight: 600, fontSize: "clamp(0.75rem, 2.2vw, 0.85rem)" }}>
+              {language === "en" ? "Smart Noise Cancellation" : "Cancelación de Ruido Inteligente"}
             </span>
             <a href="#comprar" className="btn btn-dark btn-sm rounded-pill px-3 fw-bold">
               {language === "en" ? "Reserve" : "Reservar"}
@@ -741,6 +848,14 @@ export default function ScrollLandingDemo() {
         
         {/* Sticky Viewport */}
         <div className="sticky-viewport">
+          
+          {/* Scroll Down Indicator */}
+          <div ref={scrollIndicatorRef} className="scroll-indicator-container">
+            <span className="font-monospace">
+              {language === "en" ? "Scroll to explore" : "Desliza para explorar"}
+            </span>
+            <i className="bi bi-chevron-double-down scroll-indicator-arrow"></i>
+          </div>
           
           {/* Fictional Headphones Canvas */}
           <div className="scroll-canvas-container">
@@ -798,7 +913,10 @@ export default function ScrollLandingDemo() {
               
               <div className="row g-4 mt-2">
                 <div className="col-12 col-sm-6">
-                  <h4 className="h6 spec-title">{language === "en" ? "Noise Cancellation" : "Cancelación de Ruido"}</h4>
+                  <h4 className="h6 spec-title">
+                    <i className="bi bi-volume-mute-fill me-2" style={{ color: "#e05e00" }}></i>
+                    {language === "en" ? "Noise Cancellation" : "Cancelación de Ruido"}
+                  </h4>
                   <p className="spec-desc">
                     {language === "en" 
                       ? "Eliminates twice as much background noise by adapting to the shape of your ear canal."
@@ -806,7 +924,10 @@ export default function ScrollLandingDemo() {
                   </p>
                 </div>
                 <div className="col-12 col-sm-6">
-                  <h4 className="h6 spec-title">{language === "en" ? "Personalized Spatial Audio" : "Audio Espacial Personalizado"}</h4>
+                  <h4 className="h6 spec-title">
+                    <i className="bi bi-soundwave me-2" style={{ color: "#e05e00" }}></i>
+                    {language === "en" ? "Personalized Spatial Audio" : "Audio Espacial Personalizado"}
+                  </h4>
                   <p className="spec-desc">
                     {language === "en"
                       ? "360-degree sound calibrated to the unique shape of your ears."
@@ -814,7 +935,10 @@ export default function ScrollLandingDemo() {
                   </p>
                 </div>
                 <div className="col-12 col-sm-6">
-                  <h4 className="h6 spec-title">{language === "en" ? "Smart Touch Control" : "Control Táctil Inteligente"}</h4>
+                  <h4 className="h6 spec-title">
+                    <i className="bi bi-hand-index-thumb-fill me-2" style={{ color: "#e05e00" }}></i>
+                    {language === "en" ? "Smart Touch Control" : "Control Táctil Inteligente"}
+                  </h4>
                   <p className="spec-desc">
                     {language === "en"
                       ? "Swipe the earbud stem to instantly adjust the volume."
@@ -822,7 +946,10 @@ export default function ScrollLandingDemo() {
                   </p>
                 </div>
                 <div className="col-12 col-sm-6">
-                  <h4 className="h6 spec-title">{language === "en" ? "IPX4 Water Resistance" : "Resistencia IPX4"}</h4>
+                  <h4 className="h6 spec-title">
+                    <i className="bi bi-droplet-fill me-2" style={{ color: "#e05e00" }}></i>
+                    {language === "en" ? "IPX4 Water Resistance" : "Resistencia IPX4"}
+                  </h4>
                   <p className="spec-desc">
                     {language === "en"
                       ? "Both earbuds and charging case are built to withstand sweat and water safely."
