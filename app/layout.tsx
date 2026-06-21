@@ -5,6 +5,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import GlobalLayout from "@/components/GlobalLayout";
 import { LanguageProvider } from "@/context/LanguageContext";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -85,26 +86,24 @@ export default function RootLayout({
           crossOrigin="anonymous" 
         />
         {/* Anti-flash Script */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const savedTheme = localStorage.getItem('theme-id');
-                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  const html = document.documentElement;
-                  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                    html.classList.add('dark');
-                    html.setAttribute('data-bs-theme', 'dark');
-                  } else {
-                    html.classList.remove('dark');
-                    html.setAttribute('data-bs-theme', 'light');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
+        <Script id="theme-script" strategy="beforeInteractive">
+          {`
+            (function() {
+              try {
+                const savedTheme = localStorage.getItem('theme-id');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const html = document.documentElement;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                  html.classList.add('dark');
+                  html.setAttribute('data-bs-theme', 'dark');
+                } else {
+                  html.classList.remove('dark');
+                  html.setAttribute('data-bs-theme', 'light');
+                }
+              } catch (e) {}
+            })();
+          `}
+        </Script>
       </head>
       <body className="min-h-full flex flex-col">
         <LanguageProvider>
