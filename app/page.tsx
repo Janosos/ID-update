@@ -47,7 +47,7 @@ export default function Home() {
       desc: language === "en" 
         ? "Physical and online dress and women's fashion store with integrated payments." 
         : "Tienda física y online de vestidos y moda femenina, con cobros integrados.",
-      img: "https://www.imperiodev.com/wp-content/uploads/2026/04/tzaira.avif",
+      seoImage: "https://www.tzairaboutique.com/wp-content/plugins/cmp-coming-soon-maintenance/themes/hardwork/img/hardwork_banner_large.jpg",
       url: "https://www.tzairaboutique.com/",
       badgeBg: "bg-danger bg-opacity-10 text-danger",
       textClass: "text-danger"
@@ -58,7 +58,7 @@ export default function Home() {
       desc: language === "en"
         ? "Sale and shipping of anime-inspired embroidered clothing with integrated gateway."
         : "Venta y envío de ropa bordada inspirada en anime con pasarela integrada.",
-      img: "https://www.imperiodev.com/wp-content/uploads/2026/02/nakama.webp",
+      seoImage: "https://nakamabordados.com/og-banner.png",
       url: "https://nakamabordados.com/",
       badgeBg: "bg-info bg-opacity-10 text-info",
       textClass: "text-info"
@@ -69,8 +69,10 @@ export default function Home() {
       desc: language === "en"
         ? "Marketplace for purchasing, downloading, and distributing embroidery designs and grids."
         : "Marketplace para compra, descarga y distribución de matrices y diseños bordados.",
-      img: "https://www.imperiodev.com/wp-content/uploads/2026/01/nakamaemb.png",
-      url: "https://www.nakamaemb.com/",
+      // The .com.mx site currently returns a maintenance response without og:image;
+      // keep the existing branded asset as a safe fallback until its SEO image is published.
+      seoImage: "https://www.imperiodev.com/wp-content/uploads/2026/01/nakamaemb.png",
+      url: "https://nakamaemb.com.mx/",
       badgeBg: "bg-primary bg-opacity-10 text-primary",
       textClass: "text-primary"
     },
@@ -80,7 +82,7 @@ export default function Home() {
       desc: language === "en"
         ? "Branding, brand identity studio, and digital layout with high visual level."
         : "Estudio de branding, imagen de marca y maquetación digital de alto nivel visual.",
-      img: "https://www.imperiodev.com/wp-content/uploads/2026/02/siro1.avif",
+      seoImage: "https://www.siro.com.mx/wp-content/uploads/2026/02/siro1.avif",
       url: "https://www.siro.com.mx/",
       badgeBg: "bg-purple bg-opacity-10 text-purple-600 dark:text-purple-400",
       textClass: "text-purple-600 dark:text-purple-400"
@@ -699,7 +701,7 @@ export default function Home() {
                       <div className="glass-panel overflow-hidden portfolio-card h-100 d-flex flex-column justify-content-between">
                         <div className="overflow-hidden">
                           <img 
-                            src={project.img} 
+                            src={project.seoImage}
                             alt={project.title} 
                             className="w-100 img-fluid"
                             style={{ height: "220px", objectFit: "cover" }}

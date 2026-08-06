@@ -1,3 +1,15 @@
-# ImperioDev Apache Server Configuration
-# Route all missing static file requests to the custom Next.js 404 page
+# ImperioDev Apache/LiteSpeed Server Configuration
+
+# Route missing pages to the exported Next.js 404 document.
 ErrorDocument 404 /404.html
+
+# Serve machine-readable discovery/security files with their correct MIME types.
+AddType text/plain .txt
+AddType application/xml .xml
+
+# Baseline response hardening for a static export.
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>

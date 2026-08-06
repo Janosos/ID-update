@@ -38,6 +38,20 @@ export const metadata: Metadata = {
   },
   description: "Desarrollo web a la medida con WordPress, WooCommerce, React y Bootstrap. Diseños de alto impacto y velocidad optimizada.",
   metadataBase: new URL("https://www.imperiodev.com"),
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   icons: {
     icon: "https://www.imperiodev.com/wp-content/uploads/2025/02/9c7d6fb0-1eab-481e-a6da-6b37688eacef-e1739234268387-46x63.png",
     shortcut: "https://www.imperiodev.com/wp-content/uploads/2025/02/9c7d6fb0-1eab-481e-a6da-6b37688eacef-e1739234268387-46x63.png",
