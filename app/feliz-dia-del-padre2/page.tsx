@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Feliz Día del Padre | Momentos',
     description: 'Una dedicatoria única y especial llena de fotografías y momentos con papá.',
-    url: 'https://tusitio.com/feliz-dia-del-padre2',
-    siteName: 'Dedicatoria Día del Padre',
+    url: 'https://www.imperiodev.com/feliz-dia-del-padre2',
+    siteName: 'ImperioDev',
     images: [
       {
         url: '/feliz-dia-del-padre/hero-bg.png',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
         alt: 'Imagen de portada del Día del Padre',
       },
     ],
-    locale: 'es_ES',
+    locale: 'es_MX',
     type: 'website',
   },
   twitter: {
