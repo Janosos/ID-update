@@ -119,33 +119,33 @@ export default function TutorialsPage() {
         </header>
 
         {/* Tab Selector Controls */}
-        <div className="d-flex flex-column flex-sm-row justify-content-center align-items-stretch align-items-sm-center gap-2 gap-sm-3 mb-4 mb-md-5 mx-auto w-100" style={{ maxWidth: "680px" }}>
+        <div className="d-flex flex-column flex-sm-row justify-content-center align-items-stretch gap-2 gap-sm-3 mb-4 mb-md-5 mx-auto w-100" style={{ maxWidth: "700px" }}>
           <button
             onClick={() => setActiveTab("products")}
-            className={`btn btn-lg px-3 px-sm-4 py-2.5 py-sm-3 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-3 transition-all ${
+            className={`tutorial-tab-btn transition-all ${
               activeTab === "products" 
-                ? "btn-info text-white shadow-lg tab-active" 
-                : "btn-premium-outline-theme opacity-80"
+                ? "tab-btn-active shadow-lg" 
+                : "tab-btn-inactive"
             }`}
-            style={activeTab === "products" ? { background: "linear-gradient(135deg, #0ea5e9, #2563eb)", borderColor: "#2563eb" } : {}}
             id="tab-btn-products"
+            type="button"
           >
-            <i className="bi bi-box-seam-fill fs-5"></i>
-            <span className="text-nowrap">{t.tutorials.tabProducts}</span>
+            <i className="bi bi-box-seam-fill fs-5 flex-shrink-0"></i>
+            <span className="tab-btn-text">{t.tutorials.tabProducts}</span>
           </button>
           
           <button
             onClick={() => setActiveTab("shipping")}
-            className={`btn btn-lg px-3 px-sm-4 py-2.5 py-sm-3 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-3 transition-all ${
+            className={`tutorial-tab-btn transition-all ${
               activeTab === "shipping" 
-                ? "btn-info text-white shadow-lg tab-active" 
-                : "btn-premium-outline-theme opacity-80"
+                ? "tab-btn-active shadow-lg" 
+                : "tab-btn-inactive"
             }`}
-            style={activeTab === "shipping" ? { background: "linear-gradient(135deg, #0ea5e9, #2563eb)", borderColor: "#2563eb" } : {}}
             id="tab-btn-shipping"
+            type="button"
           >
-            <i className="bi bi-truck fs-5"></i>
-            <span className="text-nowrap">{t.tutorials.tabShipping}</span>
+            <i className="bi bi-truck fs-5 flex-shrink-0"></i>
+            <span className="tab-btn-text">{t.tutorials.tabShipping}</span>
           </button>
         </div>
 
@@ -159,19 +159,19 @@ export default function TutorialsPage() {
             {activeTab === "products" && (
               <div className="glass-panel p-3 p-sm-4 p-md-5 fade-in-up" style={{ background: "var(--card-bg)" }}>
                 {/* Tutorial Header */}
-                <div className="border-bottom border-secondary border-opacity-20 pb-4 mb-4 mb-md-5">
-                  <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 mb-3">
-                    <div className="rounded-4 bg-primary bg-opacity-10 text-primary p-3 fs-2 d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                <div className="border-bottom border-secondary border-opacity-20 pb-3 pb-sm-4 mb-4 mb-md-5">
+                  <div className="guide-header-box">
+                    <div className="guide-icon-box bg-primary bg-opacity-10 text-primary shadow-sm">
                       <i className="bi bi-bag-plus-fill"></i>
                     </div>
-                    <div>
-                      <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 text-uppercase small fw-bold mb-1 d-inline-block">
+                    <div className="min-w-0 flex-grow-1">
+                      <span className="guide-badge guide-badge-primary">
                         WooCommerce Guide
                       </span>
-                      <h2 className="h2 fw-bold text-body m-0 font-display">{t.tutorials.prodTitle}</h2>
+                      <h2 className="guide-title font-display">{t.tutorials.prodTitle}</h2>
                     </div>
                   </div>
-                  <p className="lead text-secondary m-0">
+                  <p className="lead text-secondary m-0" style={{ fontSize: "clamp(0.95rem, 2.8vw, 1.15rem)" }}>
                     {t.tutorials.prodSubtitle}
                   </p>
                 </div>
@@ -536,19 +536,19 @@ export default function TutorialsPage() {
             {activeTab === "shipping" && (
               <div className="glass-panel p-3 p-sm-4 p-md-5 fade-in-up" style={{ background: "var(--card-bg)" }}>
                 {/* Tutorial Header */}
-                <div className="border-bottom border-secondary border-opacity-20 pb-4 mb-4 mb-md-5">
-                  <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 mb-3">
-                    <div className="rounded-4 bg-info bg-opacity-10 text-info p-3 fs-2 d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                <div className="border-bottom border-secondary border-opacity-20 pb-3 pb-sm-4 mb-4 mb-md-5">
+                  <div className="guide-header-box">
+                    <div className="guide-icon-box bg-info bg-opacity-10 text-info shadow-sm">
                       <i className="bi bi-truck-flatbed"></i>
                     </div>
-                    <div>
-                      <span className="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1 text-uppercase small fw-bold mb-1 d-inline-block">
+                    <div className="min-w-0 flex-grow-1">
+                      <span className="guide-badge guide-badge-info">
                         Shipping & Logistics Guide
                       </span>
-                      <h2 className="h2 fw-bold text-body m-0 font-display">{t.tutorials.shipTitle}</h2>
+                      <h2 className="guide-title font-display">{t.tutorials.shipTitle}</h2>
                     </div>
                   </div>
-                  <p className="lead text-secondary m-0">
+                  <p className="lead text-secondary m-0" style={{ fontSize: "clamp(0.95rem, 2.8vw, 1.15rem)" }}>
                     {t.tutorials.shipSubtitle}
                   </p>
                 </div>
@@ -780,6 +780,82 @@ export default function TutorialsPage() {
           letter-spacing: -0.02em;
         }
 
+        .guide-header-box {
+          display: flex;
+          align-items: center;
+          gap: 0.85rem;
+          margin-bottom: 0.85rem;
+        }
+
+        .guide-icon-box {
+          width: 48px;
+          height: 48px;
+          min-width: 48px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.35rem;
+          flex-shrink: 0;
+        }
+
+        @media (min-width: 576px) {
+          .guide-header-box {
+            gap: 1.15rem;
+            margin-bottom: 1rem;
+          }
+          .guide-icon-box {
+            width: 58px;
+            height: 58px;
+            min-width: 58px;
+            border-radius: 16px;
+            font-size: 1.75rem;
+          }
+        }
+
+        .guide-title {
+          font-size: clamp(1.2rem, 4.5vw, 1.85rem);
+          font-weight: 800;
+          line-height: 1.15;
+          margin: 0;
+          color: var(--bs-body-color);
+          word-break: break-word;
+        }
+
+        .guide-badge {
+          display: inline-block;
+          font-size: 0.72rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          padding: 0.2rem 0.6rem;
+          border-radius: 6px;
+          margin-bottom: 0.25rem;
+          line-height: 1.2;
+        }
+
+        .guide-badge-primary {
+          background-color: rgba(37, 99, 235, 0.12) !important;
+          color: #2563eb !important;
+          border: 1px solid rgba(37, 99, 235, 0.25) !important;
+        }
+        :global(html.dark) .guide-badge-primary {
+          background-color: rgba(59, 130, 246, 0.2) !important;
+          color: #60a5fa !important;
+          border-color: rgba(96, 165, 250, 0.35) !important;
+        }
+
+        .guide-badge-info {
+          background-color: rgba(14, 165, 233, 0.12) !important;
+          color: #0284c7 !important;
+          border: 1px solid rgba(14, 165, 233, 0.25) !important;
+        }
+        :global(html.dark) .guide-badge-info {
+          background-color: rgba(14, 165, 233, 0.2) !important;
+          color: #38bdf8 !important;
+          border-color: rgba(56, 189, 248, 0.35) !important;
+        }
+
         .phase-badge {
           display: inline-flex;
           align-items: center;
@@ -882,8 +958,61 @@ export default function TutorialsPage() {
           box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
         }
 
-        .tab-active {
-          transform: scale(1.02);
+        .tutorial-tab-btn {
+          width: 100%;
+          padding: 0.85rem 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.65rem;
+          border-radius: 0.85rem;
+          font-weight: 700;
+          cursor: pointer;
+          box-sizing: border-box;
+          text-align: center;
+          border: 1px solid transparent;
+          text-decoration: none;
+        }
+
+        .tab-btn-text {
+          font-size: clamp(0.82rem, 3.4vw, 0.98rem);
+          line-height: 1.25;
+          word-break: normal;
+          display: inline-block;
+        }
+
+        .tab-btn-active {
+          background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+          color: #ffffff !important;
+          border: 1px solid #2563eb !important;
+          box-shadow: 0 4px 18px rgba(14, 165, 233, 0.35);
+        }
+
+        .tab-btn-inactive {
+          background: rgba(15, 23, 42, 0.04) !important;
+          color: #0f172a !important;
+          border: 1px solid rgba(15, 23, 42, 0.12) !important;
+        }
+        :global(html.dark) .tab-btn-inactive {
+          background: rgba(255, 255, 255, 0.04) !important;
+          color: #f8fafc !important;
+          border-color: rgba(255, 255, 255, 0.12) !important;
+        }
+
+        .tab-btn-inactive:hover {
+          background: rgba(15, 23, 42, 0.08) !important;
+          border-color: rgba(14, 165, 233, 0.4) !important;
+        }
+        :global(html.dark) .tab-btn-inactive:hover {
+          background: rgba(255, 255, 255, 0.08) !important;
+          border-color: rgba(56, 189, 248, 0.4) !important;
+        }
+
+        @media (min-width: 576px) {
+          .tutorial-tab-btn {
+            flex: 1 1 0px;
+            padding: 0.9rem 1.25rem;
+          }
         }
 
         .image-container {
@@ -928,6 +1057,16 @@ export default function TutorialsPage() {
           }
           .image-container img {
             max-height: 240px !important;
+          }
+        }
+
+        @media (max-width: 380px) {
+          .tutorial-tab-btn {
+            padding: 0.7rem 0.75rem;
+            gap: 0.45rem;
+          }
+          .tab-btn-text {
+            font-size: 0.8rem;
           }
         }
       `}</style>
