@@ -476,7 +476,7 @@ export const translations = {
     privacy: {
       tag: "Legal",
       title: "Aviso de Privacidad",
-      intro: "Ezequiel Alejandro López Coronado (en lo sucesivo \"ImperioDev\"), con domicilio en la ciudad de Hermosillo, Sonora, es el responsable del tratamiento de sus datos personales, el cual se llevará a cabo de conformidad con lo dispuesto en la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.",
+      intro: "ImperioDev, con domicilio en la ciudad de Hermosillo, Sonora, es el responsable del tratamiento de sus datos personales, el cual se llevará a cabo de conformidad con lo dispuesto en la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.",
       sidebarTitle: "Resumen Ejecutivo",
       sidebarDesc: "Mantenemos una estricta política de confidencialidad. Sus datos se utilizan exclusivamente para la provisión de servicios y comunicación operativa.",
       sidebarL1: "Datos seguros y protegidos",
@@ -1223,7 +1223,7 @@ export const translations = {
     privacy: {
       tag: "Legal",
       title: "Privacy Policy",
-      intro: "Ezequiel Alejandro López Coronado (hereinafter \"ImperioDev\"), residing in the city of Hermosillo, Sonora, is responsible for processing your personal data, which will be carried out in accordance with the provisions of the Federal Law on Protection of Personal Data Held by Private Parties.",
+      intro: "ImperioDev, residing in the city of Hermosillo, Sonora, is responsible for processing your personal data, which will be carried out in accordance with the provisions of the Federal Law on Protection of Personal Data Held by Private Parties.",
       sidebarTitle: "Executive Summary",
       sidebarDesc: "We maintain a strict confidentiality policy. Your data is used exclusively for the provision of services and operational communication.",
       sidebarL1: "Safe and protected data",
