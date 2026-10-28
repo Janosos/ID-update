@@ -15,6 +15,16 @@ export const translations = {
       rightsReserved: "TODOS LOS DERECHOS RESERVADOS.",
       privacyPolicy: "Aviso de Privacidad",
       termsConditions: "Términos y Condiciones",
+      cookiePolicy: "Política de Cookies",
+    },
+    cookies: {
+      badge: "Privacidad y Cookies",
+      title: "Política de Cookies",
+      description: "Utilizamos cookies propias y de terceros para mejorar tu experiencia de navegación, recordar tus preferencias y analizar el tráfico del sitio. Consulta más detalles en nuestro",
+      privacyLink: "Aviso de Privacidad",
+      acceptAll: "Aceptar todas",
+      essentialOnly: "Solo esenciales",
+      closeLabel: "Cerrar aviso de cookies",
     },
     home: {
       available: "Disponible para nuevos proyectos",
@@ -752,6 +762,16 @@ export const translations = {
       rightsReserved: "ALL RIGHTS RESERVED.",
       privacyPolicy: "Privacy Policy",
       termsConditions: "Terms and Conditions",
+      cookiePolicy: "Cookie Policy",
+    },
+    cookies: {
+      badge: "Privacy & Cookies",
+      title: "Cookie Policy",
+      description: "We use our own and third-party cookies to enhance your browsing experience, remember your preferences, and analyze site traffic. Learn more in our",
+      privacyLink: "Privacy Policy",
+      acceptAll: "Accept all",
+      essentialOnly: "Essential only",
+      closeLabel: "Close cookie notice",
     },
     home: {
       available: "Available for new projects",

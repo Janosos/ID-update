@@ -15,10 +15,6 @@ export default function TermsAndConditionsPage() {
 
       <div className="container-xl px-4 py-5 z-1">
         <header className="mb-5 border-bottom pb-4">
-          <div className="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 mb-3">
-            <i className="bi bi-gavel text-info"></i>
-            <span className="small font-display fw-bold text-uppercase tracking-wider">{t.terms.tag}</span>
-          </div>
           <h1 className="display-4 fw-bold text-body mb-3 tracking-tight">{t.terms.title}</h1>
           <p className="lead text-secondary max-w-3xl">
             {t.terms.intro}

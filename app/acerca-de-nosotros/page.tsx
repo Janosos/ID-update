@@ -138,7 +138,7 @@ export default function AboutUsPage() {
         ></div>
 
         <div className="container-xl px-4 text-center position-relative z-10 reveal active py-5">
-          <span className="text-info font-bold tracking-widest text-uppercase small mb-3 d-block">{t.about.tag}</span>
+
           <h1 className="display-4 fw-bold leading-tight text-body mb-4">
             {language === "es" ? (
               <>Construyendo el <br /><span className="text-gradient">Imperio Digital</span> de Tu Negocio</>

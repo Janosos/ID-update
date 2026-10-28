@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import LoadingScreen from "@/components/LoadingScreen";
 import ChatBot from "@/components/ChatBot";
+import CookieBanner from "@/components/CookieBanner";
 import { useLanguage, useTranslation } from "@/context/LanguageContext";
 
 export default function GlobalLayout({ children }: { children: React.ReactNode }) {
@@ -257,6 +258,14 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
                   {t.common.privacyPolicy}
                 </Link>
                 <span className="text-muted d-none d-sm-inline">|</span>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new Event("open-cookie-settings"))}
+                  className="btn btn-link p-0 border-0 text-secondary text-decoration-none hover-text-teal small"
+                >
+                  {t.common.cookiePolicy}
+                </button>
+                <span className="text-muted d-none d-sm-inline">|</span>
                 <Link href="/terminos-y-condiciones" className="text-secondary text-decoration-none hover-text-teal">
                   {t.common.termsConditions}
                 </Link>
@@ -266,6 +275,7 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
         </footer>
       )}
 
+      {!isMothersDay && !isDemoPage && <CookieBanner />}
       {!isMothersDay && !isDemoPage && <ChatBot />}
 
       {/* Custom Global Navigation Styles */}

@@ -11,17 +11,60 @@ export default function Home() {
   const [visibleItems, setVisibleItems] = useState(3);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showPromo, setShowPromo] = useState(false);
+  const [promoDismissed, setPromoDismissed] = useState(false);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    if (showPromo) {
+      html.setAttribute("data-promo-toast", "visible");
+    } else {
+      html.removeAttribute("data-promo-toast");
+    }
+    return () => html.removeAttribute("data-promo-toast");
+  }, [showPromo]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShowPromo(true);
+      const isMobileOrTablet = window.innerWidth < 992;
+      const hasCookieConsent = (() => {
+        try {
+          return Boolean(localStorage.getItem("imperiodev-cookie-consent"));
+        } catch {
+          return false;
+        }
+      })();
+      const isCookieBannerActive = document.documentElement.hasAttribute("data-cookie-banner");
+      if (!isMobileOrTablet || (hasCookieConsent && !isCookieBannerActive)) {
+        setShowPromo(true);
+      }
     }, 4000);
-    return () => clearTimeout(timer);
+    const handleCookieClosed = () => {
+      if (!promoDismissed) {
+        setTimeout(() => {
+          setShowPromo(true);
+        }, 450);
+      }
+    };
+    const handleCookieOpened = () => {
+      if (window.innerWidth < 992) {
+        setShowPromo(false);
+      }
+    };
+    window.addEventListener("cookie-banner-closed", handleCookieClosed);
+    window.addEventListener("cookie-banner-opened", handleCookieOpened);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("cookie-banner-closed", handleCookieClosed);
+      window.removeEventListener("cookie-banner-opened", handleCookieOpened);
+    };
   }, []);
 
   const dismissPromo = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setPromoDismissed(true);
+    const html = document.documentElement;
+    html.removeAttribute("data-promo-toast");
     setShowPromo(false);
   };
 
@@ -232,11 +275,19 @@ export default function Home() {
           max-width: 360px;
           width: calc(100vw - 48px);
           animation: slide-up-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1), right 0.3s ease;
+        }
+        @media (min-width: 992px) {
+          .promo-toast-wrapper {
+            right: 116px;
+          }
         }
         .promo-toast {
           transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
           cursor: pointer;
-          background: rgba(15, 23, 42, 0.98) !important;
+          background: rgba(255, 255, 255, 0.97) !important;
+          border: 1px solid rgba(20, 184, 166, 0.32) !important;
+          box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.14), 0 4px 12px rgba(20, 184, 166, 0.08) !important;
           backdrop-filter: blur(20px);
           border-left: 4px solid #14b8a6 !important;
         }
@@ -257,7 +308,108 @@ export default function Home() {
         }
         .btn-close-promo:hover {
           color: #14b8a6;
+          background: rgba(15, 23, 42, 0.06);
+        }
+        html.dark .promo-toast {
+          background: rgba(15, 23, 42, 0.97) !important;
+          border: 1px solid rgba(20, 184, 166, 0.35) !important;
+          border-left: 4px solid #14b8a6 !important;
+          box-shadow: 0 18px 40px -5px rgba(0, 0, 0, 0.6), 0 4px 15px rgba(20, 184, 166, 0.15) !important;
+        }
+        html.dark .promo-toast:hover {
+          box-shadow: 0 18px 40px -5px rgba(20, 184, 166, 0.3), 0 6px 20px rgba(0, 0, 0, 0.65) !important;
+          border-color: #14b8a6 !important;
+        }
+        .promo-icon-container {
+          background: rgba(20, 184, 166, 0.12) !important;
+          border: 1px solid rgba(20, 184, 166, 0.25);
+          color: #0d9488 !important;
+          width: 48px;
+          height: 48px;
+        }
+        html.dark .promo-icon-container {
+          background: rgba(20, 184, 166, 0.15) !important;
+          border-color: rgba(45, 212, 191, 0.25);
+          color: #2dd4bf !important;
+        }
+        .promo-toast .promo-accent {
+          color: #0d9488 !important;
+        }
+        html.dark .promo-toast .promo-accent {
+          color: #2dd4bf !important;
+        }
+        .promo-toast .promo-title {
+          color: #0f172a !important;
+        }
+        html.dark .promo-toast .promo-title {
+          color: #f8fafc !important;
+        }
+        .promo-toast .promo-desc {
+          color: #475569 !important;
+        }
+        html.dark .promo-toast .promo-desc {
+          color: #cbd5e1 !important;
+        }
+        html.dark .btn-close-promo {
+          color: #94a3b8;
+        }
+        html.dark .btn-close-promo:hover {
+          color: #2dd4bf;
           background: rgba(255, 255, 255, 0.1);
+        }
+        @media (max-width: 991.98px) {
+          html[data-cookie-banner] .promo-toast-wrapper {
+            display: none !important;
+          }
+          html[data-promo-toast="visible"]:not([data-cookie-banner]) #cac-chat-container {
+            bottom: 130px !important;
+            transition: bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+        }
+        @media (max-width: 576px) {
+          .promo-toast-wrapper {
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            width: auto;
+            max-width: none;
+          }
+          .promo-toast {
+            padding: 0.75rem 0.85rem !important;
+            gap: 0.65rem !important;
+            border-radius: 0.9rem !important;
+          }
+          .promo-icon-container {
+            width: 38px;
+            height: 38px;
+          }
+          .promo-icon-container i {
+            font-size: 1.2rem !important;
+          }
+          .promo-toast .promo-accent {
+            font-size: 0.72rem !important;
+          }
+          .promo-toast .promo-title {
+            font-size: 0.88rem !important;
+            line-height: 1.25 !important;
+          }
+          .promo-toast .promo-desc {
+            font-size: 0.75rem !important;
+            line-height: 1.35 !important;
+          }
+        }
+        @media (max-width: 350px) {
+          .promo-icon-container {
+            width: 32px;
+            height: 32px;
+          }
+          .promo-icon-container i {
+            font-size: 1rem !important;
+          }
+          .promo-toast {
+            padding: 0.65rem 0.75rem !important;
+            gap: 0.5rem !important;
+          }
         }
       ` }} />
 
@@ -275,15 +427,6 @@ export default function Home() {
         <div className="container-xl px-4 py-5 z-1">
           <div className="row align-items-center g-5 text-center text-lg-start">
             <div className="col-12 col-lg-6 d-flex flex-column gap-4">
-              <div>
-                <span 
-                  className="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill border border-info border-opacity-25 text-info fs-6 fw-bold tracking-wider text-uppercase"
-                  style={{ background: "rgba(20, 184, 166, 0.08)" }}
-                >
-                  <span className="d-inline-block rounded-circle bg-info animate-pulse" style={{ width: "8px", height: "8px" }}></span>
-                  {t.home.available}
-                </span>
-              </div>
               <h1 className="display-3 fw-bold tracking-tight text-body lh-sm">
                 {t.home.heroTitle1} <br />
                 <span className="text-gradient">{t.home.heroTitle2}</span>
@@ -806,17 +949,17 @@ export default function Home() {
                 <i className="bi bi-x fs-5"></i>
               </button>
               
-              <div className="promo-icon-container rounded-3 bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "50px", height: "50px" }}>
+              <div className="promo-icon-container rounded-3 d-flex align-items-center justify-content-center flex-shrink-0">
                 <i className="bi bi-phone-vibrate fs-3 animate-wiggle"></i>
               </div>
               
               <div className="pe-3">
-                <span className="text-info text-xs fw-bold uppercase tracking-wider d-block mb-1">✨ {language === "en" ? "Launch!" : "¡Lanzamiento!"}</span>
-                <h4 className="h6 fw-bold text-body mb-1">{language === "en" ? "Start looking professional" : "Empieza a verte profesional"}</h4>
-                <p className="text-secondary small m-0 leading-sm">
+                <span className="promo-accent text-xs fw-bold uppercase tracking-wider d-block mb-1">✨ {language === "en" ? "Launch!" : "¡Lanzamiento!"}</span>
+                <h4 className="promo-title h6 fw-bold mb-1">{language === "en" ? "Start looking professional" : "Empieza a verte profesional"}</h4>
+                <p className="promo-desc small m-0 leading-sm">
                   {t.home.promoDesc}
                 </p>
-                <span className="text-info small fw-bold mt-1 d-inline-block">{t.home.promoBtn} <i className="bi bi-arrow-right"></i></span>
+                <span className="promo-accent small fw-bold mt-1 d-inline-block">{t.home.promoBtn} <i className="bi bi-arrow-right"></i></span>
               </div>
             </div>
           </Link>

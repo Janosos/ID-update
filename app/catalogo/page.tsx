@@ -38,7 +38,7 @@ export default function CatalogPage() {
       <div className="container-xl px-4 py-5 z-1">
         {/* Header Section */}
         <header className="text-center mb-5 max-w-2xl mx-auto">
-          <span className="text-info fw-bold tracking-wider text-uppercase small">{t.catalog.tag}</span>
+
           <h1 className="display-4 fw-bold text-body mt-2 mb-3">{t.catalog.title}</h1>
           <p className="lead text-secondary">
             {t.catalog.subtitle}

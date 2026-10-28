@@ -102,10 +102,6 @@ export default function TutorialsPage() {
       <div className="container-xl px-3 px-sm-4 py-2 py-md-4 position-relative z-1 w-100">
         {/* Page Header */}
         <header className="text-center mb-4 mb-md-5 mx-auto" style={{ maxWidth: "720px" }}>
-          <div className="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 mb-3 shadow-xs">
-            <i className="bi bi-journal-bookmark-fill"></i>
-            <span className="small font-display fw-bold text-uppercase tracking-wider">{t.tutorials.tag}</span>
-          </div>
           <h1 className="tutorials-title fw-bold text-body mt-2 mb-3 font-display">
             {language === "es" ? (
               <>Centro de <span className="text-gradient">Tutoriales</span></>
