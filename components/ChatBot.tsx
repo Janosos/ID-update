@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useTranslation } from "@/context/LanguageContext";
+import { useTranslation, useLanguage } from "@/context/LanguageContext";
 
 interface Option {
   label: string;
@@ -11,6 +11,7 @@ interface Option {
 
 interface Message {
   id: string;
+  stepKey?: string;
   type: "bot" | "user";
   text: string;
   options?: Option[];
@@ -18,17 +19,100 @@ interface Message {
   selectedOptionLabel?: string;
 }
 
+interface UserSelections {
+  category?: string;
+  webGoal?: string;
+  webStatus?: string;
+  ecommerceStage?: string;
+  ecommerceSize?: string;
+  appType?: string;
+  appFeature?: string;
+  faqTopic?: string;
+}
+
+const WHATSAPP_PHONE = "526623440716";
+
+const cleanOptionLabel = (label: string) =>
+  label
+    .replace(/^[^\p{L}\p{N}¡¿]+/u, "")
+    .trim();
+
 export default function ChatBot() {
   const t = useTranslation();
+  const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [selections, setSelections] = useState<UserSelections>({});
+  const selectionsRef = useRef<UserSelections>({});
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // --- CONFIGURACIÓN DE IMPI (ÁRBOL DE DECISIONES) ---
   const chatFlow = t.chatbot.flow as Record<string, { text: string; options: Option[] }>;
+
+  const updateSelections = (updater: (prev: UserSelections) => UserSelections) => {
+    setSelections((prev) => {
+      const next = updater(prev);
+      selectionsRef.current = next;
+      return next;
+    });
+  };
+
+  const buildPersonalizedWhatsAppUrl = (stepKey: string | undefined, fallbackUrl: string): string => {
+    const s = selectionsRef.current;
+    const isEn = language === "en";
+
+    let message = "";
+
+    if (stepKey === "web_trans_new" || stepKey === "web_trans_redesign" || s.webGoal || s.webStatus) {
+      const goal = s.webGoal || (isEn ? "Website" : "Sitio Web");
+      const status =
+        s.webStatus ||
+        (stepKey === "web_trans_redesign"
+          ? isEn
+            ? "Redesign (Glow up)"
+            : "Rediseño (Glow up)"
+          : isEn
+            ? "Start from scratch"
+            : "Empezamos desde cero");
+
+      message = isEn
+        ? `Hi! I was chatting with Impi on the ImperioDev website and I'd like a quote for a Website:\n• Main goal: ${goal}\n• Project status: ${status}\n\nCould you give me more information?`
+        : `¡Hola! Estuve platicando con Impi en el sitio web de ImperioDev y me gustaría cotizar un Sitio Web:\n• Objetivo principal: ${goal}\n• Estado del proyecto: ${status}\n\n¿Me podrían dar más información?`;
+    } else if (stepKey === "ecommerce_final" || s.ecommerceStage || s.ecommerceSize) {
+      const stage = s.ecommerceStage || (isEn ? "To be defined" : "Por definir");
+      const size = s.ecommerceSize || (isEn ? "To be defined" : "Por definir");
+
+      message = isEn
+        ? `Hi! I was chatting with Impi on the ImperioDev website and I'd like a quote for an Online Store (E-commerce):\n• Business stage: ${stage}\n• Approximate catalog: ${size} products\n\nI'd like to talk with an expert about the details.`
+        : `¡Hola! Estuve platicando con Impi en el sitio web de ImperioDev y me gustaría cotizar una Tienda en Línea (E-commerce):\n• Etapa del negocio: ${stage}\n• Cantidad aproximada de productos: ${size}\n\nMe gustaría platicar con un experto sobre los detalles.`;
+    } else if (stepKey === "app_final" || s.appType || s.appFeature) {
+      const appType = s.appType || (isEn ? "Mobile / Desktop App" : "App Móvil / Escritorio");
+      const feature = s.appFeature || (isEn ? "To be defined" : "Por definir");
+
+      message = isEn
+        ? `Hi! I was chatting with Impi on the ImperioDev website and I'm interested in developing an Application:\n• Software type: ${appType}\n• Main feature: ${feature}\n\nI'd like to go over the technical details and get a quote.`
+        : `¡Hola! Estuve platicando con Impi en el sitio web de ImperioDev y me interesa desarrollar una Aplicación:\n• Tipo de software: ${appType}\n• Función principal: ${feature}\n\nMe gustaría aterrizar los detalles técnicos y cotizar el proyecto.`;
+    } else if (stepKey === "human_contact") {
+      if (s.faqTopic) {
+        message = isEn
+          ? `Hi! I was checking the FAQ with Impi on the ImperioDev website (topic: ${s.faqTopic}) and I'd like to receive a personalized quote or talk with the team.`
+          : `¡Hola! Estuve consultando las preguntas frecuentes con Impi en el sitio web de ImperioDev (tema: ${s.faqTopic}) y me gustaría recibir una cotización personalizada o hablar con el equipo.`;
+      } else if (s.category) {
+        message = isEn
+          ? `Hi! I'm coming from the ImperioDev website chatbot. I'm interested in: ${s.category}, and I'd like to talk directly with an advisor.`
+          : `¡Hola! Vengo del chatbot del sitio web de ImperioDev. Me interesa información sobre: ${s.category}, y me gustaría hablar directamente con un asesor.`;
+      }
+    }
+
+    if (!message) {
+      return fallbackUrl;
+    }
+
+    return `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
+  };
 
   // --- LOGIC FUNCTIONS ---
   const triggerStep = (stepKey: string) => {
@@ -42,6 +126,7 @@ export default function ChatBot() {
         ...prev,
         {
           id: `${stepKey}-${Date.now()}`,
+          stepKey,
           type: "bot",
           text: step.text,
           options: step.options,
@@ -50,7 +135,56 @@ export default function ChatBot() {
     }, 600);
   };
 
-  const handleOptionClick = (msgId: string, option: Option) => {
+  const handleOptionClick = (msgId: string, stepKey: string | undefined, option: Option) => {
+    const cleanLabel = cleanOptionLabel(option.label);
+
+    // Record user choice based on current step and target step
+    if (option.next === "start") {
+      updateSelections(() => ({}));
+    } else if (stepKey === "start") {
+      if (option.next === "web_intro" || option.next === "ecommerce_intro" || option.next === "app_intro") {
+        updateSelections(() => ({ category: cleanLabel }));
+      }
+    } else if (stepKey === "web_intro" && option.next === "web_status") {
+      updateSelections((prev) => ({
+        ...prev,
+        category: prev.category || (language === "en" ? "Website" : "Sitio Web"),
+        webGoal: cleanLabel,
+      }));
+    } else if (stepKey === "web_status" && (option.next === "web_trans_new" || option.next === "web_trans_redesign")) {
+      updateSelections((prev) => ({
+        ...prev,
+        webStatus: cleanLabel,
+      }));
+    } else if (stepKey === "ecommerce_intro" && option.next === "ecommerce_size") {
+      updateSelections((prev) => ({
+        ...prev,
+        category: prev.category || (language === "en" ? "Online Store (E-commerce)" : "Tienda Online (E-commerce)"),
+        ecommerceStage: cleanLabel,
+      }));
+    } else if (stepKey === "ecommerce_size" && option.next === "ecommerce_final") {
+      updateSelections((prev) => ({
+        ...prev,
+        ecommerceSize: cleanLabel,
+      }));
+    } else if (stepKey === "app_intro" && option.next === "app_feature") {
+      updateSelections((prev) => ({
+        ...prev,
+        category: prev.category || (language === "en" ? "Mobile / Desktop App" : "App Móvil / Escritorio"),
+        appType: cleanLabel,
+      }));
+    } else if (stepKey === "app_feature" && option.next === "app_final") {
+      updateSelections((prev) => ({
+        ...prev,
+        appFeature: cleanLabel,
+      }));
+    } else if (stepKey === "faq_menu" && option.next && option.next.startsWith("faq_")) {
+      updateSelections((prev) => ({
+        ...prev,
+        faqTopic: cleanLabel,
+      }));
+    }
+
     // Disable options for this bubble
     setMessages((prev) =>
       prev.map((m) =>
@@ -65,7 +199,8 @@ export default function ChatBot() {
 
     // Trigger action
     if (option.url) {
-      window.open(option.url, "_blank");
+      const targetUrl = buildPersonalizedWhatsAppUrl(stepKey, option.url);
+      window.open(targetUrl, "_blank");
       
       setIsTyping(true);
       setTimeout(() => {
@@ -420,7 +555,7 @@ export default function ChatBot() {
                       <button
                         key={optIdx}
                         disabled={hasSelectedAny}
-                        onClick={() => handleOptionClick(msg.id, opt)}
+                        onClick={() => handleOptionClick(msg.id, msg.stepKey, opt)}
                         className="cac-option-btn"
                         style={{
                           opacity: hasSelectedAny ? (isSelected ? 1 : 0.4) : 1,

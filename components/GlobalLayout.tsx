@@ -221,7 +221,7 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
           <i className="bi bi-x-lg"></i>
         </button>
 
-        <div className="d-flex flex-column gap-4 text-center fs-2 fw-bold w-100 px-5">
+        <div className="d-flex flex-column gap-3 gap-sm-4 text-center fw-bold w-100 px-4 px-sm-5" style={{ fontSize: "clamp(1.35rem, 6vw, 2rem)" }}>
           <Link href="/" className="text-body text-decoration-none" onClick={toggleMobileMenu}>{t.common.navHome}</Link>
           <Link href="/acerca-de-nosotros" className="text-body text-decoration-none" onClick={toggleMobileMenu}>{t.common.navAboutShort}</Link>
           <Link href="/why-us" className="text-body text-decoration-none" onClick={toggleMobileMenu}>{t.common.navWhyUsShort}</Link>
@@ -230,8 +230,8 @@ export default function GlobalLayout({ children }: { children: React.ReactNode }
 
           <Link 
             href="/#contacto" 
-            className="btn btn-info text-white fw-bold py-3 mt-3 rounded-pill shadow w-100 max-w-xs mx-auto fs-4"
-            style={{ background: "#14b8a6", borderColor: "#14b8a6" }}
+            className="btn btn-info text-white fw-bold py-2 py-sm-3 mt-2 mt-sm-3 rounded-pill shadow w-100 mx-auto"
+            style={{ background: "#14b8a6", borderColor: "#14b8a6", maxWidth: "300px", fontSize: "clamp(1.05rem, 4.5vw, 1.35rem)" }}
             onClick={toggleMobileMenu}
           >
             {t.common.btnStartProject}

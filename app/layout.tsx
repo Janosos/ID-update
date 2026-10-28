@@ -119,7 +119,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-vh-100 d-flex flex-column overflow-x-hidden">
         <LanguageProvider>
           <GlobalLayout>{children}</GlobalLayout>
         </LanguageProvider>

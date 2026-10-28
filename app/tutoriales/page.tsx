@@ -88,7 +88,7 @@ export default function TutorialsPage() {
   ];
 
   return (
-    <div className="bg-grid py-4 py-md-5 min-vh-100 d-flex flex-column align-items-center position-relative w-100 overflow-hidden">
+    <div className="bg-grid py-3 py-md-5 min-vh-100 d-flex flex-column align-items-center position-relative w-100 overflow-hidden">
       {/* Background Glow Blobs */}
       <div 
         className="position-absolute bg-info rounded-circle blur-3xl opacity-10 animate-pulse-slow parallax-blob d-none d-sm-block"
@@ -99,23 +99,23 @@ export default function TutorialsPage() {
         style={{ width: "min(400px, 80vw)", height: "min(400px, 80vw)", bottom: "10%", right: "5%", filter: "blur(120px)", zIndex: 0 }}
       ></div>
 
-      <div className="container-xl px-3 px-sm-4 py-2 py-md-4 position-relative z-1 w-100">
+      <div className="container-xl px-2 px-sm-4 py-2 py-md-4 position-relative z-1 w-100">
         {/* Page Header */}
-        <header className="text-center mb-4 mb-md-5 mx-auto" style={{ maxWidth: "720px" }}>
-          <h1 className="tutorials-title fw-bold text-body mt-2 mb-3 font-display">
+        <header className="text-center mb-3 mb-sm-4 mb-md-5 mx-auto px-1" style={{ maxWidth: "720px" }}>
+          <h1 className="tutorials-title fw-bold text-body mt-1 mb-2 mb-sm-3 font-display">
             {language === "es" ? (
               <>Centro de <span className="text-gradient">Tutoriales</span></>
             ) : (
               <>Tutorials <span className="text-gradient">Center</span></>
             )}
           </h1>
-          <p className="lead text-secondary mx-auto mb-0" style={{ maxWidth: "620px" }}>
+          <p className="tutorials-lead text-secondary mx-auto mb-0" style={{ maxWidth: "620px" }}>
             {t.tutorials.subtitle}
           </p>
         </header>
 
         {/* Tab Selector Controls */}
-        <div className="d-flex flex-column flex-sm-row justify-content-center align-items-stretch gap-2 gap-sm-3 mb-4 mb-md-5 mx-auto w-100" style={{ maxWidth: "700px" }}>
+        <div className="d-flex flex-column flex-sm-row justify-content-center align-items-stretch gap-2 gap-sm-3 mb-3 mb-sm-4 mb-md-5 mx-auto w-100" style={{ maxWidth: "700px" }}>
           <button
             onClick={() => setActiveTab("products")}
             className={`tutorial-tab-btn transition-all ${
@@ -146,16 +146,16 @@ export default function TutorialsPage() {
         </div>
 
         {/* Guides Content Section */}
-        <div className="row justify-content-center">
-          <div className="col-12 col-xl-10">
+        <div className="row justify-content-center mx-0">
+          <div className="col-12 col-xl-10 px-0 px-sm-2">
 
             {/* =========================================================================
                 TAB 1: WOOCOMMERCE PRODUCT MANAGEMENT (13 STEPS + PRO TIPS)
             ========================================================================= */}
             {activeTab === "products" && (
-              <div className="glass-panel p-3 p-sm-4 p-md-5 fade-in-up" style={{ background: "var(--card-bg)" }}>
+              <div className="glass-panel tutorial-main-panel p-3 p-sm-4 p-md-5 fade-in-up" style={{ background: "var(--card-bg)" }}>
                 {/* Tutorial Header */}
-                <div className="border-bottom border-secondary border-opacity-20 pb-3 pb-sm-4 mb-4 mb-md-5">
+                <div className="border-bottom border-secondary border-opacity-20 pb-3 pb-sm-4 mb-3 mb-sm-4 mb-md-5">
                   <div className="guide-header-box">
                     <div className="guide-icon-box bg-primary bg-opacity-10 text-primary shadow-sm">
                       <i className="bi bi-bag-plus-fill"></i>
@@ -167,29 +167,29 @@ export default function TutorialsPage() {
                       <h2 className="guide-title font-display">{t.tutorials.prodTitle}</h2>
                     </div>
                   </div>
-                  <p className="lead text-secondary m-0" style={{ fontSize: "clamp(0.95rem, 2.8vw, 1.15rem)" }}>
+                  <p className="text-secondary m-0" style={{ fontSize: "clamp(0.88rem, 2.8vw, 1.12rem)", lineHeight: 1.55 }}>
                     {t.tutorials.prodSubtitle}
                   </p>
                 </div>
 
                 {/* Pro Tips Banner */}
-                <div className="mb-4 mb-md-5 p-3 p-sm-4 rounded-4 bg-body-tertiary border border-secondary border-opacity-20 shadow-sm">
-                  <div className="d-flex align-items-center gap-2 mb-3">
-                    <h3 className="h5 fw-bold text-body m-0 font-display tracking-tight">{t.tutorials.prodTipsTitle}</h3>
+                <div className="tutorial-tips-banner mb-4 mb-md-5 p-3 p-sm-4 rounded-4 bg-body-tertiary border border-secondary border-opacity-20 shadow-sm">
+                  <div className="d-flex align-items-center gap-2 mb-2 mb-sm-3">
+                    <h3 className="tutorial-section-heading fw-bold text-body m-0 font-display tracking-tight">{t.tutorials.prodTipsTitle}</h3>
                   </div>
-                  <div className="row g-3">
+                  <div className="row g-2 g-sm-3">
                     {proTips.map((tip, idx) => (
                       <div key={idx} className="col-12 col-md-6">
-                        <div className="p-3 rounded-3 h-100 bg-body bg-opacity-50 border border-secondary border-opacity-10 d-flex gap-3 align-items-start">
+                        <div className="tip-item-card p-3 rounded-3 h-100 bg-body bg-opacity-50 border border-secondary border-opacity-10 d-flex gap-3 align-items-start">
                           <div 
-                            className="rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0"
-                            style={{ backgroundColor: `${tip.color}15`, color: tip.color, width: "36px", height: "36px" }}
+                            className="tip-icon-circle rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                            style={{ backgroundColor: `${tip.color}15`, color: tip.color }}
                           >
                             <i className={`bi ${tip.icon}`}></i>
                           </div>
-                          <div>
-                            <h4 className="h6 fw-bold text-body mb-1">{tip.title}</h4>
-                            <p className="small text-secondary m-0 leading-relaxed">{tip.desc}</p>
+                          <div className="min-w-0">
+                            <h4 className="tip-item-title fw-bold text-body mb-1">{tip.title}</h4>
+                            <p className="tip-item-desc text-secondary m-0 leading-relaxed">{tip.desc}</p>
                           </div>
                         </div>
                       </div>
@@ -199,21 +199,21 @@ export default function TutorialsPage() {
 
                 {/* Phase 1: Lo Básico */}
                 <div className="mb-4 mb-md-5">
-                  <div className="d-flex align-items-center gap-2 mb-4 pb-2 border-bottom border-secondary border-opacity-15">
+                  <div className="phase-header-row d-flex flex-wrap align-items-center gap-2 mb-3 mb-sm-4 pb-2 border-bottom border-secondary border-opacity-15">
                     <span className="phase-badge phase-badge-1">Fase 1</span>
-                    <h3 className="h5 fw-bold text-body m-0 font-display">Lo Básico</h3>
+                    <h3 className="phase-heading fw-bold text-body m-0 font-display">Lo Básico</h3>
                   </div>
 
                   {/* Step 1 */}
-                  <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
+                  <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-3 mb-sm-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                     <div className="step-watermark font-display">01</div>
                     <div className="position-relative z-1">
-                      <div className="d-flex align-items-center gap-3 mb-3">
+                      <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                         <div className="step-badge">01</div>
-                        <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.prodStep1Title}</h4>
+                        <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.prodStep1Title}</h4>
                       </div>
-                      <p className="text-secondary mb-3">{t.tutorials.prodStep1Desc1}</p>
-                      <ul className="d-flex flex-column gap-2 text-secondary ps-3 mb-4">
+                      <p className="step-desc text-secondary mb-2 mb-sm-3">{t.tutorials.prodStep1Desc1}</p>
+                      <ul className="step-list d-flex flex-column gap-2 text-secondary mb-3 mb-sm-4">
                         <li>{t.tutorials.prodStep1L1}</li>
                         <li>{t.tutorials.prodStep1L2}</li>
                       </ul>
@@ -242,14 +242,14 @@ export default function TutorialsPage() {
                   </div>
 
                   {/* Step 2 */}
-                  <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
+                  <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-3 mb-sm-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                     <div className="step-watermark font-display">02</div>
                     <div className="position-relative z-1">
-                      <div className="d-flex align-items-center gap-3 mb-3">
+                      <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                         <div className="step-badge">02</div>
-                        <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.prodStep2Title}</h4>
+                        <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.prodStep2Title}</h4>
                       </div>
-                      <p className="text-secondary mb-4">{t.tutorials.prodStep2Desc1}</p>
+                      <p className="step-desc text-secondary mb-3 mb-sm-4">{t.tutorials.prodStep2Desc1}</p>
 
                       {/* Screenshot 2 */}
                       <div 
@@ -275,22 +275,22 @@ export default function TutorialsPage() {
                   </div>
 
                   {/* Step 3 */}
-                  <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
+                  <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-3 mb-sm-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                     <div className="step-watermark font-display">03</div>
                     <div className="position-relative z-1">
-                      <div className="d-flex align-items-center gap-3 mb-3">
+                      <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                         <div className="step-badge">03</div>
-                        <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.prodStep3Title}</h4>
+                        <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.prodStep3Title}</h4>
                       </div>
-                      <p className="text-secondary mb-3">{t.tutorials.prodStep3Desc1}</p>
-                      <ul className="d-flex flex-column gap-2 text-secondary ps-3 mb-4">
+                      <p className="step-desc text-secondary mb-2 mb-sm-3">{t.tutorials.prodStep3Desc1}</p>
+                      <ul className="step-list d-flex flex-column gap-2 text-secondary mb-3 mb-sm-4">
                         <li>{t.tutorials.prodStep3L1}</li>
                         <li>{t.tutorials.prodStep3L2}</li>
                       </ul>
 
                       {/* Screenshot 3 */}
                       <div 
-                        className="image-container rounded-3 overflow-hidden border border-secondary border-opacity-20 shadow-sm cursor-pointer position-relative group mb-4"
+                        className="image-container rounded-3 overflow-hidden border border-secondary border-opacity-20 shadow-sm cursor-pointer position-relative group mb-3 mb-sm-4"
                         onClick={() => setSelectedImage("https://www.imperiodev.com/wp-content/uploads/2026/05/4.png")}
                       >
                         <img 
@@ -310,11 +310,11 @@ export default function TutorialsPage() {
                       </div>
 
                       {/* Callout: Descripción Corta */}
-                      <div className="alert alert-info border-info-subtle bg-info bg-opacity-10 text-info-emphasis p-3 rounded-3 d-flex gap-3 align-items-start m-0">
-                        <i className="bi bi-info-circle-fill fs-4 flex-shrink-0 text-info mt-0.5"></i>
-                        <div>
-                          <h5 className="h6 fw-bold mb-1 text-body">{t.tutorials.prodShortDescTitle}</h5>
-                          <p className="small m-0 text-secondary leading-relaxed">
+                      <div className="tutorial-callout alert alert-info border-info-subtle bg-info bg-opacity-10 text-info-emphasis p-3 rounded-3 d-flex gap-3 align-items-start m-0">
+                        <i className="bi bi-info-circle-fill fs-4 flex-shrink-0 text-info mt-1"></i>
+                        <div className="min-w-0">
+                          <h5 className="callout-title fw-bold mb-1 text-body">{t.tutorials.prodShortDescTitle}</h5>
+                          <p className="callout-desc m-0 text-secondary leading-relaxed">
                             {t.tutorials.prodShortDescText}
                           </p>
                         </div>
@@ -325,28 +325,28 @@ export default function TutorialsPage() {
 
                 {/* Phase 2: Datos del Producto */}
                 <div className="mb-4 mb-md-5">
-                  <div className="d-flex align-items-center gap-2 mb-4 pb-2 border-bottom border-secondary border-opacity-15">
+                  <div className="phase-header-row d-flex flex-wrap align-items-center gap-2 mb-3 mb-sm-4 pb-2 border-bottom border-secondary border-opacity-15">
                     <span className="phase-badge phase-badge-2">Fase 2</span>
-                    <h3 className="h5 fw-bold text-body m-0 font-display">Datos del Producto</h3>
+                    <h3 className="phase-heading fw-bold text-body m-0 font-display">Datos del Producto</h3>
                   </div>
 
                   {/* Step 4 */}
-                  <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
+                  <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-3 mb-sm-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                     <div className="step-watermark font-display">04</div>
                     <div className="position-relative z-1">
-                      <div className="d-flex align-items-center gap-3 mb-3">
+                      <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                         <div className="step-badge">04</div>
-                        <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.prodStep4Title}</h4>
+                        <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.prodStep4Title}</h4>
                       </div>
-                      <p className="text-secondary mb-3">{t.tutorials.prodStep4Desc1}</p>
-                      <ul className="d-flex flex-column gap-2 text-secondary ps-3 mb-4">
+                      <p className="step-desc text-secondary mb-2 mb-sm-3">{t.tutorials.prodStep4Desc1}</p>
+                      <ul className="step-list d-flex flex-column gap-2 text-secondary mb-3 mb-sm-4">
                         <li>{t.tutorials.prodStep4L1}</li>
                         <li>{t.tutorials.prodStep4L2}</li>
                       </ul>
 
                       {/* Screenshot 4 */}
                       <div 
-                        className="image-container rounded-3 overflow-hidden border border-secondary border-opacity-20 shadow-sm cursor-pointer position-relative group mb-4"
+                        className="image-container rounded-3 overflow-hidden border border-secondary border-opacity-20 shadow-sm cursor-pointer position-relative group mb-3 mb-sm-4"
                         onClick={() => setSelectedImage("https://www.imperiodev.com/wp-content/uploads/2026/05/5.png")}
                       >
                         <img 
@@ -366,11 +366,11 @@ export default function TutorialsPage() {
                       </div>
 
                       {/* Callout: Producto Variable */}
-                      <div className="alert alert-warning border-warning-subtle bg-warning bg-opacity-10 text-warning-emphasis p-3 rounded-3 d-flex gap-3 align-items-start m-0">
-                        <i className="bi bi-palette-fill fs-4 flex-shrink-0 text-warning mt-0.5"></i>
-                        <div>
-                          <h5 className="h6 fw-bold mb-1 text-body">{t.tutorials.prodVariableTitle}</h5>
-                          <p className="small m-0 text-secondary leading-relaxed">
+                      <div className="tutorial-callout alert alert-warning border-warning-subtle bg-warning bg-opacity-10 text-warning-emphasis p-3 rounded-3 d-flex gap-3 align-items-start m-0">
+                        <i className="bi bi-palette-fill fs-4 flex-shrink-0 text-warning mt-1"></i>
+                        <div className="min-w-0">
+                          <h5 className="callout-title fw-bold mb-1 text-body">{t.tutorials.prodVariableTitle}</h5>
+                          <p className="callout-desc m-0 text-secondary leading-relaxed">
                             {t.tutorials.prodVariableText}
                           </p>
                         </div>
@@ -381,9 +381,9 @@ export default function TutorialsPage() {
 
                 {/* Phase 3: Variaciones (Tallas/Colores) */}
                 <div className="mb-4 mb-md-5">
-                  <div className="d-flex align-items-center gap-2 mb-4 pb-2 border-bottom border-secondary border-opacity-15">
+                  <div className="phase-header-row d-flex flex-wrap align-items-center gap-2 mb-3 mb-sm-4 pb-2 border-bottom border-secondary border-opacity-15">
                     <span className="phase-badge phase-badge-3">Fase 3</span>
-                    <h3 className="h5 fw-bold text-body m-0 font-display">Variaciones (Tallas y Colores)</h3>
+                    <h3 className="phase-heading fw-bold text-body m-0 font-display">Variaciones (Tallas y Colores)</h3>
                   </div>
 
                   <div className="row g-3">
@@ -392,11 +392,11 @@ export default function TutorialsPage() {
                       <div className="step-card position-relative p-3 p-sm-4 rounded-4 h-100 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                         <div className="step-watermark font-display">05</div>
                         <div className="position-relative z-1">
-                          <div className="d-flex align-items-center gap-3 mb-2">
+                          <div className="step-header-row d-flex align-items-center gap-3 mb-2">
                             <div className="step-badge">05</div>
-                            <h4 className="h6 fw-bold text-body m-0 font-display">{t.tutorials.prodStep5Title}</h4>
+                            <h4 className="step-title-sm fw-bold text-body m-0 font-display">{t.tutorials.prodStep5Title}</h4>
                           </div>
-                          <p className="small text-secondary m-0 leading-relaxed">{t.tutorials.prodStep5Desc1}</p>
+                          <p className="step-desc-sm text-secondary m-0 leading-relaxed">{t.tutorials.prodStep5Desc1}</p>
                         </div>
                       </div>
                     </div>
@@ -406,11 +406,11 @@ export default function TutorialsPage() {
                       <div className="step-card position-relative p-3 p-sm-4 rounded-4 h-100 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                         <div className="step-watermark font-display">06</div>
                         <div className="position-relative z-1">
-                          <div className="d-flex align-items-center gap-3 mb-2">
+                          <div className="step-header-row d-flex align-items-center gap-3 mb-2">
                             <div className="step-badge">06</div>
-                            <h4 className="h6 fw-bold text-body m-0 font-display">{t.tutorials.prodStep6Title}</h4>
+                            <h4 className="step-title-sm fw-bold text-body m-0 font-display">{t.tutorials.prodStep6Title}</h4>
                           </div>
-                          <p className="small text-secondary m-0 leading-relaxed">{t.tutorials.prodStep6Desc1}</p>
+                          <p className="step-desc-sm text-secondary m-0 leading-relaxed">{t.tutorials.prodStep6Desc1}</p>
                         </div>
                       </div>
                     </div>
@@ -420,11 +420,11 @@ export default function TutorialsPage() {
                       <div className="step-card position-relative p-3 p-sm-4 rounded-4 h-100 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                         <div className="step-watermark font-display">07</div>
                         <div className="position-relative z-1">
-                          <div className="d-flex align-items-center gap-3 mb-2">
+                          <div className="step-header-row d-flex align-items-center gap-3 mb-2">
                             <div className="step-badge">07</div>
-                            <h4 className="h6 fw-bold text-body m-0 font-display">{t.tutorials.prodStep7Title}</h4>
+                            <h4 className="step-title-sm fw-bold text-body m-0 font-display">{t.tutorials.prodStep7Title}</h4>
                           </div>
-                          <p className="small text-secondary m-0 leading-relaxed">{t.tutorials.prodStep7Desc1}</p>
+                          <p className="step-desc-sm text-secondary m-0 leading-relaxed">{t.tutorials.prodStep7Desc1}</p>
                         </div>
                       </div>
                     </div>
@@ -434,11 +434,11 @@ export default function TutorialsPage() {
                       <div className="step-card position-relative p-3 p-sm-4 rounded-4 h-100 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                         <div className="step-watermark font-display">08</div>
                         <div className="position-relative z-1">
-                          <div className="d-flex align-items-center gap-3 mb-2">
+                          <div className="step-header-row d-flex align-items-center gap-3 mb-2">
                             <div className="step-badge">08</div>
-                            <h4 className="h6 fw-bold text-body m-0 font-display">{t.tutorials.prodStep8Title}</h4>
+                            <h4 className="step-title-sm fw-bold text-body m-0 font-display">{t.tutorials.prodStep8Title}</h4>
                           </div>
-                          <p className="small text-secondary m-0 leading-relaxed">{t.tutorials.prodStep8Desc1}</p>
+                          <p className="step-desc-sm text-secondary m-0 leading-relaxed">{t.tutorials.prodStep8Desc1}</p>
                         </div>
                       </div>
                     </div>
@@ -448,11 +448,11 @@ export default function TutorialsPage() {
                       <div className="step-card position-relative p-3 p-sm-4 rounded-4 h-100 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                         <div className="step-watermark font-display">09</div>
                         <div className="position-relative z-1">
-                          <div className="d-flex align-items-center gap-3 mb-2">
+                          <div className="step-header-row d-flex align-items-center gap-3 mb-2">
                             <div className="step-badge">09</div>
-                            <h4 className="h6 fw-bold text-body m-0 font-display">{t.tutorials.prodStep9Title}</h4>
+                            <h4 className="step-title-sm fw-bold text-body m-0 font-display">{t.tutorials.prodStep9Title}</h4>
                           </div>
-                          <p className="small text-secondary m-0 leading-relaxed">{t.tutorials.prodStep9Desc1}</p>
+                          <p className="step-desc-sm text-secondary m-0 leading-relaxed">{t.tutorials.prodStep9Desc1}</p>
                         </div>
                       </div>
                     </div>
@@ -462,11 +462,11 @@ export default function TutorialsPage() {
                       <div className="step-card position-relative p-3 p-sm-4 rounded-4 h-100 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                         <div className="step-watermark font-display">10</div>
                         <div className="position-relative z-1">
-                          <div className="d-flex align-items-center gap-3 mb-2">
+                          <div className="step-header-row d-flex align-items-center gap-3 mb-2">
                             <div className="step-badge">10</div>
-                            <h4 className="h6 fw-bold text-body m-0 font-display">{t.tutorials.prodStep10Title}</h4>
+                            <h4 className="step-title-sm fw-bold text-body m-0 font-display">{t.tutorials.prodStep10Title}</h4>
                           </div>
-                          <p className="small text-secondary m-0 leading-relaxed">{t.tutorials.prodStep10Desc1}</p>
+                          <p className="step-desc-sm text-secondary m-0 leading-relaxed">{t.tutorials.prodStep10Desc1}</p>
                         </div>
                       </div>
                     </div>
@@ -476,11 +476,11 @@ export default function TutorialsPage() {
                       <div className="step-card position-relative p-3 p-sm-4 rounded-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                         <div className="step-watermark font-display">11</div>
                         <div className="position-relative z-1">
-                          <div className="d-flex align-items-center gap-3 mb-2">
+                          <div className="step-header-row d-flex align-items-center gap-3 mb-2">
                             <div className="step-badge">11</div>
-                            <h4 className="h6 fw-bold text-body m-0 font-display">{t.tutorials.prodStep11Title}</h4>
+                            <h4 className="step-title-sm fw-bold text-body m-0 font-display">{t.tutorials.prodStep11Title}</h4>
                           </div>
-                          <p className="small text-secondary m-0 leading-relaxed">{t.tutorials.prodStep11Desc1}</p>
+                          <p className="step-desc-sm text-secondary m-0 leading-relaxed">{t.tutorials.prodStep11Desc1}</p>
                         </div>
                       </div>
                     </div>
@@ -489,21 +489,21 @@ export default function TutorialsPage() {
 
                 {/* Phase 4: Detalles Finales y Publicar */}
                 <div>
-                  <div className="d-flex align-items-center gap-2 mb-4 pb-2 border-bottom border-secondary border-opacity-15">
+                  <div className="phase-header-row d-flex flex-wrap align-items-center gap-2 mb-3 mb-sm-4 pb-2 border-bottom border-secondary border-opacity-15">
                     <span className="phase-badge phase-badge-4">Fase 4</span>
-                    <h3 className="h5 fw-bold text-body m-0 font-display">Detalles Finales y Publicación</h3>
+                    <h3 className="phase-heading fw-bold text-body m-0 font-display">Detalles Finales y Publicación</h3>
                   </div>
 
                   {/* Step 12 */}
-                  <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
+                  <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-3 mb-sm-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                     <div className="step-watermark font-display">12</div>
                     <div className="position-relative z-1">
-                      <div className="d-flex align-items-center gap-3 mb-3">
+                      <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                         <div className="step-badge">12</div>
-                        <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.prodStep12Title}</h4>
+                        <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.prodStep12Title}</h4>
                       </div>
-                      <p className="text-secondary mb-3">{t.tutorials.prodStep12Desc1}</p>
-                      <ul className="d-flex flex-column gap-2 text-secondary ps-3 m-0">
+                      <p className="step-desc text-secondary mb-2 mb-sm-3">{t.tutorials.prodStep12Desc1}</p>
+                      <ul className="step-list d-flex flex-column gap-2 text-secondary m-0">
                         <li>{renderColonText(t.tutorials.prodStep12L1)}</li>
                         <li>{renderColonText(t.tutorials.prodStep12L2)}</li>
                         <li>{renderColonText(t.tutorials.prodStep12L3)}</li>
@@ -515,11 +515,11 @@ export default function TutorialsPage() {
                   <div className="step-card position-relative p-3 p-sm-4 rounded-4 border border-success border-opacity-30 bg-success bg-opacity-5">
                     <div className="step-watermark font-display text-success">13</div>
                     <div className="position-relative z-1">
-                      <div className="d-flex align-items-center gap-3 mb-3">
+                      <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                         <div className="step-badge" style={{ background: "#10b981" }}>13</div>
-                        <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.prodStep13Title}</h4>
+                        <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.prodStep13Title}</h4>
                       </div>
-                      <p className="text-secondary m-0 leading-relaxed">{t.tutorials.prodStep13Desc1}</p>
+                      <p className="step-desc text-secondary m-0 leading-relaxed">{t.tutorials.prodStep13Desc1}</p>
                     </div>
                   </div>
                 </div>
@@ -530,9 +530,9 @@ export default function TutorialsPage() {
                 TAB 2: ENVIA.COM SHIPPING CONFIGURATION (6 STEPS + LOGISTICS RULES)
             ========================================================================= */}
             {activeTab === "shipping" && (
-              <div className="glass-panel p-3 p-sm-4 p-md-5 fade-in-up" style={{ background: "var(--card-bg)" }}>
+              <div className="glass-panel tutorial-main-panel p-3 p-sm-4 p-md-5 fade-in-up" style={{ background: "var(--card-bg)" }}>
                 {/* Tutorial Header */}
-                <div className="border-bottom border-secondary border-opacity-20 pb-3 pb-sm-4 mb-4 mb-md-5">
+                <div className="border-bottom border-secondary border-opacity-20 pb-3 pb-sm-4 mb-3 mb-sm-4 mb-md-5">
                   <div className="guide-header-box">
                     <div className="guide-icon-box bg-info bg-opacity-10 text-info shadow-sm">
                       <i className="bi bi-truck-flatbed"></i>
@@ -544,30 +544,30 @@ export default function TutorialsPage() {
                       <h2 className="guide-title font-display">{t.tutorials.shipTitle}</h2>
                     </div>
                   </div>
-                  <p className="lead text-secondary m-0" style={{ fontSize: "clamp(0.95rem, 2.8vw, 1.15rem)" }}>
+                  <p className="text-secondary m-0" style={{ fontSize: "clamp(0.88rem, 2.8vw, 1.12rem)", lineHeight: 1.55 }}>
                     {t.tutorials.shipSubtitle}
                   </p>
                 </div>
 
                 {/* Pre-requisites Banner */}
-                <div className="mb-4 mb-md-5 p-3 p-sm-4 rounded-4 bg-body-tertiary border border-secondary border-opacity-20 shadow-sm">
-                  <div className="d-flex align-items-center gap-2 mb-3">
-                    <i className="bi bi-clipboard-check text-info fs-4"></i>
-                    <h3 className="h5 fw-bold text-body m-0 font-display tracking-tight">{t.tutorials.shipBeforeTitle}</h3>
+                <div className="tutorial-tips-banner mb-4 mb-md-5 p-3 p-sm-4 rounded-4 bg-body-tertiary border border-secondary border-opacity-20 shadow-sm">
+                  <div className="d-flex align-items-center gap-2 mb-2 mb-sm-3">
+                    <i className="bi bi-clipboard-check text-info fs-5 fs-sm-4 flex-shrink-0"></i>
+                    <h3 className="tutorial-section-heading fw-bold text-body m-0 font-display tracking-tight">{t.tutorials.shipBeforeTitle}</h3>
                   </div>
-                  <div className="row g-3">
+                  <div className="row g-2 g-sm-3">
                     {shipPrereqs.map((item, idx) => (
                       <div key={idx} className="col-12 col-md-4">
-                        <div className="p-3 rounded-3 h-100 bg-body bg-opacity-50 border border-secondary border-opacity-10 d-flex gap-3 align-items-start">
+                        <div className="tip-item-card p-3 rounded-3 h-100 bg-body bg-opacity-50 border border-secondary border-opacity-10 d-flex gap-3 align-items-start">
                           <div 
-                            className="rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0"
-                            style={{ backgroundColor: `${item.color}15`, color: item.color, width: "36px", height: "36px" }}
+                            className="tip-icon-circle rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                            style={{ backgroundColor: `${item.color}15`, color: item.color }}
                           >
                             <i className={`bi ${item.icon}`}></i>
                           </div>
-                          <div>
-                            <h4 className="h6 fw-bold text-body mb-1">{item.title}</h4>
-                            <p className="small text-secondary m-0 leading-relaxed">{item.desc}</p>
+                          <div className="min-w-0">
+                            <h4 className="tip-item-title fw-bold text-body mb-1">{item.title}</h4>
+                            <p className="tip-item-desc text-secondary m-0 leading-relaxed">{item.desc}</p>
                           </div>
                         </div>
                       </div>
@@ -576,15 +576,15 @@ export default function TutorialsPage() {
                 </div>
 
                 {/* Step 1 */}
-                <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
+                <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-3 mb-sm-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                   <div className="step-watermark font-display">01</div>
                   <div className="position-relative z-1">
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                    <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                       <div className="step-badge">01</div>
-                      <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.shipStep1Title}</h4>
+                      <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.shipStep1Title}</h4>
                     </div>
-                    <p className="text-secondary mb-3">{t.tutorials.shipStep1Desc1}</p>
-                    <ul className="d-flex flex-column gap-2 text-secondary ps-3 m-0">
+                    <p className="step-desc text-secondary mb-2 mb-sm-3">{t.tutorials.shipStep1Desc1}</p>
+                    <ul className="step-list d-flex flex-column gap-2 text-secondary m-0">
                       <li>{t.tutorials.shipStep1L1}</li>
                       <li>{t.tutorials.shipStep1L2}</li>
                       <li>{t.tutorials.shipStep1L3}</li>
@@ -594,15 +594,15 @@ export default function TutorialsPage() {
                 </div>
 
                 {/* Step 2 */}
-                <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
+                <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-3 mb-sm-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                   <div className="step-watermark font-display">02</div>
                   <div className="position-relative z-1">
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                    <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                       <div className="step-badge">02</div>
-                      <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.shipStep2Title}</h4>
+                      <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.shipStep2Title}</h4>
                     </div>
-                    <p className="text-secondary mb-3">{t.tutorials.shipStep2Desc1}</p>
-                    <ul className="d-flex flex-column gap-2 text-secondary ps-3 m-0">
+                    <p className="step-desc text-secondary mb-2 mb-sm-3">{t.tutorials.shipStep2Desc1}</p>
+                    <ul className="step-list d-flex flex-column gap-2 text-secondary m-0">
                       <li>{t.tutorials.shipStep2L1}</li>
                       <li>{t.tutorials.shipStep2L2}</li>
                       <li>{t.tutorials.shipStep2L3}</li>
@@ -612,20 +612,20 @@ export default function TutorialsPage() {
                 </div>
 
                 {/* Step 3 */}
-                <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
+                <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-3 mb-sm-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                   <div className="step-watermark font-display">03</div>
                   <div className="position-relative z-1">
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                    <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                       <div className="step-badge">03</div>
-                      <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.shipStep3Title}</h4>
+                      <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.shipStep3Title}</h4>
                     </div>
-                    <p className="text-secondary mb-3">{t.tutorials.shipStep3Desc1}</p>
-                    <ul className="d-flex flex-column gap-2 text-secondary ps-3 mb-3">
+                    <p className="step-desc text-secondary mb-2 mb-sm-3">{t.tutorials.shipStep3Desc1}</p>
+                    <ul className="step-list d-flex flex-column gap-2 text-secondary mb-3">
                       <li>{t.tutorials.shipStep3L1}</li>
                       <li>{t.tutorials.shipStep3L2}</li>
                       <li>{t.tutorials.shipStep3L3}</li>
                     </ul>
-                    <div className="alert alert-info border-info-subtle bg-info bg-opacity-10 text-info-emphasis p-3 rounded-3 m-0 small">
+                    <div className="tutorial-callout alert alert-info border-info-subtle bg-info bg-opacity-10 text-info-emphasis p-3 rounded-3 m-0 callout-desc">
                       <i className="bi bi-lightbulb-fill text-info me-2"></i>
                       {t.tutorials.shipStep3Tip}
                     </div>
@@ -633,26 +633,26 @@ export default function TutorialsPage() {
                 </div>
 
                 {/* Step 4 */}
-                <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
+                <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-3 mb-sm-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                   <div className="step-watermark font-display">04</div>
                   <div className="position-relative z-1">
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                    <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                       <div className="step-badge">04</div>
-                      <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.shipStep4Title}</h4>
+                      <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.shipStep4Title}</h4>
                     </div>
-                    <p className="text-secondary mb-3">{t.tutorials.shipStep4Desc1}</p>
-                    <ul className="d-flex flex-column gap-2 text-secondary ps-3 mb-4">
+                    <p className="step-desc text-secondary mb-2 mb-sm-3">{t.tutorials.shipStep4Desc1}</p>
+                    <ul className="step-list d-flex flex-column gap-2 text-secondary mb-3 mb-sm-4">
                       <li>{t.tutorials.shipStep4L1}</li>
                       <li>{t.tutorials.shipStep4L2}</li>
                       <li>{t.tutorials.shipStep4L3}</li>
                     </ul>
 
                     {/* Callout: WooCommerce Shipping Settings */}
-                    <div className="alert alert-primary border-primary-subtle bg-primary bg-opacity-10 text-primary-emphasis p-3 rounded-3 d-flex gap-3 align-items-start m-0">
-                      <i className="bi bi-sliders fs-4 flex-shrink-0 text-primary mt-0.5"></i>
-                      <div>
-                        <h5 className="h6 fw-bold mb-1 text-body">{t.tutorials.shipWooSettingsTitle}</h5>
-                        <p className="small m-0 text-secondary leading-relaxed">
+                    <div className="tutorial-callout alert alert-primary border-primary-subtle bg-primary bg-opacity-10 text-primary-emphasis p-3 rounded-3 d-flex gap-3 align-items-start m-0">
+                      <i className="bi bi-sliders fs-4 flex-shrink-0 text-primary mt-1"></i>
+                      <div className="min-w-0">
+                        <h5 className="callout-title fw-bold mb-1 text-body">{t.tutorials.shipWooSettingsTitle}</h5>
+                        <p className="callout-desc m-0 text-secondary leading-relaxed">
                           {t.tutorials.shipWooSettingsText}
                         </p>
                       </div>
@@ -661,15 +661,15 @@ export default function TutorialsPage() {
                 </div>
 
                 {/* Step 5 */}
-                <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
+                <div className="step-card position-relative p-3 p-sm-4 rounded-4 mb-3 mb-sm-4 border border-secondary border-opacity-15 bg-body bg-opacity-40">
                   <div className="step-watermark font-display">05</div>
                   <div className="position-relative z-1">
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                    <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                       <div className="step-badge">05</div>
-                      <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.shipStep5Title}</h4>
+                      <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.shipStep5Title}</h4>
                     </div>
-                    <p className="text-secondary mb-3">{t.tutorials.shipStep5Desc1}</p>
-                    <ul className="d-flex flex-column gap-2 text-secondary ps-3 mb-4">
+                    <p className="step-desc text-secondary mb-2 mb-sm-3">{t.tutorials.shipStep5Desc1}</p>
+                    <ul className="step-list d-flex flex-column gap-2 text-secondary mb-3 mb-sm-4">
                       <li>{t.tutorials.shipStep5L1}</li>
                       <li>{t.tutorials.shipStep5L2}</li>
                       <li>{t.tutorials.shipStep5L3}</li>
@@ -679,11 +679,11 @@ export default function TutorialsPage() {
                     </ul>
 
                     {/* Golden Rule Alert */}
-                    <div className="alert alert-warning border-warning-subtle bg-warning bg-opacity-10 text-warning-emphasis p-3 p-sm-4 rounded-3 d-flex gap-3 align-items-start m-0 shadow-sm">
+                    <div className="tutorial-callout alert alert-warning border-warning-subtle bg-warning bg-opacity-10 text-warning-emphasis p-3 p-sm-4 rounded-3 d-flex gap-3 align-items-start m-0 shadow-sm">
                       <i className="bi bi-exclamation-triangle-fill fs-3 flex-shrink-0 text-warning mt-1"></i>
-                      <div>
-                        <h5 className="h6 fw-bold mb-1 text-body">{t.tutorials.shipGoldRuleTitle}</h5>
-                        <p className="small m-0 text-secondary leading-relaxed">
+                      <div className="min-w-0">
+                        <h5 className="callout-title fw-bold mb-1 text-body">{t.tutorials.shipGoldRuleTitle}</h5>
+                        <p className="callout-desc m-0 text-secondary leading-relaxed">
                           {t.tutorials.shipGoldRuleDesc}
                         </p>
                       </div>
@@ -695,12 +695,12 @@ export default function TutorialsPage() {
                 <div className="step-card position-relative p-3 p-sm-4 rounded-4 border border-info border-opacity-25 bg-body bg-opacity-40">
                   <div className="step-watermark font-display">06</div>
                   <div className="position-relative z-1">
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                    <div className="step-header-row d-flex align-items-center gap-3 mb-2 mb-sm-3">
                       <div className="step-badge">06</div>
-                      <h4 className="h5 fw-bold text-body m-0 font-display">{t.tutorials.shipStep6Title}</h4>
+                      <h4 className="step-title fw-bold text-body m-0 font-display">{t.tutorials.shipStep6Title}</h4>
                     </div>
-                    <p className="text-secondary mb-3">{t.tutorials.shipStep6Desc1}</p>
-                    <ul className="d-flex flex-column gap-2 text-secondary ps-3 m-0">
+                    <p className="step-desc text-secondary mb-2 mb-sm-3">{t.tutorials.shipStep6Desc1}</p>
+                    <ul className="step-list d-flex flex-column gap-2 text-secondary m-0">
                       <li>{renderColonText(t.tutorials.shipStep6L1)}</li>
                       <li>{renderColonText(t.tutorials.shipStep6L2)}</li>
                       <li>{renderColonText(t.tutorials.shipStep6L3)}</li>
@@ -712,22 +712,22 @@ export default function TutorialsPage() {
             )}
 
             {/* Bottom Support CTA */}
-            <div className="glass-panel p-4 p-md-5 mt-4 mt-md-5 text-center rounded-4 border border-secondary border-opacity-20 d-flex flex-column align-items-center justify-content-center">
-              <div className="rounded-circle bg-info bg-opacity-10 text-info p-3 mb-3 fs-3">
+            <div className="glass-panel tutorial-cta-panel p-3 p-sm-4 p-md-5 mt-3 mt-sm-4 mt-md-5 text-center rounded-4 border border-secondary border-opacity-20 d-flex flex-column align-items-center justify-content-center">
+              <div className="rounded-circle bg-info bg-opacity-10 text-info p-2.5 p-sm-3 mb-2 mb-sm-3 fs-4 fs-sm-3 d-flex align-items-center justify-content-center" style={{ width: "52px", height: "52px" }}>
                 <i className="bi bi-headset"></i>
               </div>
-              <h3 className="h4 fw-bold text-body mb-2 font-display">
+              <h3 className="fw-bold text-body mb-2 font-display" style={{ fontSize: "clamp(1.1rem, 4vw, 1.5rem)" }}>
                 {language === "es" ? "¿Necesitas ayuda personalizada?" : "Need personalized assistance?"}
               </h3>
-              <p className="text-secondary small mb-4 mx-auto" style={{ maxWidth: "540px" }}>
+              <p className="text-secondary small mb-3 mb-sm-4 mx-auto" style={{ maxWidth: "540px", fontSize: "clamp(0.82rem, 2.8vw, 0.95rem)", lineHeight: 1.55 }}>
                 {language === "es" 
                   ? "Si tienes dudas con alguna configuración de tu tienda o necesitas soporte adicional, nuestro equipo está listo para ayudarte."
                   : "If you have questions about any configuration or need additional support, our team is ready to assist you."}
               </p>
               <Link 
                 href="/enlaces" 
-                className="btn btn-info text-white fw-bold px-4 py-2.5 rounded-3 d-inline-flex align-items-center justify-content-center gap-2 shadow w-100 w-sm-auto"
-                style={{ background: "linear-gradient(135deg, #0ea5e9, #2563eb)", borderColor: "#2563eb", maxWidth: "320px" }}
+                className="btn btn-info text-white fw-bold px-3 px-sm-4 py-2.5 rounded-3 d-inline-flex align-items-center justify-content-center gap-2 shadow w-100 w-sm-auto"
+                style={{ background: "linear-gradient(135deg, #0ea5e9, #2563eb)", borderColor: "#2563eb", maxWidth: "320px", fontSize: "clamp(0.88rem, 3vw, 1rem)" }}
               >
                 <i className="bi bi-whatsapp"></i>
                 <span>{language === "es" ? "Contactar a Soporte" : "Contact Support"}</span>
@@ -746,16 +746,16 @@ export default function TutorialsPage() {
           onClick={() => setSelectedImage(null)}
         >
           <button 
-            className="btn btn-dark position-absolute top-0 end-0 m-3 m-sm-4 rounded-circle p-2 d-flex align-items-center justify-content-center shadow-lg border border-secondary border-opacity-30"
-            style={{ width: "42px", height: "42px", zIndex: 100000 }}
+            className="btn btn-dark position-absolute top-0 end-0 m-2 m-sm-4 rounded-circle p-2 d-flex align-items-center justify-content-center shadow-lg border border-secondary border-opacity-30"
+            style={{ width: "40px", height: "40px", zIndex: 100000 }}
             onClick={() => setSelectedImage(null)}
             aria-label="Cerrar vista previa"
           >
-            <i className="bi bi-x-lg fs-5"></i>
+            <i className="bi bi-x-lg fs-6"></i>
           </button>
           <div 
-            className="position-relative overflow-hidden rounded-4 shadow-2xl border border-secondary border-opacity-30 bg-body p-2"
-            style={{ maxWidth: "min(1100px, 95vw)", maxHeight: "90vh" }}
+            className="position-relative overflow-hidden rounded-4 shadow-2xl border border-secondary border-opacity-30 bg-body p-1.5 p-sm-2"
+            style={{ maxWidth: "min(1100px, 96vw)", maxHeight: "90vh" }}
             onClick={(e) => e.stopPropagation()}
           >
             <img 
@@ -771,27 +771,33 @@ export default function TutorialsPage() {
       {/* Custom Styles for Tutorials */}
       <style jsx>{`
         .tutorials-title {
-          font-size: clamp(2rem, 5vw, 3.25rem);
+          font-size: clamp(1.65rem, 5.5vw, 3.25rem);
           line-height: 1.15;
           letter-spacing: -0.02em;
+          word-break: break-word;
+        }
+
+        .tutorials-lead {
+          font-size: clamp(0.9rem, 3vw, 1.18rem);
+          line-height: 1.55;
         }
 
         .guide-header-box {
           display: flex;
           align-items: center;
-          gap: 0.85rem;
-          margin-bottom: 0.85rem;
+          gap: 0.75rem;
+          margin-bottom: 0.75rem;
         }
 
         .guide-icon-box {
-          width: 48px;
-          height: 48px;
-          min-width: 48px;
+          width: 44px;
+          height: 44px;
+          min-width: 44px;
           border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.35rem;
+          font-size: 1.25rem;
           flex-shrink: 0;
         }
 
@@ -810,9 +816,9 @@ export default function TutorialsPage() {
         }
 
         .guide-title {
-          font-size: clamp(1.2rem, 4.5vw, 1.85rem);
+          font-size: clamp(1.1rem, 4.2vw, 1.85rem);
           font-weight: 800;
-          line-height: 1.15;
+          line-height: 1.18;
           margin: 0;
           color: var(--bs-body-color);
           word-break: break-word;
@@ -820,11 +826,11 @@ export default function TutorialsPage() {
 
         .guide-badge {
           display: inline-block;
-          font-size: 0.72rem;
+          font-size: clamp(0.65rem, 2.2vw, 0.72rem);
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          padding: 0.2rem 0.6rem;
+          padding: 0.18rem 0.55rem;
           border-radius: 6px;
           margin-bottom: 0.25rem;
           line-height: 1.2;
@@ -852,17 +858,44 @@ export default function TutorialsPage() {
           border-color: rgba(56, 189, 248, 0.35) !important;
         }
 
+        .tutorial-section-heading {
+          font-size: clamp(0.98rem, 3.4vw, 1.2rem);
+          line-height: 1.3;
+        }
+
+        .tip-icon-circle {
+          width: 34px;
+          height: 34px;
+          min-width: 34px;
+          font-size: 0.95rem;
+        }
+
+        .tip-item-title {
+          font-size: clamp(0.88rem, 2.8vw, 1rem);
+          line-height: 1.3;
+        }
+
+        .tip-item-desc {
+          font-size: clamp(0.8rem, 2.5vw, 0.875rem);
+        }
+
         .phase-badge {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          padding: 0.35rem 0.9rem;
-          font-size: 0.8rem;
+          padding: 0.32rem 0.75rem;
+          font-size: clamp(0.7rem, 2.4vw, 0.8rem);
           font-weight: 800;
           border-radius: 50rem;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           line-height: 1;
+          flex-shrink: 0;
+        }
+
+        .phase-heading {
+          font-size: clamp(1rem, 3.5vw, 1.25rem);
+          line-height: 1.25;
         }
 
         .phase-badge-1 {
@@ -925,8 +958,8 @@ export default function TutorialsPage() {
         .step-watermark {
           position: absolute;
           top: 0.25rem;
-          right: 0.85rem;
-          font-size: clamp(2.5rem, 6vw, 3.6rem);
+          right: 0.65rem;
+          font-size: clamp(2rem, 6vw, 3.6rem);
           font-weight: 900;
           line-height: 1;
           opacity: 0.05;
@@ -938,10 +971,14 @@ export default function TutorialsPage() {
           opacity: 0.08;
         }
 
+        .step-header-row {
+          gap: 0.85rem !important;
+        }
+
         .step-badge {
-          width: 36px;
-          height: 36px;
-          min-width: 36px;
+          width: 34px;
+          height: 34px;
+          min-width: 34px;
           border-radius: 10px;
           background: linear-gradient(135deg, #0ea5e9, #2563eb);
           color: #ffffff;
@@ -949,18 +986,52 @@ export default function TutorialsPage() {
           align-items: center;
           justify-content: center;
           font-weight: 800;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           flex-shrink: 0;
           box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
         }
 
+        .step-title {
+          font-size: clamp(0.95rem, 3.4vw, 1.2rem);
+          line-height: 1.3;
+        }
+
+        .step-title-sm {
+          font-size: clamp(0.9rem, 3.1vw, 1.05rem);
+          line-height: 1.3;
+        }
+
+        .step-desc {
+          font-size: clamp(0.86rem, 2.8vw, 1rem);
+          line-height: 1.6;
+        }
+
+        .step-desc-sm {
+          font-size: clamp(0.82rem, 2.6vw, 0.9rem);
+        }
+
+        .step-list {
+          padding-left: 1.15rem;
+          font-size: clamp(0.84rem, 2.7vw, 0.96rem);
+          line-height: 1.55;
+        }
+
+        .callout-title {
+          font-size: clamp(0.88rem, 2.9vw, 1rem);
+          line-height: 1.3;
+        }
+
+        .callout-desc {
+          font-size: clamp(0.8rem, 2.6vw, 0.875rem);
+        }
+
         .tutorial-tab-btn {
           width: 100%;
-          padding: 0.85rem 1rem;
+          padding: 0.75rem 0.9rem;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.65rem;
+          gap: 0.55rem;
           border-radius: 0.85rem;
           font-weight: 700;
           cursor: pointer;
@@ -971,7 +1042,7 @@ export default function TutorialsPage() {
         }
 
         .tab-btn-text {
-          font-size: clamp(0.82rem, 3.4vw, 0.98rem);
+          font-size: clamp(0.8rem, 3.2vw, 0.98rem);
           line-height: 1.25;
           word-break: normal;
           display: inline-block;
@@ -1008,6 +1079,20 @@ export default function TutorialsPage() {
           .tutorial-tab-btn {
             flex: 1 1 0px;
             padding: 0.9rem 1.25rem;
+            gap: 0.65rem;
+          }
+          .step-header-row {
+          gap: 0.85rem !important;
+        }
+
+        .step-badge {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            font-size: 0.9rem;
+          }
+          .step-list {
+            padding-left: 1.35rem;
           }
         }
 
@@ -1038,31 +1123,70 @@ export default function TutorialsPage() {
         }
 
         .leading-relaxed {
-          line-height: 1.7;
+          line-height: 1.65;
         }
 
         @media (max-width: 576px) {
-          .step-card {
-            padding: 1rem !important;
+          .tutorial-main-panel {
+            padding: 1rem 0.85rem !important;
+            border-radius: 1rem !important;
           }
-          .step-badge {
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            font-size: 0.8rem;
+          .tutorial-tips-banner {
+            padding: 0.85rem !important;
+            border-radius: 0.85rem !important;
+          }
+          .tip-item-card {
+            padding: 0.75rem !important;
+          }
+          .step-card {
+            padding: 0.9rem !important;
+            border-radius: 0.85rem !important;
+          }
+          .step-header-row {
+          gap: 0.85rem !important;
+        }
+
+        .step-badge {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            font-size: 0.78rem;
+            border-radius: 8px;
+          }
+          .tutorial-callout {
+            padding: 0.75rem !important;
           }
           .image-container img {
-            max-height: 240px !important;
+            max-height: 220px !important;
           }
         }
 
-        @media (max-width: 380px) {
+        @media (max-width: 360px) {
+          .tutorial-main-panel {
+            padding: 0.85rem 0.65rem !important;
+          }
           .tutorial-tab-btn {
-            padding: 0.7rem 0.75rem;
-            gap: 0.45rem;
+            padding: 0.65rem 0.65rem;
+            gap: 0.4rem;
           }
           .tab-btn-text {
-            font-size: 0.8rem;
+            font-size: 0.76rem;
+          }
+          .guide-icon-box {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+          }
+          .step-card {
+            padding: 0.75rem 0.65rem !important;
+          }
+          .step-watermark {
+            display: none;
+          }
+          .step-list {
+            padding-left: 1rem;
           }
         }
       `}</style>
